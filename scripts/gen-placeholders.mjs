@@ -45,10 +45,11 @@ function composition(seed, w, h) {
     shapes.push(`<polygon points="${w * 0.2},${h * 0.15} ${w * 0.45},${h * 0.45} ${w * 0.05},${h * 0.45}" fill="${c(3)}"/>`);
   }
 
+  // No drawn-in border — the card supplies the border. A painted-on border would
+  // fragment when the thumbnail is cropped to a square.
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
     <rect width="${w}" height="${h}" fill="${palette.paper}"/>
     ${shapes.join('\n    ')}
-    <rect x="1" y="1" width="${w - 2}" height="${h - 2}" fill="none" stroke="${palette.ink}" stroke-width="2"/>
   </svg>`;
 }
 

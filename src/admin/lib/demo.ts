@@ -76,7 +76,7 @@ function placeholder(path: string): string {
   const bg = '#f7f4ec';
   const a = palette[h % 3];
   const b = palette[(h >> 3) % 3];
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="${bg}"/><circle cx="150" cy="160" r="90" fill="${a}"/><rect x="200" y="180" width="150" height="150" fill="${b}"/><rect x="2" y="2" width="396" height="396" fill="none" stroke="#161616" stroke-width="4"/></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="${bg}"/><circle cx="150" cy="160" r="90" fill="${a}"/><rect x="200" y="180" width="150" height="150" fill="${b}"/></svg>`;
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
 }
 
