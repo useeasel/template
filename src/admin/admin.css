@@ -171,6 +171,17 @@
   .ez-wiz__preview { position: static; }
 }
 
+/* Font picker (dropdown with live font previews) */
+.ez-fontpick { position: relative; }
+.ez-fontpick__btn { display: flex; align-items: center; justify-content: space-between; gap: var(--ez-space-2); width: 100%; text-align: left; cursor: pointer; }
+.ez-fontpick__chev { font-family: var(--ez-font-body); color: var(--ez-stone); font-size: var(--ez-text-sm); }
+.ez-fontpick__menu { position: absolute; z-index: 60; top: calc(100% + 4px); left: 0; right: 0; max-height: 320px; overflow-y: auto; background: var(--ez-white); border: var(--ez-border-width) solid var(--ez-border); display: flex; flex-direction: column; }
+.ez-fontpick__opt { text-align: left; background: var(--ez-white); border: 0; border-bottom: 0.5px solid var(--ez-border); padding: 10px 12px; cursor: pointer; color: var(--ez-ink); font-size: 1.05rem; }
+.ez-fontpick__opt:hover { background: var(--ez-paper); }
+.ez-fontpick__opt--on { background: var(--ez-ink); color: var(--ez-white); }
+.ez-fontpick__custom { display: flex; gap: var(--ez-space-2); padding: var(--ez-space-2); border-top: var(--ez-border-width) solid var(--ez-border); }
+.ez-fontpick__custom .ez-input { font-family: var(--ez-font-body); }
+
 /* Demo banner */
 .ez-demobar { background: var(--ez-yellow); color: var(--ez-ink); font-weight: 500; text-align: center; padding: var(--ez-space-2) var(--ez-space-4); border-bottom: var(--ez-border-width) solid var(--ez-border); font-size: var(--ez-text-sm); }
 

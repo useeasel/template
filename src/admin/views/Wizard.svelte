@@ -4,6 +4,7 @@
   import { loadSettings, saveSettings } from '../lib/store';
   import { VIBES, SUGGESTED_FONTS, resolveDesign, type DesignTokens } from '../../lib/design';
   import LivePreview from './LivePreview.svelte';
+  import FontPicker from './FontPicker.svelte';
 
   let {
     gh,
@@ -78,12 +79,10 @@
       {:else if step === 1}
         <h1>Choose your type</h1>
         <label class="ez-field"><span class="ez-label">Heading font</span>
-          <input class="ez-input" list="wf-h" bind:value={d.type.headingFont} /></label>
+          <FontPicker value={d.type.headingFont} fonts={SUGGESTED_FONTS.heading} onpick={(f) => (d.type.headingFont = f)} /></label>
         <label class="ez-field"><span class="ez-label">Body font</span>
-          <input class="ez-input" list="wf-b" bind:value={d.type.bodyFont} /></label>
-        <datalist id="wf-h">{#each SUGGESTED_FONTS.heading as f}<option value={f}></option>{/each}</datalist>
-        <datalist id="wf-b">{#each SUGGESTED_FONTS.body as f}<option value={f}></option>{/each}</datalist>
-        <p class="ez-help">Pick a suggestion or type any Google Fonts name.</p>
+          <FontPicker value={d.type.bodyFont} fonts={SUGGESTED_FONTS.body} onpick={(f) => (d.type.bodyFont = f)} /></label>
+        <p class="ez-help">Each option shows in its own typeface. Pick by sight.</p>
         <label class="ez-field"><span class="ez-label">Heading weight</span>
           <select class="ez-input" bind:value={d.type.headingWeight}>{#each WEIGHTS as w}<option value={w}>{w}</option>{/each}</select></label>
         <label class="ez-field"><span class="ez-label">Text size — {d.type.baseSize}px</span>
@@ -107,6 +106,12 @@
           <select class="ez-input" bind:value={d.thumb.fit}>
             <option value="contain">Keep original shape</option><option value="cover">Crop to squares</option></select></label>
         <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.hero.enabled} /><span>Show an intro (name + tagline) above my work</span></label>
+        {#if d.hero.enabled && s}
+          <label class="ez-field"><span class="ez-label">Your name</span>
+            <input class="ez-input" bind:value={s.siteTitle} oninput={() => s && (s.logoText = s.siteTitle)} placeholder="Lina Marsh" /></label>
+          <label class="ez-field"><span class="ez-label">Tagline</span>
+            <input class="ez-input" bind:value={s.tagline} placeholder="Paintings and works on paper" /></label>
+        {/if}
       {:else}
         <h1>Looks great.</h1>
         <p>Your site is ready to wear this style. You can fine-tune every detail any time in the <strong>Design</strong> tab.</p>
@@ -114,7 +119,9 @@
       {/if}
     </div>
 
-    <div class="ez-wiz__preview"><LivePreview design={d} /></div>
+    <div class="ez-wiz__preview">
+      <LivePreview design={d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline }} />
+    </div>
   </div>
 
   <footer class="ez-wiz__foot">

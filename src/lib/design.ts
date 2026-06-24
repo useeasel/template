@@ -181,9 +181,25 @@ export function googleFontsHref(d: DesignTokens): string {
 
 /** Curated fonts offered in the editor (all available on Google Fonts). */
 export const SUGGESTED_FONTS = {
-  heading: ['Syne', 'Archivo', 'Anton', 'Playfair Display', 'Fraunces', 'DM Serif Display', 'Space Grotesk', 'Outfit'],
-  body: ['Space Grotesk', 'Inter', 'Work Sans', 'Outfit', 'Libre Baskerville', 'Lora', 'Nunito Sans'],
+  heading: [
+    'Syne', 'Archivo', 'Anton', 'Bebas Neue', 'Playfair Display', 'Fraunces',
+    'DM Serif Display', 'Cormorant Garamond', 'Space Grotesk', 'Outfit',
+    'Bricolage Grotesque', 'Sora', 'Spectral', 'Libre Franklin',
+  ],
+  body: [
+    'Inter', 'Work Sans', 'Outfit', 'Nunito Sans', 'Source Sans 3', 'IBM Plex Sans',
+    'Karla', 'Mulish', 'Space Grotesk', 'Lora', 'Libre Baskerville', 'EB Garamond',
+    'Spectral', 'Atkinson Hyperlegible',
+  ],
 };
+
+/** All curated families deduped — used to load previews in the editor's font picker. */
+export function allFontsHref(): string {
+  const families = [...new Set([...SUGGESTED_FONTS.heading, ...SUGGESTED_FONTS.body])]
+    .map((name) => `family=${name.replace(/ /g, '+')}:wght@400;700`)
+    .join('&');
+  return `https://fonts.googleapis.com/css2?${families}&display=swap`;
+}
 
 /**
  * Discipline starter templates — a friendly first question in the wizard. Each
@@ -209,14 +225,27 @@ export function disciplineDesign(id: string): DesignTokens {
   return mergeOver(resolveDesign({ preset: disc.preset }), disc.overrides);
 }
 
-/** Vibes — the wizard's first question. Each maps to a theme preset. */
+/** Vibes — the wizard's first question + the Design tab gallery. Each maps to a preset. */
 export const VIBES: { preset: string; label: string; blurb: string }[] = [
   { preset: 'minimal', label: 'Minimal & quiet', blurb: 'Clean, lots of space' },
-  { preset: 'editorial', label: 'Editorial & classic', blurb: 'Serif type, gallery feel' },
-  { preset: 'warm', label: 'Warm & handmade', blurb: 'Soft, earthy, rounded' },
+  { preset: 'editorial', label: 'Editorial', blurb: 'Serif type, gallery feel' },
+  { preset: 'classic', label: 'Classic serif', blurb: 'Elegant, timeless' },
+  { preset: 'newsprint', label: 'Newsprint', blurb: 'Cream paper, ink type' },
+  { preset: 'warm', label: 'Warm studio', blurb: 'Soft, earthy, rounded' },
+  { preset: 'clay', label: 'Clay', blurb: 'Handmade and tactile' },
+  { preset: 'botanical', label: 'Botanical', blurb: 'Greens and naturals' },
+  { preset: 'sunset', label: 'Sunset', blurb: 'Warm corals and amber' },
+  { preset: 'ocean', label: 'Ocean', blurb: 'Cool blues and teal' },
+  { preset: 'pastel', label: 'Pastel', blurb: 'Soft and gentle' },
+  { preset: 'candy', label: 'Candy', blurb: 'Bright and playful' },
+  { preset: 'bauhaus', label: 'Playful & geometric', blurb: 'Primaries, hard edges' },
+  { preset: 'zine', label: 'Zine', blurb: 'Riso pink + blue' },
   { preset: 'bold', label: 'Bold & graphic', blurb: 'Big type, high impact' },
-  { preset: 'dark', label: 'Dark & moody', blurb: 'Low-light and dramatic' },
-  { preset: 'bauhaus', label: 'Playful & geometric', blurb: 'Primary colors, hard edges' },
+  { preset: 'noir', label: 'Noir', blurb: 'Stark black & white' },
+  { preset: 'brutalist', label: 'Brutalist', blurb: 'Raw, heavy, loud' },
+  { preset: 'dark', label: 'Dark & moody', blurb: 'Low-light, dramatic' },
+  { preset: 'midnight', label: 'Midnight', blurb: 'Deep blue night' },
+  { preset: 'forest', label: 'Forest', blurb: 'Dark, green, calm' },
 ];
 
 /** Theme presets: each is a bundle layered over the defaults. */
@@ -272,6 +301,139 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Anton', bodyFont: 'Work Sans', headingWeight: 400, bodyWeight: 400, baseSize: 18, headingTransform: 'uppercase', letterSpacing: 0 },
       shape: { radius: 0, borderWidth: 3, shadows: 'hard' },
       density: 'normal',
+    }),
+  },
+  noir: {
+    label: 'Noir',
+    design: withDefaults({
+      preset: 'noir',
+      color: { background: '#ffffff', surface: '#ffffff', text: '#0a0a0a', muted: '#777777', accent: '#0a0a0a', accent2: '#d11d2a', border: '#0a0a0a' },
+      type: { headingFont: 'Archivo', bodyFont: 'Inter', headingWeight: 800, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: -0.02 },
+      shape: { radius: 0, borderWidth: 2, shadows: 'none' },
+      density: 'normal',
+    }),
+  },
+  pastel: {
+    label: 'Pastel',
+    design: withDefaults({
+      preset: 'pastel',
+      color: { background: '#fbf7fb', surface: '#ffffff', text: '#3a2f4a', muted: '#9a8fb0', accent: '#9b7fd4', accent2: '#e58ab0', border: '#e6dcec' },
+      type: { headingFont: 'Outfit', bodyFont: 'Nunito Sans', headingWeight: 600, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 18, borderWidth: 1, shadows: 'soft' },
+      density: 'airy',
+      thumb: { fit: 'cover', hover: 'lift' },
+    }),
+  },
+  botanical: {
+    label: 'Botanical',
+    design: withDefaults({
+      preset: 'botanical',
+      color: { background: '#f4f1e8', surface: '#ffffff', text: '#2e3326', muted: '#7c8268', accent: '#5a7a4a', accent2: '#b07d3a', border: '#cfd0be' },
+      type: { headingFont: 'Fraunces', bodyFont: 'Lora', headingWeight: 600, bodyWeight: 400, baseSize: 18, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 6, borderWidth: 1, shadows: 'none' },
+      density: 'airy',
+    }),
+  },
+  sunset: {
+    label: 'Sunset',
+    design: withDefaults({
+      preset: 'sunset',
+      color: { background: '#fff6ef', surface: '#ffffff', text: '#4a2c2a', muted: '#a07b6f', accent: '#e8683a', accent2: '#f2a93b', border: '#f0d6c4' },
+      type: { headingFont: 'DM Serif Display', bodyFont: 'Nunito Sans', headingWeight: 400, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 12, borderWidth: 1, shadows: 'soft' },
+      density: 'normal',
+      thumb: { fit: 'cover', hover: 'zoom' },
+    }),
+  },
+  ocean: {
+    label: 'Ocean',
+    design: withDefaults({
+      preset: 'ocean',
+      color: { background: '#f2f8fb', surface: '#ffffff', text: '#14323f', muted: '#6a8a96', accent: '#1287a8', accent2: '#0e5a7a', border: '#cfe2ea' },
+      type: { headingFont: 'Outfit', bodyFont: 'Inter', headingWeight: 600, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 10, borderWidth: 1, shadows: 'none' },
+      density: 'normal',
+    }),
+  },
+  zine: {
+    label: 'Zine',
+    design: withDefaults({
+      preset: 'zine',
+      color: { background: '#fdf3f0', surface: '#ffffff', text: '#1a1a1a', muted: '#8a6f6f', accent: '#ff4d8d', accent2: '#2b4cff', border: '#1a1a1a' },
+      type: { headingFont: 'Space Grotesk', bodyFont: 'Space Grotesk', headingWeight: 700, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: -0.01 },
+      shape: { radius: 0, borderWidth: 2, shadows: 'none' },
+      density: 'normal',
+    }),
+  },
+  newsprint: {
+    label: 'Newsprint',
+    design: withDefaults({
+      preset: 'newsprint',
+      color: { background: '#f4f1e9', surface: '#faf8f2', text: '#1c1a17', muted: '#7a756a', accent: '#1c1a17', accent2: '#8a1f1f', border: '#1c1a17' },
+      type: { headingFont: 'Playfair Display', bodyFont: 'Lora', headingWeight: 700, bodyWeight: 400, baseSize: 18, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 0, borderWidth: 1, shadows: 'none' },
+      density: 'airy',
+    }),
+  },
+  candy: {
+    label: 'Candy',
+    design: withDefaults({
+      preset: 'candy',
+      color: { background: '#fffdf5', surface: '#ffffff', text: '#2a1a3a', muted: '#9a87a8', accent: '#ff5ca8', accent2: '#00c2c7', border: '#2a1a3a' },
+      type: { headingFont: 'Outfit', bodyFont: 'Work Sans', headingWeight: 700, bodyWeight: 400, baseSize: 18, headingTransform: 'none', letterSpacing: -0.01 },
+      shape: { radius: 20, borderWidth: 2, shadows: 'hard' },
+      density: 'normal',
+      thumb: { fit: 'cover', hover: 'lift' },
+    }),
+  },
+  midnight: {
+    label: 'Midnight',
+    design: withDefaults({
+      preset: 'midnight',
+      color: { background: '#0d1424', surface: '#141d33', text: '#eaf0ff', muted: '#8a96b3', accent: '#5b8cff', accent2: '#c0a3ff', border: '#283250' },
+      type: { headingFont: 'Outfit', bodyFont: 'Inter', headingWeight: 700, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: -0.01 },
+      shape: { radius: 8, borderWidth: 1, shadows: 'none' },
+      density: 'normal',
+    }),
+  },
+  forest: {
+    label: 'Forest',
+    design: withDefaults({
+      preset: 'forest',
+      color: { background: '#10160f', surface: '#18211a', text: '#eaf3e6', muted: '#8aa088', accent: '#7fc15e', accent2: '#d9a441', border: '#2a3a2a' },
+      type: { headingFont: 'Fraunces', bodyFont: 'Nunito Sans', headingWeight: 600, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 6, borderWidth: 1, shadows: 'none' },
+      density: 'normal',
+    }),
+  },
+  clay: {
+    label: 'Clay',
+    design: withDefaults({
+      preset: 'clay',
+      color: { background: '#f0e6dd', surface: '#fbf5ef', text: '#3c2a22', muted: '#8a7060', accent: '#c2643f', accent2: '#6a8f86', border: '#d8c4b4' },
+      type: { headingFont: 'DM Serif Display', bodyFont: 'Lora', headingWeight: 400, bodyWeight: 400, baseSize: 18, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 14, borderWidth: 1, shadows: 'soft' },
+      density: 'airy',
+    }),
+  },
+  brutalist: {
+    label: 'Brutalist',
+    design: withDefaults({
+      preset: 'brutalist',
+      color: { background: '#e8e8e3', surface: '#ffffff', text: '#111111', muted: '#666660', accent: '#1f1f1f', accent2: '#ff3b00', border: '#111111' },
+      type: { headingFont: 'Archivo', bodyFont: 'IBM Plex Sans', headingWeight: 800, bodyWeight: 400, baseSize: 17, headingTransform: 'uppercase', letterSpacing: 0 },
+      shape: { radius: 0, borderWidth: 3, shadows: 'hard' },
+      density: 'compact',
+    }),
+  },
+  classic: {
+    label: 'Classic serif',
+    design: withDefaults({
+      preset: 'classic',
+      color: { background: '#fcfbf9', surface: '#ffffff', text: '#22201d', muted: '#7d7972', accent: '#3a4a5a', accent2: '#9a6a3a', border: '#ddd8cf' },
+      type: { headingFont: 'Cormorant Garamond', bodyFont: 'EB Garamond', headingWeight: 600, bodyWeight: 400, baseSize: 19, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 2, borderWidth: 1, shadows: 'none' },
+      density: 'airy',
     }),
   },
 };

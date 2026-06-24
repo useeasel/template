@@ -6,6 +6,7 @@
     PRESETS, SUGGESTED_FONTS, resolveDesign, type DesignTokens,
   } from '../../lib/design';
   import LivePreview from './LivePreview.svelte';
+  import FontPicker from './FontPicker.svelte';
 
   let {
     gh,
@@ -114,13 +115,10 @@
         <strong>Type</strong>
         <div class="ez-row">
           <label class="ez-field"><span class="ez-label">Heading font</span>
-            <input class="ez-input" list="fh" bind:value={d.type.headingFont} /></label>
+            <FontPicker value={d.type.headingFont} fonts={SUGGESTED_FONTS.heading} onpick={(f) => (d.type.headingFont = f)} /></label>
           <label class="ez-field"><span class="ez-label">Body font</span>
-            <input class="ez-input" list="fb" bind:value={d.type.bodyFont} /></label>
+            <FontPicker value={d.type.bodyFont} fonts={SUGGESTED_FONTS.body} onpick={(f) => (d.type.bodyFont = f)} /></label>
         </div>
-        <datalist id="fh">{#each SUGGESTED_FONTS.heading as f}<option value={f}></option>{/each}</datalist>
-        <datalist id="fb">{#each SUGGESTED_FONTS.body as f}<option value={f}></option>{/each}</datalist>
-        <p class="ez-help">Pick a suggested font or type any Google Fonts name.</p>
         <div class="ez-row">
           <label class="ez-field"><span class="ez-label">Heading weight</span>
             <select class="ez-input" bind:value={d.type.headingWeight}>{#each WEIGHTS as w}<option value={w}>{w}</option>{/each}</select></label>
@@ -196,7 +194,7 @@
     </div>
 
     <div class="ez-design__preview">
-      <LivePreview design={d} />
+      <LivePreview design={d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline }} />
     </div>
   </div>
 {/if}

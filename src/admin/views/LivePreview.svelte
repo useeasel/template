@@ -1,7 +1,13 @@
 <script lang="ts">
   import { designVars, designClasses, motionAttr, googleFontsHref, type DesignTokens } from '../../lib/design';
 
-  let { design }: { design: DesignTokens } = $props();
+  let {
+    design,
+    content,
+  }: {
+    design: DesignTokens;
+    content?: { logoText?: string; siteTitle?: string; tagline?: string };
+  } = $props();
 
   let iframe: HTMLIFrameElement;
   let loaded = $state(false);
@@ -24,11 +30,24 @@
       doc.head.appendChild(link);
     }
     link.href = googleFontsHref(design);
+
+    // Inject editable text (name/tagline) so those preview live too.
+    if (content) {
+      const setText = (sel: string, text?: string) => {
+        if (text == null) return;
+        const el = doc.querySelector(sel);
+        if (el) el.textContent = text;
+      };
+      setText('.ez-nav__logotext', content.logoText);
+      setText('.ez-home-head h1', content.siteTitle);
+      setText('.ez-home-tagline', content.tagline);
+    }
   }
 
-  // Reapply whenever any token changes (deep — Svelte tracks nested access).
+  // Reapply whenever any token or content changes (deep tracking).
   $effect(() => {
-    JSON.stringify(design); // touch all fields so the effect re-runs on any change
+    JSON.stringify(design);
+    JSON.stringify(content);
     if (loaded) apply();
   });
 </script>

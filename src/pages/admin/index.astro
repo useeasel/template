@@ -9,6 +9,7 @@ import '@fontsource/space-grotesk/700.css';
 import '../../styles/tokens.css';
 import '../../admin/admin.css';
 import Editor from '../../admin/Editor.svelte';
+import { allFontsHref } from '../../lib/design';
 ---
 
 <!doctype html>
@@ -18,6 +19,8 @@ import Editor from '../../admin/Editor.svelte';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href={allFontsHref()} />
     <title>Edit your site · Easel</title>
   </head>
   <body>
