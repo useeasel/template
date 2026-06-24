@@ -31,14 +31,22 @@ export interface DesignTokens {
     shadows: 'none' | 'hard' | 'soft';
   };
   density: 'compact' | 'normal' | 'airy';
+  contentWidth: 'narrow' | 'normal' | 'wide';
   motion: 'smooth' | 'rigid' | 'none';
   nav: { layout: 'side' | 'top' };
   logo: { mode: 'none' | 'text' | 'image'; image?: string };
   background: { type: 'solid' | 'texture' | 'none' };
   thumb: { fit: 'cover' | 'contain'; hover: 'none' | 'zoom' | 'lift' };
-  gallery: { layout: 'grid' | 'masonry'; columns: number };
+  gallery: {
+    layout: 'grid' | 'masonry';
+    columns: number;
+    gutter: 'tight' | 'normal' | 'loose';
+    caption: 'below' | 'hover' | 'hidden';
+    featureFirst: boolean;
+  };
   lightbox: { transition: 'fade' | 'slide' };
-  hero: { enabled: boolean };
+  hero: { enabled: boolean; align: 'left' | 'center'; size: 'small' | 'large' };
+  footer: { socials: boolean; credit: boolean; text?: string };
   pages: { about: boolean; contact: boolean; cv: boolean; press: boolean };
 }
 
@@ -64,14 +72,16 @@ export const DEFAULT_DESIGN: DesignTokens = {
   },
   shape: { radius: 0, borderWidth: 2, shadows: 'hard' },
   density: 'normal',
+  contentWidth: 'normal',
   motion: 'smooth',
   nav: { layout: 'side' },
   logo: { mode: 'none' },
   background: { type: 'solid' },
   thumb: { fit: 'cover', hover: 'zoom' },
-  gallery: { layout: 'grid', columns: 3 },
+  gallery: { layout: 'grid', columns: 3, gutter: 'normal', caption: 'below', featureFirst: false },
   lightbox: { transition: 'fade' },
-  hero: { enabled: false },
+  hero: { enabled: false, align: 'left', size: 'small' },
+  footer: { socials: true, credit: true },
   pages: { about: true, contact: true, cv: true, press: true },
 };
 
@@ -92,6 +102,7 @@ function mergeOver(base: DesignTokens, partial: Partial<DesignTokens> | undefine
     gallery: { ...base.gallery, ...(d.gallery ?? {}) },
     lightbox: { ...base.lightbox, ...(d.lightbox ?? {}) },
     hero: { ...base.hero, ...(d.hero ?? {}) },
+    footer: { ...base.footer, ...(d.footer ?? {}) },
     pages: { ...base.pages, ...(d.pages ?? {}) },
   };
 }
@@ -112,6 +123,8 @@ export function resolveDesign(partial: Partial<DesignTokens> | undefined): Desig
 }
 
 const DENSITY_GAP = { compact: '1rem', normal: '1.5rem', airy: '2.5rem' };
+const GUTTER = { tight: '0.75rem', normal: '1.5rem', loose: '2.5rem' };
+const CONTENT_WIDTH = { narrow: '880px', normal: '1200px', wide: '1500px' };
 const SHADOW = {
   none: 'none',
   hard: 'var(--ez-border-width) var(--ez-border-width) 0 var(--ez-ink)',
@@ -140,6 +153,8 @@ export function designVars(d: DesignTokens): string {
     '--ez-shadow': SHADOW[d.shape.shadows],
     '--ez-gap': DENSITY_GAP[d.density],
     '--ez-columns': String(d.gallery.columns),
+    '--ez-gallery-gap': GUTTER[d.gallery.gutter],
+    '--ez-content-max': CONTENT_WIDTH[d.contentWidth],
   };
   return `font-size:${d.type.baseSize}px;` + Object.entries(v).map(([k, val]) => `${k}:${val}`).join(';');
 }
@@ -154,9 +169,15 @@ export function designClasses(d: DesignTokens): string {
     `ez-layout-${d.gallery.layout}`,
     `ez-bg-${d.background.type}`,
     `ez-light-${d.lightbox.transition}`,
+    `ez-cap-${d.gallery.caption}`,
+    `ez-heroalign-${d.hero.align}`,
+    `ez-herosize-${d.hero.size}`,
+    d.gallery.featureFirst ? 'ez-feature-first' : '',
     d.shape.shadows === 'none' ? 'ez-flat' : '',
     d.hero.enabled ? 'ez-hero-on' : 'ez-hero-off',
     d.logo.mode === 'image' ? 'ez-logo-image' : 'ez-logo-text',
+    d.footer.socials ? '' : 'ez-footer-nosocial',
+    d.footer.credit ? '' : 'ez-footer-nocredit',
     ...pages.filter((k) => !d.pages[k]).map((k) => `ez-page-${k}-off`),
   ]
     .filter(Boolean)

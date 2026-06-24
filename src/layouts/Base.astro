@@ -74,7 +74,7 @@ const fontsHref = googleFontsHref(design);
       <slot />
     </main>
 
-    <Footer logoText={settings.logoText} socialLinks={settings.socialLinks} />
+    <Footer logoText={settings.logoText} socialLinks={settings.socialLinks} footerText={design.footer.text} />
 
     {settings.rightClickProtect && (
       <script is:inline>

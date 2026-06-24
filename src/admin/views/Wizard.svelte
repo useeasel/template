@@ -112,6 +112,12 @@
         <label class="ez-field"><span class="ez-label">Thumbnails</span>
           <select class="ez-input" bind:value={d.thumb.fit}>
             <option value="contain">Keep original shape</option><option value="cover">Crop to squares</option></select></label>
+        <label class="ez-field"><span class="ez-label">Captions</span>
+          <select class="ez-input" bind:value={d.gallery.caption}>
+            <option value="below">Below each piece</option><option value="hover">On hover</option><option value="hidden">Hidden</option></select></label>
+        <label class="ez-field"><span class="ez-label">Content width</span>
+          <select class="ez-input" bind:value={d.contentWidth}>
+            <option value="narrow">Narrow</option><option value="normal">Normal</option><option value="wide">Wide</option></select></label>
         <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.hero.enabled} /><span>Show an intro (name + tagline) above my work</span></label>
         {#if d.hero.enabled && s}
           <label class="ez-field"><span class="ez-label">Your name</span>
@@ -127,7 +133,7 @@
     </div>
 
     <div class="ez-wiz__preview">
-      <LivePreview design={d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline }} />
+      <LivePreview design={d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline, footerText: d.footer.text }} />
     </div>
   </div>
 

@@ -175,6 +175,23 @@
             <select class="ez-input" bind:value={d.thumb.hover}>
               <option value="none">None</option><option value="zoom">Zoom</option><option value="lift">Lift</option></select></label>
         </div>
+        <div class="ez-row">
+          <label class="ez-field"><span class="ez-label">Content width</span>
+            <select class="ez-input" bind:value={d.contentWidth}>
+              <option value="narrow">Narrow</option><option value="normal">Normal</option><option value="wide">Wide</option></select></label>
+          <label class="ez-field"><span class="ez-label">Space between items</span>
+            <select class="ez-input" bind:value={d.gallery.gutter}>
+              <option value="tight">Tight</option><option value="normal">Normal</option><option value="loose">Loose</option></select></label>
+        </div>
+        <div class="ez-row">
+          <label class="ez-field"><span class="ez-label">Captions</span>
+            <select class="ez-input" bind:value={d.gallery.caption}>
+              <option value="below">Below each piece</option><option value="hover">On hover</option><option value="hidden">Hidden</option></select></label>
+          <label class="ez-field"><span class="ez-label">Lightbox</span>
+            <select class="ez-input" bind:value={d.lightbox.transition}>
+              <option value="fade">Fade</option><option value="slide">Slide</option></select></label>
+        </div>
+        <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.gallery.featureFirst} /><span>Feature the first piece (span two columns)</span></label>
       </section>
 
       <section class="ez-block">
@@ -192,6 +209,16 @@
             <input class="ez-input" bind:value={d.logo.image} placeholder="/assets/site/logo.png" /></label>
         {/if}
         <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.hero.enabled} /><span>Show an intro (name + tagline) above my work</span></label>
+        {#if d.hero.enabled}
+          <div class="ez-row">
+            <label class="ez-field"><span class="ez-label">Intro alignment</span>
+              <select class="ez-input" bind:value={d.hero.align}>
+                <option value="left">Left</option><option value="center">Centered</option></select></label>
+            <label class="ez-field"><span class="ez-label">Intro size</span>
+              <select class="ez-input" bind:value={d.hero.size}>
+                <option value="small">Small</option><option value="large">Large</option></select></label>
+          </div>
+        {/if}
         <p class="ez-help" style="margin-top:.5rem">Pages to show in the menu</p>
         <div class="ez-row">
           <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.about} /><span>About</span></label>
@@ -200,10 +227,18 @@
           <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.press} /><span>Press</span></label>
         </div>
       </section>
+
+      <section class="ez-block">
+        <strong>Footer</strong>
+        <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.footer.socials} /><span>Show my social links</span></label>
+        <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.footer.credit} /><span>Show the "Made with Easel" credit</span></label>
+        <label class="ez-field"><span class="ez-label">Footer text (optional)</span>
+          <input class="ez-input" bind:value={d.footer.text} placeholder="e.g. By appointment only" /></label>
+      </section>
     </div>
 
     <div class="ez-design__preview">
-      <LivePreview design={d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline }} />
+      <LivePreview design={d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline, footerText: d.footer.text }} />
     </div>
   </div>
 {/if}

@@ -6,7 +6,7 @@
     content,
   }: {
     design: DesignTokens;
-    content?: { logoText?: string; siteTitle?: string; tagline?: string };
+    content?: { logoText?: string; siteTitle?: string; tagline?: string; footerText?: string };
   } = $props();
 
   let iframe: HTMLIFrameElement;
@@ -41,6 +41,7 @@
       setText('.ez-nav__logotext', content.logoText);
       setText('.ez-home-head h1', content.siteTitle);
       setText('.ez-home-tagline', content.tagline);
+      setText('.ez-footer__text', content.footerText);
     }
   }
 

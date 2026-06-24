@@ -2,8 +2,9 @@
 interface Props {
   logoText: string;
   socialLinks?: { label: string; url: string }[];
+  footerText?: string;
 }
-const { logoText, socialLinks = [] } = Astro.props;
+const { logoText, socialLinks = [], footerText } = Astro.props;
 const year = new Date().getFullYear();
 ---
 
@@ -22,7 +23,9 @@ const year = new Date().getFullYear();
     )}
 
     <p class="ez-footer__meta">
-      © {year} {logoText}. Made with <a href="https://easel.rosematcha.com" rel="noopener">Easel</a>.
+      <span>© {year} {logoText}.</span>
+      <span class="ez-footer__text">{footerText ?? ''}</span>
+      <span class="ez-footer__credit">Made with <a href="https://easel.rosematcha.com" rel="noopener">Easel</a>.</span>
     </p>
   </div>
 </footer>
@@ -61,5 +64,9 @@ const year = new Date().getFullYear();
     color: var(--ez-stone);
     font-size: var(--ez-text-sm);
     width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
+  .ez-footer__text:empty { display: none; }
 </style>

@@ -158,6 +158,10 @@ const { items } = Astro.props;
       img.alt = item.alt;
       titleEl.textContent = item.title;
       metaEl.textContent = item.meta ?? '';
+      // Restart the entrance animation (fade/slide, chosen by the theme).
+      img.classList.remove('ez-anim');
+      void img.offsetWidth;
+      img.classList.add('ez-anim');
     };
 
     const open = (index: number) => {

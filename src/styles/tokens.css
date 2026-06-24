@@ -328,16 +328,51 @@ img {
 :root.ez-layout-grid .ez-portfolio {
   display: grid;
   grid-template-columns: repeat(var(--ez-columns, 3), 1fr);
-  gap: var(--ez-gap);
+  gap: var(--ez-gallery-gap, var(--ez-gap));
 }
 :root.ez-layout-masonry .ez-portfolio {
   column-count: var(--ez-columns, 3);
-  column-gap: var(--ez-gap);
+  column-gap: var(--ez-gallery-gap, var(--ez-gap));
 }
 :root.ez-layout-masonry .ez-portfolio > * {
   break-inside: avoid;
-  margin-bottom: var(--ez-gap);
+  margin-bottom: var(--ez-gallery-gap, var(--ez-gap));
 }
+/* Feature the first piece: span two columns in grid mode. */
+:root.ez-feature-first.ez-layout-grid .ez-portfolio > :first-child {
+  grid-column: span 2;
+}
+
+/* Caption display: under the image (default), reveal on hover, or hidden. */
+:root.ez-cap-hidden .ez-artcard__body { display: none; }
+:root.ez-cap-hover .ez-artcard { position: relative; }
+:root.ez-cap-hover .ez-artcard__body {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: var(--ez-ink);
+  color: var(--ez-white);
+  transform: translateY(100%);
+  transition: transform var(--ez-motion-base) var(--ez-ease);
+}
+:root.ez-cap-hover .ez-artcard:hover .ez-artcard__body,
+:root.ez-cap-hover .ez-artcard:focus-within .ez-artcard__body { transform: translateY(0); }
+:root.ez-cap-hover .ez-artcard__meta { color: var(--ez-white); opacity: 0.7; }
+
+/* Hero alignment + size. */
+:root.ez-heroalign-center .ez-hero { text-align: center; }
+:root.ez-herosize-large .ez-hero { padding-block: var(--ez-space-7); }
+:root.ez-herosize-large .ez-hero h1 { font-size: var(--ez-text-4xl); }
+
+/* Footer toggles. */
+:root.ez-footer-nosocial .ez-footer__social { display: none; }
+:root.ez-footer-nocredit .ez-footer__credit { display: none; }
+
+/* Lightbox transition (re-triggered per navigation via the .ez-anim class). */
+:root.ez-light-fade .ez-lightbox__img.ez-anim { animation: ezLbFade var(--ez-motion-base) var(--ez-ease); }
+:root.ez-light-slide .ez-lightbox__img.ez-anim { animation: ezLbSlide var(--ez-motion-base) var(--ez-ease); }
+@keyframes ezLbFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ezLbSlide { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+:root[data-motion='reduced'] .ez-lightbox__img.ez-anim { animation: none; }
 @media (max-width: 1024px) {
   :root.ez-layout-grid .ez-portfolio { grid-template-columns: repeat(2, 1fr); }
   :root.ez-layout-masonry .ez-portfolio { column-count: 2; }
