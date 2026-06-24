@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { GitHub } from '../lib/github';
   import type { Settings } from '../lib/content';
-  import { loadSettings, saveSettings } from '../lib/store';
+  import { loadSettings, saveSettings, uploadAsset } from '../lib/store';
   import {
     PRESETS, SUGGESTED_FONTS, resolveDesign, type DesignTokens,
   } from '../../lib/design';
@@ -23,6 +23,32 @@
   let d = $state<DesignTokens>(resolveDesign(undefined));
   let loading = $state(true);
   let saving = $state(false);
+  let logoPreview = $state('');
+  let faviconPreview = $state('');
+  let uploading = $state(false);
+
+  async function uploadFor(kind: 'logo' | 'favicon', e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    const objUrl = URL.createObjectURL(file);
+    if (kind === 'logo') logoPreview = objUrl;
+    else faviconPreview = objUrl;
+    uploading = true;
+    try {
+      const path = await uploadAsset(gh, file, kind);
+      if (kind === 'logo') {
+        d.logo.image = path;
+        d.logo.mode = 'image';
+      } else {
+        d.favicon.image = path;
+        d.favicon.mode = 'image';
+      }
+      notify(`${kind === 'logo' ? 'Logo' : 'Favicon'} uploaded.`);
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Could not upload.', 'error');
+    }
+    uploading = false;
+  }
 
   async function load() {
     loading = true;
@@ -205,11 +231,27 @@
               <option value="side">Name beside links</option><option value="top">Name above links</option></select></label>
           <label class="ez-field"><span class="ez-label">Logo</span>
             <select class="ez-input" bind:value={d.logo.mode}>
-              <option value="none">Just my name</option><option value="image">Upload a logo</option></select></label>
+              <option value="none">Just my name</option><option value="image">An image</option></select></label>
         </div>
         {#if d.logo.mode === 'image'}
-          <label class="ez-field"><span class="ez-label">Logo image path</span>
-            <input class="ez-input" bind:value={d.logo.image} placeholder="/assets/site/logo.png" /></label>
+          <label class="ez-field"><span class="ez-label">Logo image</span>
+            {#if logoPreview || d.logo.image}
+              <img class="ez-form__preview" style="max-height:48px" src={logoPreview || d.logo.image} alt="" />
+            {/if}
+            <input type="file" accept="image/*" disabled={uploading} onchange={(e) => uploadFor('logo', e)} />
+            <span class="ez-help">Shown in your header instead of your name.</span></label>
+        {/if}
+
+        <label class="ez-field"><span class="ez-label">Favicon</span>
+          <select class="ez-input" bind:value={d.favicon.mode}>
+            <option value="initials">My initials</option><option value="image">An image</option></select>
+          <span class="ez-help">The little icon in the browser tab.</span></label>
+        {#if d.favicon.mode === 'image'}
+          <label class="ez-field">
+            {#if faviconPreview || d.favicon.image}
+              <img class="ez-form__preview" style="max-height:40px" src={faviconPreview || d.favicon.image} alt="" />
+            {/if}
+            <input type="file" accept="image/*" disabled={uploading} onchange={(e) => uploadFor('favicon', e)} /></label>
         {/if}
         <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.hero.enabled} /><span>Show an intro (name + tagline) above my work</span></label>
         {#if d.hero.enabled}
@@ -241,7 +283,7 @@
     </div>
 
     <div class="ez-design__preview">
-      <LivePreview design={d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline, footerText: d.footer.text }} />
+      <LivePreview design={d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline, footerText: d.footer.text, logoImage: d.logo.image }} />
     </div>
   </div>
 {/if}

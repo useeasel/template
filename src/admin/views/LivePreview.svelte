@@ -6,7 +6,13 @@
     content,
   }: {
     design: DesignTokens;
-    content?: { logoText?: string; siteTitle?: string; tagline?: string; footerText?: string };
+    content?: {
+      logoText?: string;
+      siteTitle?: string;
+      tagline?: string;
+      footerText?: string;
+      logoImage?: string;
+    };
   } = $props();
 
   let iframe: HTMLIFrameElement;
@@ -42,6 +48,10 @@
       setText('.ez-home-head h1', content.siteTitle);
       setText('.ez-home-tagline', content.tagline);
       setText('.ez-footer__text', content.footerText);
+      if (content.logoImage != null) {
+        const img = doc.querySelector('.ez-nav__logoimg');
+        if (img) img.setAttribute('src', content.logoImage);
+      }
     }
   }
 

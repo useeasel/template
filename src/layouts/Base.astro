@@ -9,7 +9,7 @@ import { getEntry } from 'astro:content';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import SEO from '../components/SEO.astro';
-import { resolveDesign, designVars, designClasses, motionAttr, googleFontsHref } from '../lib/design';
+import { resolveDesign, designVars, designClasses, motionAttr, googleFontsHref, faviconDataUri, readableOn } from '../lib/design';
 
 interface Props {
   pageTitle?: string;
@@ -27,6 +27,11 @@ const design = resolveDesign(settings.design as any);
 const rootStyle = designVars(design);
 const rootClass = designClasses(design);
 const fontsHref = googleFontsHref(design);
+// Favicon: the artist's uploaded image, or their initials on the accent color.
+const faviconHref =
+  design.favicon.mode === 'image' && design.favicon.image
+    ? design.favicon.image
+    : faviconDataUri(settings.siteTitle, design.color.accent, readableOn(design.color.accent));
 ---
 
 <!doctype html>
@@ -34,7 +39,7 @@ const fontsHref = googleFontsHref(design);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={faviconHref} />
     <meta name="generator" content={Astro.generator} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />

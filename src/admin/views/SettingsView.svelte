@@ -81,10 +81,21 @@
     {/each}
   </div>
 
+  <div class="ez-block">
+    <strong>Custom domain</strong>
+    <p class="ez-help">Use your own web address (like your-name.com) instead of the Netlify one. Optional, and free with Netlify.</p>
+    <label class="ez-field"><span class="ez-label">Your domain</span>
+      <input class="ez-input" bind:value={s.customDomain} placeholder="your-name.com" /></label>
+    <ol class="ez-steps">
+      <li>Buy a domain if you don't have one — Porkbun, Namecheap, or similar, usually about $10–20 a year.</li>
+      <li>In Netlify, open your site, then <strong>Domain management → Add a domain</strong>, and enter your domain.</li>
+      <li>Follow Netlify's prompts to point your domain at Netlify (or use Netlify DNS). HTTPS is set up automatically.</li>
+      <li>Pop your domain in the box above and save, so links and search results use it.</li>
+    </ol>
+  </div>
+
   <details class="ez-advanced">
     <summary>Advanced</summary>
-    <label class="ez-field"><span class="ez-label">Custom domain</span>
-      <input class="ez-input" bind:value={s.customDomain} placeholder="your-name.com" /></label>
     <label class="ez-field"><span class="ez-label">Social preview image path</span>
       <input class="ez-input" bind:value={s.ogImage} placeholder="/assets/og-default.jpg" /></label>
     <label class="ez-field"><span class="ez-label">Analytics code</span>

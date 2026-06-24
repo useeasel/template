@@ -221,6 +221,23 @@ export async function saveSettings(gh: GitHub, s: Settings): Promise<void> {
   await gh.commit([{ path: PATHS.settings, content: toJson(s) }], 'Update site settings');
 }
 
+// ---------- Asset uploads (logo, favicon) ----------
+
+/**
+ * Commit an uploaded image to public/assets and return its served path (e.g.
+ * /assets/logo-ab12cd.png). Stored under public/ so the site can reference it by
+ * URL directly (no astro:assets import needed for dynamic identity images).
+ */
+export async function uploadAsset(gh: GitHub, file: File, baseName: string): Promise<string> {
+  const ext = (file.name.split('.').pop() ?? 'png').toLowerCase();
+  const rel = `assets/${baseName}-${shortStamp()}.${ext}`;
+  await gh.commit(
+    [{ path: `public/${rel}`, content: await fileToBase64(file), encoding: 'base64' }],
+    `Upload ${baseName}`,
+  );
+  return `/${rel}`;
+}
+
 // ---------- helpers ----------
 
 function shortStamp(): string {

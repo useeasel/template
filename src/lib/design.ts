@@ -51,6 +51,7 @@ export interface DesignTokens {
   lightbox: { transition: 'fade' | 'slide' };
   hero: { enabled: boolean; align: 'left' | 'center'; size: 'small' | 'large' };
   footer: { socials: boolean; credit: boolean; text?: string };
+  favicon: { mode: 'initials' | 'image'; image?: string };
   pages: { about: boolean; contact: boolean; cv: boolean; press: boolean };
 }
 
@@ -86,6 +87,7 @@ export const DEFAULT_DESIGN: DesignTokens = {
   lightbox: { transition: 'fade' },
   hero: { enabled: false, align: 'left', size: 'small' },
   footer: { socials: true, credit: true },
+  favicon: { mode: 'initials' },
   pages: { about: true, contact: true, cv: true, press: true },
 };
 
@@ -107,6 +109,7 @@ function mergeOver(base: DesignTokens, partial: Partial<DesignTokens> | undefine
     lightbox: { ...base.lightbox, ...(d.lightbox ?? {}) },
     hero: { ...base.hero, ...(d.hero ?? {}) },
     footer: { ...base.footer, ...(d.footer ?? {}) },
+    favicon: { ...base.favicon, ...(d.favicon ?? {}) },
     pages: { ...base.pages, ...(d.pages ?? {}) },
   };
 }
@@ -253,6 +256,20 @@ export function contrastRatio(fg: string, bg: string): number {
   const hi = Math.max(luminance(a), luminance(b));
   const lo = Math.min(luminance(a), luminance(b));
   return (hi + 0.05) / (lo + 0.05);
+}
+
+/** A data-URI SVG favicon: the artist's initials on their accent color. */
+export function faviconDataUri(siteTitle: string, accent: string, fg: string): string {
+  const initials =
+    (siteTitle || '')
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join('')
+      .toUpperCase() || 'A';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="8" fill="${accent}"/><text x="32" y="44" font-family="system-ui,-apple-system,sans-serif" font-size="34" font-weight="700" text-anchor="middle" fill="${fg}">${initials}</text></svg>`;
+  return 'data:image/svg+xml,' + encodeURIComponent(svg);
 }
 
 /** Pick black or white text — whichever is more readable on the given background. */

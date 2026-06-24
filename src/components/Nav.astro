@@ -21,7 +21,7 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
 <header class="ez-nav">
   <div class="ez-container ez-nav__inner">
     <a href="/" class="ez-nav__brand" aria-label={`${logoText} — home`}>
-      {logo.image && <img class="ez-nav__logoimg" src={logo.image} alt={logoText} />}
+      <img class="ez-nav__logoimg" src={logo.image || undefined} alt={logoText} />
       <span class="ez-nav__logotext">{logoText}</span>
     </a>
 

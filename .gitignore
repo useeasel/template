@@ -23,3 +23,6 @@ yarn-error.log*
 
 # netlify
 .netlify/
+
+# agent notes (local living document)
+AGENTS.md

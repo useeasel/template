@@ -182,6 +182,9 @@
 .ez-fontpick__custom { display: flex; gap: var(--ez-space-2); padding: var(--ez-space-2); border-top: var(--ez-border-width) solid var(--ez-border); }
 .ez-fontpick__custom .ez-input { font-family: var(--ez-font-body); }
 
+/* Numbered guide (custom domain steps) */
+.ez-steps { margin: var(--ez-space-3) 0 0; padding-left: 1.2rem; font-size: var(--ez-text-sm); color: var(--ez-stone); display: grid; gap: var(--ez-space-2); }
+
 /* Monospace input for code fields */
 .ez-mono { font-family: var(--ez-font-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace); font-size: var(--ez-text-sm); }
 
