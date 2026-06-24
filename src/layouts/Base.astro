@@ -11,6 +11,7 @@ import { getEntry } from 'astro:content';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import SEO from '../components/SEO.astro';
+import { withDefaults, designVars, designClasses, motionAttr, googleFontsHref } from '../lib/design';
 
 interface Props {
   pageTitle?: string;
@@ -23,20 +24,24 @@ const { pageTitle, pageDescription, pageImage } = Astro.props;
 const siteEntry = await getEntry('site', 'settings');
 const settings = siteEntry!.data;
 
-// Inline style overrides for theme-driven font choices (optional).
-const fontVars: string[] = [];
-if (settings.headingFont) fontVars.push(`--ez-font-display:'${settings.headingFont}',sans-serif`);
-if (settings.bodyFont) fontVars.push(`--ez-font-body:'${settings.bodyFont}',sans-serif`);
-const rootStyle = fontVars.join(';');
+// Design tokens drive the whole look. Falls back to Bauhaus defaults.
+const design = withDefaults(settings.design as any);
+const rootStyle = designVars(design);
+const rootClass = designClasses(design);
+const fontsHref = googleFontsHref(design);
 ---
 
 <!doctype html>
-<html lang="en" data-theme={settings.theme} data-motion={settings.motionDefault} style={rootStyle}>
+<html lang="en" data-motion={motionAttr(design)} class={rootClass} style={rootStyle}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="generator" content={Astro.generator} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href={fontsHref} />
 
     <SEO
       siteTitle={settings.siteTitle}
@@ -64,7 +69,7 @@ const rootStyle = fontVars.join(';');
   <body>
     <a href="#main" class="ez-skip-link">Skip to content</a>
 
-    <Nav logoText={settings.logoText} />
+    <Nav logoText={settings.logoText} logo={design.logo} layout={design.nav.layout} pages={design.pages} />
 
     <main id="main" class="ez-main">
       <slot />

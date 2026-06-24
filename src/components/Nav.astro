@@ -1,29 +1,39 @@
 ---
-import EaselMark from './EaselMark.astro';
 import MotionToggle from './MotionToggle.astro';
 
 interface Props {
   logoText: string;
+  logo?: { mode: 'none' | 'text' | 'image'; image?: string };
+  layout?: 'side' | 'top';
+  pages?: { about: boolean; contact: boolean; cv: boolean; press: boolean };
 }
-const { logoText } = Astro.props;
+const {
+  logoText,
+  logo = { mode: 'none' },
+  layout = 'side',
+  pages = { about: true, contact: true, cv: true, press: true },
+} = Astro.props;
 
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
-const links = [
-  { href: '/', label: 'Work' },
-  { href: '/about', label: 'About' },
-  { href: '/cv', label: 'CV' },
-  { href: '/press', label: 'Press' },
-  { href: '/contact', label: 'Contact' },
+const all = [
+  { href: '/', label: 'Work', on: true },
+  { href: '/about', label: 'About', on: pages.about },
+  { href: '/cv', label: 'CV', on: pages.cv },
+  { href: '/press', label: 'Press', on: pages.press },
+  { href: '/contact', label: 'Contact', on: pages.contact },
 ];
-const isActive = (href: string) =>
-  href === '/' ? path === '/' : path.startsWith(href);
+const links = all.filter((l) => l.on);
+const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
 ---
 
-<header class="ez-nav">
+<header class:list={['ez-nav', `ez-nav--${layout}`]}>
   <div class="ez-container ez-nav__inner">
     <a href="/" class="ez-nav__brand" aria-label={`${logoText} — home`}>
-      <EaselMark size={36} title={logoText} />
-      <span class="ez-nav__logotext">{logoText}</span>
+      {logo.mode === 'image' && logo.image ? (
+        <img class="ez-nav__logoimg" src={logo.image} alt={logoText} />
+      ) : (
+        <span class="ez-nav__logotext">{logoText}</span>
+      )}
     </a>
 
     <nav aria-label="Primary">
@@ -70,10 +80,12 @@ const isActive = (href: string) =>
   }
   .ez-nav__logotext {
     font-family: var(--ez-font-display);
-    font-weight: 800;
+    font-weight: var(--ez-heading-weight, 800);
     font-size: var(--ez-text-xl);
-    letter-spacing: -0.02em;
+    letter-spacing: var(--ez-heading-spacing, -0.02em);
+    text-transform: var(--ez-heading-transform, none);
   }
+  .ez-nav__logoimg { max-height: 44px; width: auto; }
   .ez-nav__list {
     display: flex;
     gap: var(--ez-space-5);
@@ -89,24 +101,23 @@ const isActive = (href: string) =>
     padding-bottom: 2px;
     border-bottom: var(--ez-border-width) solid transparent;
   }
-  .ez-nav__link:hover {
-    border-bottom-color: var(--ez-ink);
-  }
-  .ez-nav__link.is-active {
-    border-bottom-color: var(--ez-blue);
-    color: var(--ez-blue);
-  }
-  .ez-nav__tools {
-    display: flex;
+  .ez-nav__link:hover { border-bottom-color: var(--ez-ink); }
+  .ez-nav__link.is-active { border-bottom-color: var(--ez-blue); color: var(--ez-blue); }
+  .ez-nav__tools { display: flex; align-items: center; }
+
+  /* Top layout: name on its own row, centered, with the links centered below. */
+  .ez-nav--top .ez-nav__inner {
+    flex-direction: column;
     align-items: center;
+    gap: var(--ez-space-3);
+    text-align: center;
   }
+  .ez-nav--top .ez-nav__brand { margin-right: 0; }
+  .ez-nav--top .ez-nav__tools { position: absolute; right: var(--ez-space-5); top: var(--ez-space-4); }
+  .ez-nav--top { position: relative; }
+
   @media (max-width: 640px) {
-    .ez-nav__inner {
-      gap: var(--ez-space-3);
-    }
-    .ez-nav__list {
-      gap: var(--ez-space-4);
-      font-size: var(--ez-text-sm);
-    }
+    .ez-nav__inner { gap: var(--ez-space-3); }
+    .ez-nav__list { gap: var(--ez-space-4); font-size: var(--ez-text-sm); }
   }
 </style>

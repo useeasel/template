@@ -2,6 +2,7 @@
   import type { GitHub } from '../lib/github';
   import type { Settings } from '../lib/content';
   import { loadSettings, saveSettings } from '../lib/store';
+  import { PRESETS } from '../../lib/design';
 
   let { gh, notify }: { gh: GitHub; notify: (m: string, k?: 'info' | 'error') => void } = $props();
 
@@ -23,6 +24,12 @@
   }
   load();
 
+  const currentPreset = $derived((s.design?.preset as string) ?? 'bauhaus');
+  function applyPreset(id: string) {
+    s.design = structuredClone(PRESETS[id].design) as Record<string, any>;
+    notify(`Theme set to ${PRESETS[id].label}. Save to apply it.`);
+  }
+
   async function save() {
     saving = true;
     try {
@@ -33,6 +40,8 @@
     }
     saving = false;
   }
+
+  const presetIds = Object.keys(PRESETS);
 </script>
 
 <div class="ez-view__head">
@@ -45,35 +54,25 @@
 {#if loading}
   <p class="ez-help">Loading…</p>
 {:else}
+  <div class="ez-block">
+    <strong>Theme</strong>
+    <p class="ez-help">A starting look for your whole site. You'll be able to fine-tune colors, fonts, and more soon.</p>
+    <div class="ez-presets">
+      {#each presetIds as id (id)}
+        <button class="ez-preset" class:ez-preset--on={currentPreset === id} onclick={() => applyPreset(id)}>
+          {PRESETS[id].label}
+        </button>
+      {/each}
+    </div>
+  </div>
+
   <label class="ez-field"><span class="ez-label">Site title</span>
     <input class="ez-input" bind:value={s.siteTitle} placeholder="Your name or studio" />
     <span class="ez-help">Shows in the browser tab and search results.</span></label>
   <label class="ez-field"><span class="ez-label">Tagline</span>
     <input class="ez-input" bind:value={s.tagline} placeholder="Paintings and works on paper" /></label>
-  <label class="ez-field"><span class="ez-label">Logo text</span>
+  <label class="ez-field"><span class="ez-label">Name shown in the header</span>
     <input class="ez-input" bind:value={s.logoText} placeholder="Your name" /></label>
-
-  <div class="ez-row">
-    <label class="ez-field"><span class="ez-label">Color theme</span>
-      <select class="ez-input" bind:value={s.theme}>
-        <option value="default">Paper (light)</option>
-        <option value="ink">Ink (dark)</option>
-      </select></label>
-    <label class="ez-field"><span class="ez-label">Homepage layout</span>
-      <select class="ez-input" bind:value={s.portfolioLayout}>
-        <option value="grid">Even grid</option>
-        <option value="masonry">Masonry</option>
-      </select></label>
-    <label class="ez-field"><span class="ez-label">Columns</span>
-      <input class="ez-input" type="number" min="1" max="6" bind:value={s.columns} /></label>
-  </div>
-
-  <label class="ez-field"><span class="ez-label">Animations</span>
-    <select class="ez-input" bind:value={s.motionDefault}>
-      <option value="full">On</option>
-      <option value="reduced">Reduced</option>
-    </select>
-    <span class="ez-help">Visitors who prefer less motion always get the calm version automatically.</span></label>
 
   <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={s.rightClickProtect} />
     <span>Discourage saving my images (right-click)</span></label>

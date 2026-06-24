@@ -109,9 +109,12 @@ const site = defineCollection({
     fontPairing: z.string().default('syne-space-grotesk'),
     headingFont: z.string().optional(),
     bodyFont: z.string().optional(),
-    // layout
+    // layout (backend — chosen by us, not surfaced in the editor)
     portfolioLayout: z.enum(['grid', 'masonry']).default('grid'),
     columns: z.number().min(1).max(6).default(3),
+    // Design tokens (theme). Validated/normalized at render via src/lib/design.ts,
+    // so kept permissive here. See planning/customization.md.
+    design: z.record(z.any()).optional(),
     // motion
     motionDefault: z.enum(['full', 'reduced']).default('full'),
     // protection

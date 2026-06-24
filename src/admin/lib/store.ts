@@ -211,6 +211,7 @@ export async function loadSettings(gh: GitHub): Promise<Settings> {
     socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
     customDomain: data.customDomain,
     analyticsSnippet: data.analyticsSnippet,
+    design: data.design,
   };
 }
 
