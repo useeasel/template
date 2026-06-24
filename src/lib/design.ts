@@ -39,7 +39,8 @@ export interface DesignTokens {
   thumb: { fit: 'cover' | 'contain'; hover: 'none' | 'zoom' | 'lift' };
   gallery: {
     layout: 'grid' | 'masonry';
-    columns: number;
+    /** Target size of each piece; columns auto-fit to the window. */
+    size: 'small' | 'medium' | 'large';
     gutter: 'tight' | 'normal' | 'loose';
     caption: 'below' | 'hover' | 'hidden';
     featureFirst: boolean;
@@ -78,7 +79,7 @@ export const DEFAULT_DESIGN: DesignTokens = {
   logo: { mode: 'none' },
   background: { type: 'solid' },
   thumb: { fit: 'cover', hover: 'zoom' },
-  gallery: { layout: 'grid', columns: 3, gutter: 'normal', caption: 'below', featureFirst: false },
+  gallery: { layout: 'grid', size: 'medium', gutter: 'normal', caption: 'below', featureFirst: false },
   lightbox: { transition: 'fade' },
   hero: { enabled: false, align: 'left', size: 'small' },
   footer: { socials: true, credit: true },
@@ -125,6 +126,8 @@ export function resolveDesign(partial: Partial<DesignTokens> | undefined): Desig
 const DENSITY_GAP = { compact: '1rem', normal: '1.5rem', airy: '2.5rem' };
 const GUTTER = { tight: '0.75rem', normal: '1.5rem', loose: '2.5rem' };
 const CONTENT_WIDTH = { narrow: '880px', normal: '1200px', wide: '1500px' };
+// Target min width per piece; the grid fits as many columns as the window allows.
+const ITEM_MIN = { small: '200px', medium: '290px', large: '400px' };
 const SHADOW = {
   none: 'none',
   hard: 'var(--ez-border-width) var(--ez-border-width) 0 var(--ez-ink)',
@@ -152,7 +155,7 @@ export function designVars(d: DesignTokens): string {
     '--ez-border-width': `${d.shape.borderWidth}px`,
     '--ez-shadow': SHADOW[d.shape.shadows],
     '--ez-gap': DENSITY_GAP[d.density],
-    '--ez-columns': String(d.gallery.columns),
+    '--ez-item-min': ITEM_MIN[d.gallery.size],
     '--ez-gallery-gap': GUTTER[d.gallery.gutter],
     '--ez-content-max': CONTENT_WIDTH[d.contentWidth],
   };

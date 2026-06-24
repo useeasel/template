@@ -164,8 +164,9 @@
           <label class="ez-field"><span class="ez-label">Gallery layout</span>
             <select class="ez-input" bind:value={d.gallery.layout}>
               <option value="grid">Even grid</option><option value="masonry">Masonry</option></select></label>
-          <label class="ez-field"><span class="ez-label">Columns — {d.gallery.columns}</span>
-            <input type="range" min="2" max="5" step="1" bind:value={d.gallery.columns} /></label>
+          <label class="ez-field"><span class="ez-label">Piece size</span>
+            <select class="ez-input" bind:value={d.gallery.size}>
+              <option value="small">Small (more per row)</option><option value="medium">Medium</option><option value="large">Large (fewer per row)</option></select></label>
         </div>
         <div class="ez-row">
           <label class="ez-field"><span class="ez-label">Thumbnails</span>

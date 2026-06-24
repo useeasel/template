@@ -325,13 +325,16 @@ img {
 
 /* Gallery layout: even grid vs masonry, column count from --ez-columns. Keyed on
    the root class so the editor can toggle it live. */
+/* Columns auto-fit to the window based on the chosen item size (--ez-item-min);
+   no fixed column count, so it reflows smoothly at any width. The min(…, 100%)
+   stops a single item from overflowing on very narrow screens. */
 :root.ez-layout-grid .ez-portfolio {
   display: grid;
-  grid-template-columns: repeat(var(--ez-columns, 3), 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--ez-item-min, 290px), 100%), 1fr));
   gap: var(--ez-gallery-gap, var(--ez-gap));
 }
 :root.ez-layout-masonry .ez-portfolio {
-  column-count: var(--ez-columns, 3);
+  column-width: var(--ez-item-min, 290px);
   column-gap: var(--ez-gallery-gap, var(--ez-gap));
 }
 :root.ez-layout-masonry .ez-portfolio > * {
@@ -373,15 +376,6 @@ img {
 @keyframes ezLbFade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes ezLbSlide { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
 :root[data-motion='reduced'] .ez-lightbox__img.ez-anim { animation: none; }
-@media (max-width: 1024px) {
-  :root.ez-layout-grid .ez-portfolio { grid-template-columns: repeat(2, 1fr); }
-  :root.ez-layout-masonry .ez-portfolio { column-count: 2; }
-}
-@media (max-width: 640px) {
-  :root.ez-layout-grid .ez-portfolio { grid-template-columns: 1fr; }
-  :root.ez-layout-masonry .ez-portfolio { column-count: 1; }
-}
-
 /* Thumbnail crop: uniform squares vs natural shape. The aspect-ratio lives on the
    image (not the bordered button) so cropping never leaves a sub-pixel border gap. */
 :root.ez-fit-cover .ez-artcard__img { aspect-ratio: 1; height: auto; object-fit: cover; }
