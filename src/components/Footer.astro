@@ -1,6 +1,4 @@
 ---
-import EaselMark from './EaselMark.astro';
-
 interface Props {
   logoText: string;
   socialLinks?: { label: string; url: string }[];
@@ -11,10 +9,7 @@ const year = new Date().getFullYear();
 
 <footer class="ez-footer">
   <div class="ez-container ez-footer__inner">
-    <div class="ez-footer__brand">
-      <EaselMark size={28} title={logoText} />
-      <span>{logoText}</span>
-    </div>
+    <div class="ez-footer__brand"><span>{logoText}</span></div>
 
     {socialLinks.length > 0 && (
       <ul class="ez-footer__social">
@@ -27,7 +22,7 @@ const year = new Date().getFullYear();
     )}
 
     <p class="ez-footer__meta">
-      © {year} {logoText}. Made with <a href="/admin">Easel</a>.
+      © {year} {logoText}. Made with <a href="https://easel.rosematcha.com" rel="noopener">Easel</a>.
     </p>
   </div>
 </footer>

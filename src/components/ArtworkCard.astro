@@ -71,9 +71,6 @@ const metaParts = [year, medium, dimensions].filter(Boolean);
     background: var(--ez-white);
     transition: transform var(--ez-motion-base) var(--ez-ease);
   }
-  .ez-artcard:hover {
-    transform: translate(-3px, -3px);
-  }
   .ez-artcard__trigger {
     display: block;
     width: 100%;
@@ -82,12 +79,15 @@ const metaParts = [year, medium, dimensions].filter(Boolean);
     border-bottom: var(--ez-border-width) solid var(--ez-border);
     background: var(--ez-paper);
     cursor: zoom-in;
+    overflow: hidden;
   }
   .ez-artcard__img {
     width: 100%;
     height: auto;
     display: block;
+    transition: transform var(--ez-motion-base) var(--ez-ease);
   }
+  /* Hover + crop are driven by root classes from the design tokens (see tokens.css). */
   .ez-artcard__body {
     padding: var(--ez-space-4);
   }

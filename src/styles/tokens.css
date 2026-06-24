@@ -21,10 +21,11 @@
   --ez-stone: #6b6b63;  /* muted */
   --ez-border: #161616; /* borders (ink) */
 
-  /* Status colors map to artwork status. */
+  /* Status colors derive from the theme so they stay on-palette. Inquire blends
+     the two accents into a distinct third hue. */
   --ez-status-available: var(--ez-blue);
   --ez-status-sold: var(--ez-red);
-  --ez-status-inquire: var(--ez-yellow);
+  --ez-status-inquire: color-mix(in srgb, var(--ez-blue) 50%, var(--ez-red));
   --ez-status-nfs: var(--ez-stone);
 
   /* --- Typography --- */
@@ -321,6 +322,15 @@ img {
 
 /* Structural toggles driven by root classes (so the editor previews them live). */
 :root.ez-hero-off .ez-hero { display: none; }
+
+/* Thumbnail crop: uniform squares vs natural shape. */
+:root.ez-fit-cover .ez-artcard__trigger { aspect-ratio: 1; }
+:root.ez-fit-cover .ez-artcard__img { height: 100%; object-fit: cover; }
+
+/* Thumbnail hover effect. */
+:root.ez-thumb-zoom .ez-artcard:hover .ez-artcard__img { transform: scale(1.05); }
+:root.ez-thumb-lift .ez-artcard:hover { transform: translateY(-4px); }
+
 :root.ez-bg-none body { background: var(--ez-white); }
 :root.ez-bg-texture body {
   background-image: repeating-linear-gradient(

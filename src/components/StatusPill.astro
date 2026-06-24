@@ -33,11 +33,11 @@ const labels: Record<Status, string> = {
     padding: 0.4em 0.85em;
     border: var(--ez-border-width) solid var(--ez-border);
     border-radius: var(--ez-radius-pill); /* pills are the rounded exception */
-    color: var(--ez-white);
+    /* Pills sit on saturated accent backgrounds, so keep text light in every theme. */
+    color: #fff;
   }
   .ez-pill--available { background: var(--ez-status-available); }
   .ez-pill--sold { background: var(--ez-status-sold); }
-  /* yellow needs ink text for contrast */
-  .ez-pill--inquire { background: var(--ez-status-inquire); color: var(--ez-ink); }
+  .ez-pill--inquire { background: var(--ez-status-inquire); }
   .ez-pill--nfs { background: var(--ez-status-nfs); }
 </style>

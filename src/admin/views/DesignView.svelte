@@ -160,6 +160,14 @@
             <select class="ez-input" bind:value={d.background.type}>
               <option value="solid">Solid color</option><option value="texture">Subtle texture</option><option value="none">Plain white</option></select></label>
         </div>
+        <div class="ez-row">
+          <label class="ez-field"><span class="ez-label">Thumbnails</span>
+            <select class="ez-input" bind:value={d.thumb.fit}>
+              <option value="contain">Keep original shape</option><option value="cover">Crop to squares</option></select></label>
+          <label class="ez-field"><span class="ez-label">Hover effect</span>
+            <select class="ez-input" bind:value={d.thumb.hover}>
+              <option value="none">None</option><option value="zoom">Zoom</option><option value="lift">Lift</option></select></label>
+        </div>
       </section>
 
       <section class="ez-block">

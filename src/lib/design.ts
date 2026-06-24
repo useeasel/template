@@ -124,6 +124,7 @@ export function designVars(d: DesignTokens): string {
     '--ez-stone': d.color.muted,
     '--ez-blue': d.color.accent,
     '--ez-red': d.color.accent2,
+    '--ez-yellow': d.color.accent2,
     '--ez-border': d.color.border,
     '--ez-font-display': `'${d.type.headingFont}', system-ui, sans-serif`,
     '--ez-font-body': `'${d.type.bodyFont}', system-ui, sans-serif`,
@@ -145,6 +146,7 @@ export function designClasses(d: DesignTokens): string {
   return [
     `ez-nav-${d.nav.layout}`,
     `ez-thumb-${d.thumb.hover}`,
+    `ez-fit-${d.thumb.fit}`,
     `ez-bg-${d.background.type}`,
     `ez-light-${d.lightbox.transition}`,
     d.shape.shadows === 'none' ? 'ez-flat' : '',
