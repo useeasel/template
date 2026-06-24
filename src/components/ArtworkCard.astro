@@ -80,6 +80,9 @@ const metaParts = [year, medium, dimensions].filter(Boolean);
     background: var(--ez-paper);
     cursor: zoom-in;
     overflow: hidden;
+    /* Round the top corners to match the card so the image (and its hover zoom)
+       clip cleanly instead of poking square corners past the rounded border. */
+    border-radius: var(--ez-radius) var(--ez-radius) 0 0;
   }
   .ez-artcard__img {
     width: 100%;

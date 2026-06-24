@@ -179,25 +179,25 @@ export function googleFontsHref(d: DesignTokens): string {
   return `https://fonts.googleapis.com/css2?${families}&display=swap`;
 }
 
-/** Curated fonts offered in the editor (all available on Google Fonts). */
-export const SUGGESTED_FONTS = {
-  heading: [
-    'Syne', 'Archivo', 'Anton', 'Bebas Neue', 'Playfair Display', 'Fraunces',
-    'DM Serif Display', 'Cormorant Garamond', 'Space Grotesk', 'Outfit',
-    'Bricolage Grotesque', 'Sora', 'Spectral', 'Libre Franklin',
-  ],
-  body: [
-    'Inter', 'Work Sans', 'Outfit', 'Nunito Sans', 'Source Sans 3', 'IBM Plex Sans',
-    'Karla', 'Mulish', 'Space Grotesk', 'Lora', 'Libre Baskerville', 'EB Garamond',
-    'Spectral', 'Atkinson Hyperlegible',
-  ],
-};
+/**
+ * One comprehensive, alphabetized font list, offered for both heading and body so
+ * every font any preset uses is always pickable. (All on Google Fonts.) If a new
+ * preset introduces a font, add it here too — `assertPresetFontsListed` guards it.
+ */
+export const FONTS = [
+  'Anton', 'Archivo', 'Atkinson Hyperlegible', 'Bebas Neue', 'Bricolage Grotesque',
+  'Cormorant Garamond', 'DM Serif Display', 'EB Garamond', 'Fraunces', 'IBM Plex Sans',
+  'Inter', 'Karla', 'Libre Baskerville', 'Libre Franklin', 'Lora', 'Mulish',
+  'Nunito Sans', 'Outfit', 'Playfair Display', 'Sora', 'Source Sans 3', 'Space Grotesk',
+  'Spectral', 'Syne', 'Work Sans',
+];
 
-/** All curated families deduped — used to load previews in the editor's font picker. */
+/** Both pickers use the same full list. */
+export const SUGGESTED_FONTS = { heading: FONTS, body: FONTS };
+
+/** A Google Fonts stylesheet covering the whole list — preloaded by the editor. */
 export function allFontsHref(): string {
-  const families = [...new Set([...SUGGESTED_FONTS.heading, ...SUGGESTED_FONTS.body])]
-    .map((name) => `family=${name.replace(/ /g, '+')}:wght@400;700`)
-    .join('&');
+  const families = FONTS.map((name) => `family=${name.replace(/ /g, '+')}:wght@400;700`).join('&');
   return `https://fonts.googleapis.com/css2?${families}&display=swap`;
 }
 

@@ -323,9 +323,9 @@ img {
 /* Structural toggles driven by root classes (so the editor previews them live). */
 :root.ez-hero-off .ez-hero { display: none; }
 
-/* Thumbnail crop: uniform squares vs natural shape. */
-:root.ez-fit-cover .ez-artcard__trigger { aspect-ratio: 1; }
-:root.ez-fit-cover .ez-artcard__img { height: 100%; object-fit: cover; }
+/* Thumbnail crop: uniform squares vs natural shape. The aspect-ratio lives on the
+   image (not the bordered button) so cropping never leaves a sub-pixel border gap. */
+:root.ez-fit-cover .ez-artcard__img { aspect-ratio: 1; height: auto; object-fit: cover; }
 
 /* Thumbnail hover effect. */
 :root.ez-thumb-zoom .ez-artcard:hover .ez-artcard__img { transform: scale(1.05); }
