@@ -36,6 +36,7 @@ export interface DesignTokens {
   logo: { mode: 'none' | 'text' | 'image'; image?: string };
   background: { type: 'solid' | 'texture' | 'none' };
   thumb: { fit: 'cover' | 'contain'; hover: 'none' | 'zoom' | 'lift' };
+  gallery: { layout: 'grid' | 'masonry'; columns: number };
   lightbox: { transition: 'fade' | 'slide' };
   hero: { enabled: boolean };
   pages: { about: boolean; contact: boolean; cv: boolean; press: boolean };
@@ -68,6 +69,7 @@ export const DEFAULT_DESIGN: DesignTokens = {
   logo: { mode: 'none' },
   background: { type: 'solid' },
   thumb: { fit: 'cover', hover: 'zoom' },
+  gallery: { layout: 'grid', columns: 3 },
   lightbox: { transition: 'fade' },
   hero: { enabled: false },
   pages: { about: true, contact: true, cv: true, press: true },
@@ -87,6 +89,7 @@ function mergeOver(base: DesignTokens, partial: Partial<DesignTokens> | undefine
     logo: { ...base.logo, ...(d.logo ?? {}) },
     background: { ...base.background, ...(d.background ?? {}) },
     thumb: { ...base.thumb, ...(d.thumb ?? {}) },
+    gallery: { ...base.gallery, ...(d.gallery ?? {}) },
     lightbox: { ...base.lightbox, ...(d.lightbox ?? {}) },
     hero: { ...base.hero, ...(d.hero ?? {}) },
     pages: { ...base.pages, ...(d.pages ?? {}) },
@@ -136,6 +139,7 @@ export function designVars(d: DesignTokens): string {
     '--ez-border-width': `${d.shape.borderWidth}px`,
     '--ez-shadow': SHADOW[d.shape.shadows],
     '--ez-gap': DENSITY_GAP[d.density],
+    '--ez-columns': String(d.gallery.columns),
   };
   return `font-size:${d.type.baseSize}px;` + Object.entries(v).map(([k, val]) => `${k}:${val}`).join(';');
 }
@@ -147,6 +151,7 @@ export function designClasses(d: DesignTokens): string {
     `ez-nav-${d.nav.layout}`,
     `ez-thumb-${d.thumb.hover}`,
     `ez-fit-${d.thumb.fit}`,
+    `ez-layout-${d.gallery.layout}`,
     `ez-bg-${d.background.type}`,
     `ez-light-${d.lightbox.transition}`,
     d.shape.shadows === 'none' ? 'ez-flat' : '',

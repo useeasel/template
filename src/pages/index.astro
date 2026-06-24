@@ -2,8 +2,6 @@
 import { getCollection, getEntry } from 'astro:content';
 import { getImage } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import Grid from '../components/Grid.astro';
-import Masonry from '../components/Masonry.astro';
 import ArtworkCard from '../components/ArtworkCard.astro';
 import Lightbox from '../components/Lightbox.astro';
 
@@ -21,8 +19,6 @@ const lightboxItems = await Promise.all(
     return { src: img.src, alt: a.data.alt, title: a.data.title, meta };
   })
 );
-
-const Layout = settings.portfolioLayout === 'masonry' ? Masonry : Grid;
 ---
 
 <Base pageDescription={settings.tagline}>
@@ -34,7 +30,7 @@ const Layout = settings.portfolioLayout === 'masonry' ? Masonry : Grid;
       </div>
     </header>
 
-    <Layout columns={settings.columns}>
+    <div class="ez-portfolio">
       {artworks.map((a, i) => (
         <ArtworkCard
           image={a.data.image}
@@ -45,11 +41,10 @@ const Layout = settings.portfolioLayout === 'masonry' ? Masonry : Grid;
           dimensions={a.data.dimensions}
           price={a.data.price}
           status={a.data.status}
-          columns={settings.columns}
           index={i}
         />
       ))}
-    </Layout>
+    </div>
   </div>
 
   <Lightbox items={lightboxItems} />

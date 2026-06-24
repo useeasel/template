@@ -3,7 +3,6 @@ import type { GetStaticPaths } from 'astro';
 import { getCollection, getEntry } from 'astro:content';
 import { getImage } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import Grid from '../components/Grid.astro';
 import ArtworkCard from '../components/ArtworkCard.astro';
 import Lightbox from '../components/Lightbox.astro';
 
@@ -41,7 +40,7 @@ const lightboxItems = await Promise.all(
     <h1>{series.data.title}</h1>
     {series.data.description && <p class="ez-series-desc">{series.data.description}</p>}
 
-    <Grid columns={settings.columns}>
+    <div class="ez-portfolio">
       {artworks.map((a, i) => (
         <ArtworkCard
           image={a.data.image}
@@ -52,11 +51,10 @@ const lightboxItems = await Promise.all(
           dimensions={a.data.dimensions}
           price={a.data.price}
           status={a.data.status}
-          columns={settings.columns}
           index={i}
         />
       ))}
-    </Grid>
+    </div>
   </div>
 
   <Lightbox items={lightboxItems} />
