@@ -4,6 +4,7 @@
   import type { Series } from './lib/content';
   import { loadSeries } from './lib/store';
   import { getToken, setToken, clearToken, signIn } from './lib/auth';
+  import { makeDemoClient } from './lib/demo';
   import Artworks from './views/Artworks.svelte';
   import SeriesView from './views/SeriesView.svelte';
   import PagesView from './views/PagesView.svelte';
@@ -21,6 +22,7 @@
   let authBaseUrl = $state('');
   let siteUrl = $state('/');
 
+  let demo = $state(false);
   let toast = $state<{ msg: string; kind: 'info' | 'error' } | null>(null);
   let toastTimer: number | undefined;
   function notify(msg: string, kind: 'info' | 'error' = 'info') {
@@ -36,11 +38,34 @@
       const res = await fetch('/admin/config.json', { cache: 'no-store' });
       config = await res.json();
     } catch {
+      config = null;
+    }
+
+    const wantsDemo =
+      new URLSearchParams(location.search).has('demo') ||
+      ['localhost', '127.0.0.1'].includes(location.hostname);
+    const unconfigured = !config || !config.repo || config.repo.includes('REPLACED_AT_PROVISION');
+
+    // Demo mode: explore the whole UI with sample data, no sign-in, no repo.
+    if (wantsDemo && unconfigured) {
+      demo = true;
+      gh = makeDemoClient();
+      login = 'demo-artist';
+      try {
+        seriesList = await loadSeries(gh);
+      } catch {
+        seriesList = [];
+      }
+      status = 'ready';
+      return;
+    }
+
+    if (!config) {
       status = 'error';
       errorMsg = 'Could not load editor configuration.';
       return;
     }
-    if (!config || !config.repo || config.repo.includes('REPLACED_AT_PROVISION')) {
+    if (unconfigured) {
       status = 'unconfigured';
       return;
     }
@@ -122,11 +147,17 @@
       </nav>
       <div class="ez-topbar__right">
         <a class="ez-btn ez-btn--sm ez-btn--ghost" href={siteUrl} target="_blank" rel="noopener">View site</a>
-        <span class="ez-who">@{login}</span>
-        <button class="ez-btn ez-btn--sm" onclick={signOut}>Sign out</button>
+        {#if !demo}
+          <span class="ez-who">@{login}</span>
+          <button class="ez-btn ez-btn--sm" onclick={signOut}>Sign out</button>
+        {/if}
       </div>
     {/if}
   </header>
+
+  {#if demo}
+    <div class="ez-demobar">Demo mode — explore freely. Changes here aren't saved anywhere.</div>
+  {/if}
 
   <main class="ez-main">
     {#if status === 'loading'}

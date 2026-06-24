@@ -55,7 +55,31 @@
 
 /* Artwork grid */
 .ez-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--ez-space-4); }
-.ez-tile { border: var(--ez-border-width) solid var(--ez-border); background: var(--ez-white); display: flex; flex-direction: column; cursor: grab; }
+.ez-tile { border: var(--ez-border-width) solid var(--ez-border); background: var(--ez-white); display: flex; flex-direction: column; cursor: grab; touch-action: none; transition: opacity var(--ez-motion-fast) var(--ez-ease); }
+.ez-tile:active { cursor: grabbing; }
+.ez-tile img { -webkit-user-drag: none; user-select: none; }
+
+/* The tile left behind while its clone is being dragged. */
+.ez-tile--ghost { opacity: 0.35; outline: 2px dashed var(--ez-stone); outline-offset: -2px; }
+.ez-tile--ghost > * { visibility: hidden; }
+
+/* The lifted piece that follows the cursor. */
+.ez-drag-clone {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  background: var(--ez-white);
+  border: var(--ez-border-width) solid var(--ez-border);
+  box-shadow: 8px 8px 0 var(--ez-ink);
+  transform: rotate(-2deg) scale(1.03);
+  cursor: grabbing;
+}
+.ez-drag-clone .ez-tile__img { aspect-ratio: 1; position: relative; border-bottom: var(--ez-border-width) solid var(--ez-border); overflow: hidden; }
+.ez-drag-clone .ez-tile__img img { width: 100%; height: 100%; object-fit: cover; }
+.ez-drag-clone .ez-tile__meta { padding: var(--ez-space-3); }
+@media (prefers-reduced-motion: reduce) {
+  .ez-drag-clone { transform: none; }
+}
 .ez-tile__img { position: relative; aspect-ratio: 1; background: var(--ez-paper); border-bottom: var(--ez-border-width) solid var(--ez-border); overflow: hidden; }
 .ez-tile__img img { width: 100%; height: 100%; object-fit: cover; }
 .ez-tile__meta { padding: var(--ez-space-3); display: flex; flex-direction: column; gap: 2px; }
@@ -71,7 +95,7 @@
 /* Forms */
 .ez-form { max-width: 640px; }
 .ez-form__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--ez-space-5); }
-.ez-form__preview { max-height: 220px; width: auto; border: var(--ez-border-width) solid var(--ez-border); margin-bottom: var(--ez-space-3); }
+.ez-form__preview { display: block; width: auto; max-width: 100%; height: auto; max-height: 260px; object-fit: contain; border: var(--ez-border-width) solid var(--ez-border); margin-bottom: var(--ez-space-3); }
 .ez-form__actions { margin-top: var(--ez-space-5); }
 .ez-row { display: flex; gap: var(--ez-space-3); flex-wrap: wrap; }
 .ez-row > .ez-field { flex: 1; min-width: 8rem; }
@@ -92,6 +116,9 @@
 .ez-block__head { display: flex; align-items: center; justify-content: space-between; gap: var(--ez-space-3); }
 .ez-advanced { margin-top: var(--ez-space-5); border-top: var(--ez-border-width) solid var(--ez-border); padding-top: var(--ez-space-4); }
 .ez-advanced summary { font-family: var(--ez-font-display); font-weight: 700; cursor: pointer; margin-bottom: var(--ez-space-4); }
+
+/* Demo banner */
+.ez-demobar { background: var(--ez-yellow); color: var(--ez-ink); font-weight: 500; text-align: center; padding: var(--ez-space-2) var(--ez-space-4); border-bottom: var(--ez-border-width) solid var(--ez-border); font-size: var(--ez-text-sm); }
 
 /* Toast */
 .ez-toast { position: fixed; left: 50%; bottom: var(--ez-space-5); transform: translateX(-50%); background: var(--ez-ink); color: var(--ez-white); font-weight: 500; padding: var(--ez-space-3) var(--ez-space-5); border: var(--ez-border-width) solid var(--ez-border); max-width: 90vw; z-index: 50; }

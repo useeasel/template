@@ -19,13 +19,18 @@
   let editing = $state<Artwork | null>(null);
   let adding = $state(false);
   let orderDirty = $state(false);
-  let dragIndex = $state<number | null>(null);
+
+  // --- pointer-based drag reordering ---
+  let dragId = $state<string | null>(null);
+  let ptr = $state({ x: 0, y: 0 });
+  let grab = { x: 0, y: 0 };
+  let cloneSize = $state({ w: 0, h: 0 });
+  let downId: string | null = null;
+  let downAt = { x: 0, y: 0 };
+  let started = false;
 
   const STATUS_LABEL: Record<string, string> = {
-    available: 'Available',
-    sold: 'Sold',
-    inquire: 'Ask me',
-    nfs: 'Not for sale',
+    available: 'Available', sold: 'Sold', inquire: 'Ask me', nfs: 'Not for sale',
   };
 
   async function refresh() {
@@ -44,17 +49,51 @@
     return a.image ? gh.rawUrl(resolveAssetPath('src/content/artworks', a.image)) : '';
   }
 
-  function onDragStart(i: number) {
-    dragIndex = i;
+  const dragged = $derived(items.find((a) => a.id === dragId) ?? null);
+
+  function onPointerDown(e: PointerEvent, a: Artwork) {
+    if (e.button !== 0) return;
+    if ((e.target as HTMLElement).closest('button')) return; // let buttons work
+    downId = a.id;
+    downAt = { x: e.clientX, y: e.clientY };
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    grab = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    cloneSize = { w: rect.width, h: rect.height };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
   }
-  function onDrop(i: number) {
-    if (dragIndex === null || dragIndex === i) return;
-    const next = [...items];
-    const [moved] = next.splice(dragIndex, 1);
-    next.splice(i, 0, moved);
-    items = next;
-    dragIndex = null;
-    orderDirty = true;
+
+  function onMove(e: PointerEvent) {
+    if (!downId) return;
+    if (!started) {
+      if (Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) < 6) return;
+      started = true;
+      dragId = downId;
+      document.body.style.userSelect = 'none';
+    }
+    ptr = { x: e.clientX, y: e.clientY };
+    const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+    const overId = el?.closest<HTMLElement>('[data-id]')?.dataset.id;
+    if (overId && overId !== dragId) {
+      const from = items.findIndex((x) => x.id === dragId);
+      const to = items.findIndex((x) => x.id === overId);
+      if (from > -1 && to > -1) {
+        const next = [...items];
+        const [m] = next.splice(from, 1);
+        next.splice(to, 0, m);
+        items = next;
+        orderDirty = true;
+      }
+    }
+  }
+
+  function onUp() {
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    document.body.style.userSelect = '';
+    started = false;
+    downId = null;
+    dragId = null;
   }
 
   async function saveOrder() {
@@ -110,16 +149,15 @@
     </div>
   {:else}
     <div class="ez-grid">
-      {#each items as a, i (a.id)}
+      {#each items as a (a.id)}
         <div
           class="ez-tile"
-          draggable="true"
-          ondragstart={() => onDragStart(i)}
-          ondragover={(e) => e.preventDefault()}
-          ondrop={() => onDrop(i)}
+          class:ez-tile--ghost={dragId === a.id}
+          data-id={a.id}
+          onpointerdown={(e) => onPointerDown(e, a)}
         >
           <div class="ez-tile__img">
-            {#if thumb(a)}<img src={thumb(a)} alt={a.alt} loading="lazy" />{/if}
+            {#if thumb(a)}<img src={thumb(a)} alt={a.alt} draggable="false" loading="lazy" />{/if}
             <span class="ez-pill ez-pill--{a.status}">{STATUS_LABEL[a.status]}</span>
           </div>
           <div class="ez-tile__meta">
@@ -133,5 +171,18 @@
         </div>
       {/each}
     </div>
+
+    {#if dragged}
+      <div
+        class="ez-drag-clone"
+        style="left:{ptr.x - grab.x}px; top:{ptr.y - grab.y}px; width:{cloneSize.w}px;"
+      >
+        <div class="ez-tile__img">
+          {#if thumb(dragged)}<img src={thumb(dragged)} alt="" draggable="false" />{/if}
+          <span class="ez-pill ez-pill--{dragged.status}">{STATUS_LABEL[dragged.status]}</span>
+        </div>
+        <div class="ez-tile__meta"><strong>{dragged.title}</strong></div>
+      </div>
+    {/if}
   {/if}
 {/if}
