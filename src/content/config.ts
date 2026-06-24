@@ -2,8 +2,9 @@ import { defineCollection, reference, z } from 'astro:content';
 
 /**
  * Content model for an Easel portfolio. All of these collections are edited by
- * the artist through Sveltia CMS at /admin — never by hand. The Zod schemas here
- * mirror public/admin/config.yml so the CMS and the build agree.
+ * the artist through the custom Easel editor at /admin (src/admin) — never by
+ * hand. The editor writes exactly the fields these Zod schemas validate, so what
+ * it commits is always what the build can read.
  */
 
 const statusEnum = z.enum(['available', 'sold', 'inquire', 'nfs']);

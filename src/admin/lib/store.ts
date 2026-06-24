@@ -218,7 +218,25 @@ export async function loadSettings(gh: GitHub): Promise<Settings> {
 }
 
 export async function saveSettings(gh: GitHub, s: Settings): Promise<void> {
-  await gh.commit([{ path: PATHS.settings, content: toJson(s) }], 'Update site settings');
+  // Read-merge-write: never drop keys the editor doesn't model. The basic
+  // Settings shape omits some schema fields (e.g. fontPairing/headingFont/
+  // bodyFont) and may not know about future additions, so we overlay only the
+  // *defined* values onto whatever is currently on disk. This also guards the
+  // design tokens (owned by the Look UI/wizard) from being clobbered on a plain
+  // settings save.
+  const existing = await gh.getFile(PATHS.settings);
+  let merged: Record<string, any> = {};
+  if (existing) {
+    try {
+      merged = JSON.parse(existing.text);
+    } catch {
+      /* corrupt/empty — fall back to a fresh object */
+    }
+  }
+  for (const [k, v] of Object.entries(s)) {
+    if (v !== undefined) merged[k] = v;
+  }
+  await gh.commit([{ path: PATHS.settings, content: toJson(merged) }], 'Update site settings');
 }
 
 // ---------- Asset uploads (logo, favicon) ----------
