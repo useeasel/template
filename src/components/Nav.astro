@@ -13,6 +13,7 @@ const links = [
   { href: '/about', label: 'About', key: 'about' },
   { href: '/cv', label: 'CV', key: 'cv' },
   { href: '/press', label: 'Press', key: 'press' },
+  { href: '/news', label: 'News', key: 'news' },
   { href: '/contact', label: 'Contact', key: 'contact' },
 ];
 const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
@@ -62,7 +63,8 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
   :global(html.ez-page-about-off) .ez-pagelink-about,
   :global(html.ez-page-contact-off) .ez-pagelink-contact,
   :global(html.ez-page-cv-off) .ez-pagelink-cv,
-  :global(html.ez-page-press-off) .ez-pagelink-press { display: none; }
+  :global(html.ez-page-press-off) .ez-pagelink-press,
+  :global(html.ez-page-news-off) .ez-pagelink-news { display: none; }
 
   /* Top layout: name on its own centered row, links centered below. */
   :global(html.ez-nav-top) .ez-nav { position: relative; }

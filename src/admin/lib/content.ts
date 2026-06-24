@@ -9,6 +9,7 @@ export const PATHS = {
   artworks: 'src/content/artworks',
   series: 'src/content/collections',
   pages: 'src/content/pages',
+  posts: 'src/content/posts',
   settings: 'src/content/site/settings.json',
   assets: 'src/assets',
 };
@@ -24,8 +25,20 @@ export interface Artwork {
   price?: string;
   alt: string;
   collection?: string; // series id
+  /** Optional YouTube/Vimeo URL — plays on the artwork's own page. */
+  video?: string;
   order: number;
   featured: boolean;
+  body: string;
+}
+
+export interface Post {
+  id: string;
+  title: string;
+  date: string; // YYYY-MM-DD
+  excerpt?: string;
+  cover?: string;
+  draft: boolean;
   body: string;
 }
 
@@ -86,7 +99,11 @@ export interface Settings {
   ogImage?: string;
   socialLinks: { label: string; url: string }[];
   customDomain?: string;
+  cfAnalyticsToken?: string;
   analyticsSnippet?: string;
+  newsletterEnabled?: boolean;
+  newsletterHeading?: string;
+  newsletterBlurb?: string;
   customCss?: string;
   customCode?: string;
   /** Design tokens (theme). Opaque to the editor's basic settings; carried through

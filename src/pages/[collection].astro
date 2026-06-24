@@ -5,6 +5,7 @@ import { getImage } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import ArtworkCard from '../components/ArtworkCard.astro';
 import Lightbox from '../components/Lightbox.astro';
+import { resolveDesign } from '../lib/design';
 
 // Astro 5 content-collection ids include the file extension; strip it for clean
 // URLs and for matching artwork series references.
@@ -20,6 +21,8 @@ const { series } = Astro.props;
 const slugify = (id: string) => id.replace(/\.md$/, '');
 const seriesSlug = slugify(series.id);
 const settings = (await getEntry('site', 'settings'))!.data;
+const design = resolveDesign(settings.design as any);
+const linkToPage = design.gallery.click === 'page';
 
 const artworks = (await getCollection('artworks'))
   .filter((a) => a.data.collection && slugify(a.data.collection.id) === seriesSlug)
@@ -52,12 +55,13 @@ const lightboxItems = await Promise.all(
           price={a.data.price}
           status={a.data.status}
           index={i}
+          href={linkToPage ? `/work/${slugify(a.id)}/` : undefined}
         />
       ))}
     </div>
   </div>
 
-  <Lightbox items={lightboxItems} />
+  {!linkToPage && <Lightbox items={lightboxItems} />}
 </Base>
 
 <style>

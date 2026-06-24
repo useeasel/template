@@ -129,6 +129,12 @@
     <span class="ez-help">A short description of the image, for screen readers and search. Required.</span>
   </label>
 
+  <label class="ez-field">
+    <span class="ez-label">Video (optional)</span>
+    <input class="ez-input" bind:value={form.video} placeholder="https://vimeo.com/… or https://youtube.com/watch?v=…" />
+    <span class="ez-help">Paste a YouTube or Vimeo link to add a video on this piece's page. The photo above is the thumbnail.</span>
+  </label>
+
   <label class="ez-field ez-field--check">
     <input type="checkbox" bind:checked={form.featured} />
     <span>Feature this piece at the top of my homepage</span>

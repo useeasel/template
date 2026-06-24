@@ -1,0 +1,48 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const settings = (await getEntry('site', 'settings'))!.data;
+const slugify = (id: string) => id.replace(/\.md$/, '');
+
+const posts = (await getCollection('posts'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => (a.data.date < b.data.date ? 1 : -1));
+
+const fmtDate = (iso: string) => {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime())
+    ? iso
+    : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+---
+
+<Base pageTitle="News" pageDescription={`Updates from ${settings.siteTitle}`}>
+  <div class="ez-container ez-news">
+    <h1>News</h1>
+    {posts.length === 0 && <p class="ez-news__empty">No updates yet — check back soon.</p>}
+    <ul class="ez-news__list" role="list">
+      {posts.map((p) => (
+        <li class="ez-news__item">
+          <a class="ez-news__link" href={`/news/${slugify(p.id)}/`}>
+            <time class="ez-news__date" datetime={p.data.date}>{fmtDate(p.data.date)}</time>
+            <h2 class="ez-news__title">{p.data.title}</h2>
+            {p.data.excerpt && <p class="ez-news__excerpt">{p.data.excerpt}</p>}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</Base>
+
+<style>
+  .ez-news { max-width: 720px; }
+  .ez-news__empty { color: var(--ez-stone); }
+  .ez-news__list { list-style: none; margin: var(--ez-space-6) 0 0; padding: 0; display: grid; gap: var(--ez-space-5); }
+  .ez-news__item { border-bottom: var(--ez-border-width) solid var(--ez-border); padding-bottom: var(--ez-space-5); }
+  .ez-news__link { text-decoration: none; color: var(--ez-ink); display: block; }
+  .ez-news__date { color: var(--ez-stone); font-size: var(--ez-text-sm); }
+  .ez-news__title { margin: var(--ez-space-2) 0; }
+  .ez-news__excerpt { margin: 0; color: var(--ez-stone); }
+  .ez-news__link:hover .ez-news__title { color: var(--ez-blue); }
+</style>

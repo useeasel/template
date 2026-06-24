@@ -4,8 +4,12 @@ import { getImage } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import ArtworkCard from '../components/ArtworkCard.astro';
 import Lightbox from '../components/Lightbox.astro';
+import { resolveDesign } from '../lib/design';
 
 const settings = (await getEntry('site', 'settings'))!.data;
+const design = resolveDesign(settings.design as any);
+const linkToPage = design.gallery.click === 'page';
+const slugify = (id: string) => id.replace(/\.md$/, '');
 
 const artworks = (await getCollection('artworks')).sort(
   (a, b) => a.data.order - b.data.order
@@ -42,12 +46,13 @@ const lightboxItems = await Promise.all(
           price={a.data.price}
           status={a.data.status}
           index={i}
+          href={linkToPage ? `/work/${slugify(a.id)}/` : undefined}
         />
       ))}
     </div>
   </div>
 
-  <Lightbox items={lightboxItems} />
+  {!linkToPage && <Lightbox items={lightboxItems} />}
 </Base>
 
 <style>

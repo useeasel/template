@@ -11,6 +11,7 @@ import {
   slugify,
   type Artwork,
   type Series,
+  type Post,
   type AboutPage,
   type ContactPage,
   type CvPage,
@@ -40,6 +41,7 @@ export async function loadArtworks(gh: GitHub): Promise<Artwork[]> {
         price: data.price,
         alt: data.alt ?? '',
         collection: data.collection,
+        video: data.video,
         order: typeof data.order === 'number' ? data.order : 0,
         featured: !!data.featured,
         body,
@@ -62,6 +64,7 @@ function artworkToMd(a: Artwork): string {
       price: a.status === 'available' ? a.price : undefined,
       alt: a.alt,
       collection: a.collection,
+      video: a.video,
       order: a.order,
       featured: a.featured,
     },
@@ -97,6 +100,65 @@ export async function saveArtwork(
 
 export async function deleteArtwork(gh: GitHub, art: Artwork): Promise<void> {
   await gh.commit([{ path: `${PATHS.artworks}/${art.id}.md`, remove: true }], `Remove artwork: ${art.title}`);
+}
+
+/** Filename → a friendly title: "blue_study-02.jpg" → "Blue Study 02". */
+function titleFromFilename(name: string): string {
+  return (
+    name
+      .replace(/\.[^.]+$/, '')
+      .replace(/[-_]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, (c) => c.toUpperCase()) || 'Untitled'
+  );
+}
+
+/**
+ * Add many photos at once in a SINGLE commit (so the site rebuilds once, not N
+ * times). Each becomes a draft artwork titled from its filename, ready for the
+ * artist to flesh out. The biggest day-2 friction is adding work one-at-a-time;
+ * this removes it. Returns how many were added.
+ */
+export async function bulkAddArtworks(gh: GitHub, files: File[]): Promise<number> {
+  if (!files.length) return 0;
+  const existing = new Set((await gh.listDir(PATHS.artworks)).map((e) => e.name.replace(/\.md$/, '')));
+  const startOrder = existing.size;
+  const changes: FileChange[] = [];
+
+  let i = 0;
+  for (const file of files) {
+    const title = titleFromFilename(file.name);
+    // Unique id across what's on disk AND what we're adding in this same batch.
+    let id = slugify(title);
+    if (existing.has(id)) {
+      let n = 2;
+      while (existing.has(`${id}-${n}`)) n++;
+      id = `${id}-${n}`;
+    }
+    existing.add(id);
+
+    const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase();
+    const fname = `${id}-${shortStamp()}.${ext}`;
+    const art: Artwork = {
+      id,
+      image: `${ARTWORK_IMG_REL}/${fname}`,
+      title,
+      status: 'available',
+      // Seed alt with the title so the schema's required field is satisfied; the
+      // artist should refine it, but a draft shouldn't fail the build.
+      alt: title,
+      order: startOrder + i,
+      featured: false,
+      body: '',
+    };
+    changes.push({ path: `${ARTWORK_IMG_DIR}/${fname}`, content: await fileToBase64(file), encoding: 'base64' });
+    changes.push({ path: `${PATHS.artworks}/${id}.md`, content: artworkToMd(art) });
+    i++;
+  }
+
+  await gh.commit(changes, `Add ${files.length} artwork${files.length > 1 ? 's' : ''}`);
+  return files.length;
 }
 
 /** Persist a new display order by rewriting each artwork's `order`. One commit. */
@@ -144,6 +206,43 @@ export async function saveSeries(gh: GitHub, s: Series, isNew: boolean): Promise
 
 export async function deleteSeries(gh: GitHub, s: Series): Promise<void> {
   await gh.commit([{ path: `${PATHS.series}/${s.id}.md`, remove: true }], `Remove series: ${s.title}`);
+}
+
+// ---------- Posts (news) ----------
+
+export async function loadPosts(gh: GitHub): Promise<Post[]> {
+  const entries = (await gh.listDir(PATHS.posts)).filter((e) => e.name.endsWith('.md'));
+  const items = await Promise.all(
+    entries.map(async (e) => {
+      const file = await gh.getFile(e.path);
+      const { data, body } = parseFrontmatter(file?.text ?? '');
+      return {
+        id: e.name.replace(/\.md$/, ''),
+        title: data.title ?? 'Untitled',
+        date: data.date ?? '',
+        excerpt: data.excerpt,
+        cover: data.cover,
+        draft: !!data.draft,
+        body,
+      } as Post;
+    }),
+  );
+  // Newest first.
+  return items.sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
+export async function savePost(gh: GitHub, p: Post, isNew: boolean): Promise<string> {
+  const id = isNew ? await uniqueId(gh, PATHS.posts, slugify(p.title)) : p.id;
+  const md = toMarkdown(
+    { title: p.title, date: p.date, excerpt: p.excerpt, cover: p.cover, draft: p.draft },
+    p.body,
+  );
+  await gh.commit([{ path: `${PATHS.posts}/${id}.md`, content: md }], `${isNew ? 'Add' : 'Update'} post: ${p.title}`);
+  return id;
+}
+
+export async function deletePost(gh: GitHub, p: Post): Promise<void> {
+  await gh.commit([{ path: `${PATHS.posts}/${p.id}.md`, remove: true }], `Remove post: ${p.title}`);
 }
 
 // ---------- Pages ----------
@@ -210,7 +309,11 @@ export async function loadSettings(gh: GitHub): Promise<Settings> {
     ogImage: data.ogImage,
     socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
     customDomain: data.customDomain,
+    cfAnalyticsToken: data.cfAnalyticsToken,
     analyticsSnippet: data.analyticsSnippet,
+    newsletterEnabled: !!data.newsletterEnabled,
+    newsletterHeading: data.newsletterHeading,
+    newsletterBlurb: data.newsletterBlurb,
     customCss: data.customCss,
     customCode: data.customCode,
     design: data.design,

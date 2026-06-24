@@ -1,0 +1,62 @@
+---
+/**
+ * Newsletter signup — captures emails via Netlify Forms (same mechanism as the
+ * contact form, already enabled on artist sites). Submissions land in the artist's
+ * Netlify dashboard; they can wire it to Buttondown/Mailchimp via customCode if they
+ * want automation. Owning an audience list is the most durable thing an independent
+ * artist can do, so the platform makes it one toggle.
+ */
+interface Props {
+  heading?: string;
+  blurb?: string;
+}
+const { heading, blurb } = Astro.props;
+---
+
+<section class="ez-newsletter" aria-label="Newsletter signup">
+  <div class="ez-newsletter__inner">
+    <h2 class="ez-newsletter__title">{heading || 'Stay in the loop'}</h2>
+    {blurb && <p class="ez-newsletter__blurb">{blurb}</p>}
+    <form
+      name="newsletter"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      action="/?subscribed=1"
+      class="ez-newsletter__form"
+    >
+      <input type="hidden" name="form-name" value="newsletter" />
+      <p class="ez-visually-hidden" aria-hidden="true">
+        <label>Do not fill this out: <input name="bot-field" /></label>
+      </p>
+      <label class="ez-visually-hidden" for="newsletter-email">Email address</label>
+      <input
+        class="ez-input ez-newsletter__email"
+        id="newsletter-email"
+        type="email"
+        name="email"
+        placeholder="you@example.com"
+        autocomplete="email"
+        required
+      />
+      <button type="submit" class="ez-btn ez-btn--primary">Subscribe</button>
+    </form>
+  </div>
+</section>
+
+<style>
+  .ez-newsletter {
+    border-top: var(--ez-border-width) solid var(--ez-border);
+    margin-top: var(--ez-space-7);
+    padding-top: var(--ez-space-6);
+  }
+  .ez-newsletter__inner { max-width: 520px; }
+  .ez-newsletter__title { margin: 0 0 var(--ez-space-2); }
+  .ez-newsletter__blurb { color: var(--ez-stone); margin: 0 0 var(--ez-space-4); }
+  .ez-newsletter__form {
+    display: flex;
+    gap: var(--ez-space-3);
+    flex-wrap: wrap;
+  }
+  .ez-newsletter__email { flex: 1 1 16rem; }
+</style>

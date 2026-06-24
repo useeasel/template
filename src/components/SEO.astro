@@ -8,9 +8,11 @@ interface Props {
   pageTitle?: string;
   pageDescription?: string;
   pageImage?: string;
+  /** Schema.org JSON-LD nodes to emit (see lib/structured-data.ts). */
+  jsonLd?: Record<string, unknown>[];
 }
 
-const props = Astro.props;
+const { jsonLd, ...props } = Astro.props;
 const input: SeoInput = {
   ...props,
   url: Astro.url,
@@ -35,3 +37,8 @@ const seo = buildSeo(input);
 <meta name="twitter:title" content={seo.title} />
 <meta name="twitter:description" content={seo.description} />
 {seo.ogImage && <meta name="twitter:image" content={seo.ogImage} />}
+
+<!-- Structured data (schema.org JSON-LD) -->
+{jsonLd?.map((node) => (
+  <script type="application/ld+json" set:html={JSON.stringify(node)} />
+))}

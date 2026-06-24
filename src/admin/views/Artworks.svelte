@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { GitHub } from '../lib/github';
   import { resolveAssetPath, type Artwork, type Series } from '../lib/content';
-  import { loadArtworks, deleteArtwork, reorderArtworks } from '../lib/store';
+  import { loadArtworks, deleteArtwork, reorderArtworks, bulkAddArtworks } from '../lib/store';
   import ArtworkForm from './ArtworkForm.svelte';
 
   let {
@@ -19,6 +19,8 @@
   let editing = $state<Artwork | null>(null);
   let adding = $state(false);
   let orderDirty = $state(false);
+  let bulkBusy = $state(false);
+  let bulkInput = $state<HTMLInputElement | null>(null);
 
   // --- pointer-based drag reordering ---
   let dragId = $state<string | null>(null);
@@ -122,6 +124,22 @@
     adding = false;
     if (changed) refresh();
   }
+
+  async function onBulkPick(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    input.value = ''; // allow re-picking the same files
+    if (!files.length) return;
+    bulkBusy = true;
+    try {
+      const n = await bulkAddArtworks(gh, files);
+      notify(`Added ${n} piece${n === 1 ? '' : 's'}. Add titles and details any time — your site will update shortly.`);
+      await refresh();
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Could not add those photos.', 'error');
+    }
+    bulkBusy = false;
+  }
 </script>
 
 {#if adding || editing}
@@ -136,6 +154,17 @@
       {#if orderDirty}
         <button class="ez-btn ez-btn--accent" onclick={saveOrder}>Save order</button>
       {/if}
+      <input
+        type="file"
+        accept="image/*"
+        multiple
+        class="ez-visually-hidden"
+        bind:this={bulkInput}
+        onchange={onBulkPick}
+      />
+      <button class="ez-btn ez-btn--ghost" onclick={() => bulkInput?.click()} disabled={bulkBusy}>
+        {bulkBusy ? 'Uploading…' : 'Add many photos'}
+      </button>
       <button class="ez-btn ez-btn--primary" onclick={() => (adding = true)}>Add artwork</button>
     </div>
   </div>

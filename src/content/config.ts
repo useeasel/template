@@ -24,6 +24,9 @@ const artworks = defineCollection({
       price: z.string().optional(),
       // Required for SEO + accessibility; prompted in the CMS.
       alt: z.string(),
+      // Optional time-based media: a YouTube or Vimeo URL. The still image above is
+      // the thumbnail/poster; the embed plays on the artwork's own page.
+      video: z.string().url().optional(),
       // Optional series tag — references a `collections` entry by slug.
       collection: reference('collections').optional(),
       // Manual sort, set by drag-reorder in the CMS.
@@ -91,6 +94,21 @@ const pages = defineCollection({
     }),
 });
 
+// News / updates — a lightweight reverse-chronological feed. Gives visitors a
+// reason to return and the site fresh content for SEO, without a full blog CMS.
+const posts = defineCollection({
+  type: 'content',
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      // ISO date string (YYYY-MM-DD); used for sort + display.
+      date: z.string(),
+      excerpt: z.string().optional(),
+      cover: image().optional(),
+      draft: z.boolean().default(false),
+    }),
+});
+
 const socialLink = z.object({
   label: z.string(),
   url: z.string().url(),
@@ -127,7 +145,15 @@ const site = defineCollection({
     metaDescription: z.string().optional(),
     socialLinks: z.array(socialLink).default([]),
     customDomain: z.string().optional(),
+    // Privacy-friendly analytics: paste a Cloudflare Web Analytics token and we
+    // inject the beacon (no cookie banner needed). The raw snippet below stays for
+    // power users who want GA/Plausible/etc.
+    cfAnalyticsToken: z.string().optional(),
     analyticsSnippet: z.string().optional(),
+    // Newsletter signup (Netlify Forms). When enabled, a signup block renders.
+    newsletterEnabled: z.boolean().default(false),
+    newsletterHeading: z.string().optional(),
+    newsletterBlurb: z.string().optional(),
     // Power-user escape hatches (the artist's own site).
     customCss: z.string().optional(),
     customCode: z.string().optional(),
@@ -138,5 +164,6 @@ export const collections = {
   artworks,
   collections: seriesCollection,
   pages,
+  posts,
   site,
 };

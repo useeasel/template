@@ -220,6 +220,12 @@
             <select class="ez-input" bind:value={d.lightbox.transition}>
               <option value="fade">Fade</option><option value="slide">Slide</option></select></label>
         </div>
+        <div class="ez-row">
+          <label class="ez-field"><span class="ez-label">Clicking a piece</span>
+            <select class="ez-input" bind:value={d.gallery.click}>
+              <option value="lightbox">Opens a lightbox</option><option value="page">Opens its own page</option></select>
+            <span class="ez-help">Its own page is better for long descriptions, video, and sharing a single piece.</span></label>
+        </div>
         <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.gallery.featureFirst} /><span>Feature the first piece (span two columns)</span></label>
       </section>
 
@@ -270,6 +276,7 @@
           <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.contact} /><span>Contact</span></label>
           <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.cv} /><span>CV</span></label>
           <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.press} /><span>Press</span></label>
+          <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.news} /><span>News</span></label>
         </div>
       </section>
 

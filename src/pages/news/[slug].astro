@@ -1,0 +1,46 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import { FULL_WIDTHS } from '../../lib/images';
+
+export const getStaticPaths = (async () => {
+  const slug = (id: string) => id.replace(/\.md$/, '');
+  const posts = (await getCollection('posts')).filter((p) => !p.data.draft);
+  return posts.map((entry) => ({ params: { slug: slug(entry.id) }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const p = entry.data;
+const { Content } = await render(entry);
+
+const fmtDate = (iso: string) => {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime())
+    ? iso
+    : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+---
+
+<Base pageTitle={p.title} pageDescription={p.excerpt}>
+  <article class="ez-container ez-post">
+    <p class="ez-back"><a href="/news/">← All news</a></p>
+    <time class="ez-post__date" datetime={p.date}>{fmtDate(p.date)}</time>
+    <h1 class="ez-post__title">{p.title}</h1>
+    {p.cover && <Image src={p.cover} alt={p.title} widths={FULL_WIDTHS} sizes="(max-width: 720px) 100vw, 720px" class="ez-post__cover" />}
+    <div class="ez-post__body">
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .ez-post { max-width: 720px; }
+  .ez-back { margin-bottom: var(--ez-space-4); font-weight: 700; }
+  .ez-post__date { color: var(--ez-stone); font-size: var(--ez-text-sm); }
+  .ez-post__title { margin: var(--ez-space-2) 0 var(--ez-space-5); }
+  .ez-post__cover { width: 100%; height: auto; border: var(--ez-border-width) solid var(--ez-border); margin-bottom: var(--ez-space-5); }
+  .ez-post__body { line-height: 1.7; }
+  .ez-post__body :global(p) { margin: 0 0 var(--ez-space-4); }
+</style>

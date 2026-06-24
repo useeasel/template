@@ -47,12 +47,14 @@ export interface DesignTokens {
     gutter: 'tight' | 'normal' | 'loose';
     caption: 'below' | 'hover' | 'hidden';
     featureFirst: boolean;
+    /** What a thumbnail click does: open the lightbox, or go to its own page. */
+    click: 'lightbox' | 'page';
   };
   lightbox: { transition: 'fade' | 'slide' };
   hero: { enabled: boolean; align: 'left' | 'center'; size: 'small' | 'large' };
   footer: { socials: boolean; credit: boolean; text?: string };
   favicon: { mode: 'initials' | 'image'; image?: string };
-  pages: { about: boolean; contact: boolean; cv: boolean; press: boolean };
+  pages: { about: boolean; contact: boolean; cv: boolean; press: boolean; news: boolean };
 }
 
 export const DEFAULT_DESIGN: DesignTokens = {
@@ -83,12 +85,12 @@ export const DEFAULT_DESIGN: DesignTokens = {
   logo: { mode: 'none' },
   background: { type: 'solid' },
   thumb: { fit: 'cover', hover: 'zoom' },
-  gallery: { layout: 'grid', size: 'medium', gutter: 'normal', caption: 'below', featureFirst: false },
+  gallery: { layout: 'grid', size: 'medium', gutter: 'normal', caption: 'below', featureFirst: false, click: 'lightbox' },
   lightbox: { transition: 'fade' },
   hero: { enabled: false, align: 'left', size: 'small' },
   footer: { socials: true, credit: true },
   favicon: { mode: 'initials' },
-  pages: { about: true, contact: true, cv: true, press: true },
+  pages: { about: true, contact: true, cv: true, press: true, news: false },
 };
 
 /** Deep-merge a partial design over a base token bundle. */
@@ -181,7 +183,7 @@ export function designVars(d: DesignTokens): string {
 
 /** Root classes that switch structural variants (so they preview live via CSS). */
 export function designClasses(d: DesignTokens): string {
-  const pages = ['about', 'contact', 'cv', 'press'] as const;
+  const pages = ['about', 'contact', 'cv', 'press', 'news'] as const;
   return [
     `ez-nav-${d.nav.layout}`,
     `ez-thumb-${d.thumb.hover}`,

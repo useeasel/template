@@ -82,6 +82,26 @@
   </div>
 
   <div class="ez-block">
+    <strong>Newsletter</strong>
+    <p class="ez-help">Collect email addresses from visitors. Signups arrive in your Netlify dashboard under Forms.</p>
+    <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={s.newsletterEnabled} />
+      <span>Show a newsletter signup on my contact page</span></label>
+    {#if s.newsletterEnabled}
+      <label class="ez-field"><span class="ez-label">Heading</span>
+        <input class="ez-input" bind:value={s.newsletterHeading} placeholder="Stay in the loop" /></label>
+      <label class="ez-field"><span class="ez-label">Short blurb</span>
+        <input class="ez-input" bind:value={s.newsletterBlurb} placeholder="The occasional note about new work and shows." /></label>
+    {/if}
+  </div>
+
+  <div class="ez-block">
+    <strong>Visitor analytics</strong>
+    <p class="ez-help">See how many people visit, privately — no cookie banner needed. Turn on Web Analytics in your Cloudflare dashboard, then paste the token here.</p>
+    <label class="ez-field"><span class="ez-label">Cloudflare Web Analytics token</span>
+      <input class="ez-input ez-mono" bind:value={s.cfAnalyticsToken} placeholder="abc123…" /></label>
+  </div>
+
+  <div class="ez-block">
     <strong>Custom domain</strong>
     <p class="ez-help">Use your own web address (like your-name.com) instead of the Netlify one. Optional, and free with Netlify.</p>
     <label class="ez-field"><span class="ez-label">Your domain</span>

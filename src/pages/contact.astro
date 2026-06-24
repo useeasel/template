@@ -1,10 +1,12 @@
 ---
 import { getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import NewsletterSignup from '../components/NewsletterSignup.astro';
 
 const page = await getEntry('pages', 'contact');
 const { Content } = await page!.render();
 const data = page!.data;
+const settings = (await getEntry('site', 'settings'))!.data;
 ---
 
 <Base pageTitle={data.title} pageDescription={data.intro}>
@@ -52,6 +54,10 @@ const data = page!.data;
 
         <button type="submit" class="ez-btn ez-btn--primary">Send message</button>
       </form>
+    )}
+
+    {settings.newsletterEnabled && (
+      <NewsletterSignup heading={settings.newsletterHeading} blurb={settings.newsletterBlurb} />
     )}
   </div>
 </Base>

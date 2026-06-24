@@ -16,6 +16,8 @@ interface Props {
   columns?: number;
   /** Index used for the lightbox gallery. */
   index?: number;
+  /** When set, the card links to this URL (its own page) instead of the lightbox. */
+  href?: string;
 }
 const {
   image,
@@ -28,19 +30,27 @@ const {
   status,
   columns = 3,
   index,
+  href,
 } = Astro.props;
 
 const metaParts = [year, medium, dimensions].filter(Boolean);
+
+// Same trigger element, two behaviors: a link to the artwork's own page, or a
+// button that opens the lightbox. A dynamic tag keeps the image markup in one place.
+const Trigger = href ? 'a' : 'button';
+const triggerProps = href
+  ? { href, class: 'ez-artcard__trigger ez-artcard__trigger--link', 'aria-label': `View ${title}` }
+  : {
+      type: 'button',
+      class: 'ez-artcard__trigger',
+      'data-ez-lightbox': true,
+      'data-index': index,
+      'aria-label': `View ${title}`,
+    };
 ---
 
 <article class="ez-card ez-artcard">
-  <button
-    type="button"
-    class="ez-artcard__trigger"
-    data-ez-lightbox
-    data-index={index}
-    aria-label={`View ${title}`}
-  >
+  <Trigger {...triggerProps}>
     <Image
       src={image}
       alt={alt}
@@ -49,7 +59,7 @@ const metaParts = [year, medium, dimensions].filter(Boolean);
       loading="lazy"
       class="ez-artcard__img"
     />
-  </button>
+  </Trigger>
 
   <div class="ez-artcard__body">
     <div class="ez-artcard__head">
@@ -84,6 +94,7 @@ const metaParts = [year, medium, dimensions].filter(Boolean);
        clip cleanly instead of poking square corners past the rounded border. */
     border-radius: var(--ez-radius) var(--ez-radius) 0 0;
   }
+  .ez-artcard__trigger--link { cursor: pointer; }
   .ez-artcard__img {
     width: 100%;
     height: auto;

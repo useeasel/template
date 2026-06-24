@@ -1,0 +1,168 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, getEntry, render } from 'astro:content';
+import { getImage, Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import StatusPill from '../../components/StatusPill.astro';
+import { FULL_WIDTHS } from '../../lib/images';
+import { visualArtworkLd, breadcrumbLd } from '../../lib/structured-data';
+import { toEmbedSrc } from '../../lib/embed';
+
+// One indexable, shareable page per artwork. Linked from the gallery when the
+// design's gallery.click is 'page' (otherwise the lightbox handles clicks). Even
+// when the gallery opens lightboxes, these pages still exist for SEO + deep links.
+export const getStaticPaths = (async () => {
+  // getStaticPaths runs in isolation — it can't see component-scope consts, so the
+  // slug helper lives here.
+  const slug = (id: string) => id.replace(/\.md$/, '');
+  const artworks = (await getCollection('artworks')).sort((a, b) => a.data.order - b.data.order);
+  return artworks.map((entry, i) => ({
+    params: { slug: slug(entry.id) },
+    props: {
+      entry,
+      prev: artworks[i - 1] ? { slug: slug(artworks[i - 1].id), title: artworks[i - 1].data.title } : null,
+      next: artworks[i + 1] ? { slug: slug(artworks[i + 1].id), title: artworks[i + 1].data.title } : null,
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { entry, prev, next } = Astro.props;
+const a = entry.data;
+const { Content } = await render(entry);
+
+const settings = (await getEntry('site', 'settings'))!.data;
+const artistName = settings.logoText || settings.siteTitle;
+
+const metaParts = [a.year, a.medium, a.dimensions].filter(Boolean);
+const embedSrc = a.video ? toEmbedSrc(a.video) : null;
+
+// Absolute URLs for structured data.
+const origin = (Astro.site ?? Astro.url).origin;
+const ogImg = await getImage({ src: a.image, width: 1600 });
+const imageAbs = new URL(ogImg.src, origin).href;
+const pageAbs = new URL(Astro.url.pathname, origin).href;
+
+const jsonLd = [
+  visualArtworkLd(
+    {
+      title: a.title,
+      imageUrl: imageAbs,
+      pageUrl: pageAbs,
+      year: a.year,
+      medium: a.medium,
+      description: a.alt,
+      status: a.status,
+      price: a.price,
+    },
+    { name: artistName, url: origin },
+  ),
+  breadcrumbLd([
+    [settings.siteTitle, origin],
+    [a.title, pageAbs],
+  ]),
+];
+---
+
+<Base pageTitle={a.title} pageDescription={a.alt} pageImage={ogImg.src} jsonLd={jsonLd}>
+  <div class="ez-container ez-work">
+    <p class="ez-back"><a href="/">← All work</a></p>
+
+    <div class="ez-work__grid">
+      <div class="ez-work__media">
+        <Image src={a.image} alt={a.alt} widths={FULL_WIDTHS} sizes="(max-width: 800px) 100vw, 60vw" class="ez-work__img" />
+        {embedSrc && (
+          <div class="ez-work__video">
+            <iframe
+              src={embedSrc}
+              title={`${a.title} — video`}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+        )}
+      </div>
+
+      <div class="ez-work__info">
+        <div class="ez-work__head">
+          <h1 class="ez-work__title">{a.title}</h1>
+          <StatusPill status={a.status} />
+        </div>
+        {metaParts.length > 0 && <p class="ez-work__meta">{metaParts.join(' · ')}</p>}
+        {a.status === 'available' && a.price && <p class="ez-work__price">{a.price}</p>}
+
+        <div class="ez-work__body">
+          <Content />
+        </div>
+      </div>
+    </div>
+
+    <nav class="ez-work__nav" aria-label="More work">
+      {prev ? <a class="ez-work__navlink" href={`/work/${prev.slug}/`} rel="prev">← {prev.title}</a> : <span />}
+      {next ? <a class="ez-work__navlink ez-work__navlink--next" href={`/work/${next.slug}/`} rel="next">{next.title} →</a> : <span />}
+    </nav>
+  </div>
+</Base>
+
+<style>
+  .ez-back { margin-bottom: var(--ez-space-4); font-weight: 700; }
+  .ez-work__grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: var(--ez-space-7);
+    align-items: start;
+  }
+  .ez-work__img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: var(--ez-border-width) solid var(--ez-border);
+    background: var(--ez-paper);
+  }
+  .ez-work__video {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    margin-top: var(--ez-space-4);
+    border: var(--ez-border-width) solid var(--ez-border);
+    background: var(--ez-ink);
+  }
+  .ez-work__video iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .ez-work__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ez-space-3);
+  }
+  .ez-work__title { margin: 0; }
+  .ez-work__meta { color: var(--ez-stone); margin: var(--ez-space-3) 0 0; }
+  .ez-work__price {
+    font-family: var(--ez-font-display);
+    font-weight: 700;
+    color: var(--ez-blue);
+    margin: var(--ez-space-2) 0 0;
+    font-size: var(--ez-text-lg);
+  }
+  .ez-work__body { margin-top: var(--ez-space-5); line-height: 1.7; }
+  .ez-work__body :global(p) { margin: 0 0 var(--ez-space-3); }
+  .ez-work__nav {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--ez-space-4);
+    margin-top: var(--ez-space-7);
+    padding-top: var(--ez-space-5);
+    border-top: var(--ez-border-width) solid var(--ez-border);
+  }
+  .ez-work__navlink { font-weight: 700; }
+  .ez-work__navlink--next { margin-left: auto; text-align: right; }
+
+  @media (max-width: 800px) {
+    .ez-work__grid { grid-template-columns: 1fr; gap: var(--ez-space-5); }
+  }
+</style>
