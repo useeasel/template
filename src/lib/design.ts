@@ -184,6 +184,56 @@ export function googleFontsHref(d: DesignTokens): string {
  * every font any preset uses is always pickable. (All on Google Fonts.) If a new
  * preset introduces a font, add it here too — `assertPresetFontsListed` guards it.
  */
+// ---------- Contrast (readability) checks ----------
+
+function hexToRgb(hex: string): [number, number, number] | null {
+  let h = hex.trim().replace('#', '');
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+  const n = parseInt(h, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function luminance(rgb: [number, number, number]): number {
+  const a = rgb.map((v) => {
+    const s = v / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+}
+
+/** WCAG contrast ratio between two hex colors (1–21). Returns 21 if unparseable. */
+export function contrastRatio(fg: string, bg: string): number {
+  const a = hexToRgb(fg);
+  const b = hexToRgb(bg);
+  if (!a || !b) return 21;
+  const hi = Math.max(luminance(a), luminance(b));
+  const lo = Math.min(luminance(a), luminance(b));
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+export interface ContrastIssue {
+  label: string;
+  ratio: number;
+  min: number;
+}
+
+/** Flag color pairs that may be hard to read. Non-blocking — just a heads-up. */
+export function contrastIssues(d: DesignTokens): ContrastIssue[] {
+  const c = d.color;
+  const checks: { label: string; fg: string; bg: string; min: number }[] = [
+    { label: 'Body text on background', fg: c.text, bg: c.background, min: 4.5 },
+    { label: 'Body text on cards', fg: c.text, bg: c.surface, min: 4.5 },
+    { label: 'Muted text on background', fg: c.muted, bg: c.background, min: 3 },
+    { label: 'Accent on background', fg: c.accent, bg: c.background, min: 3 },
+    { label: 'Tag text on accent', fg: '#ffffff', bg: c.accent, min: 3 },
+    { label: 'Tag text on second accent', fg: '#ffffff', bg: c.accent2, min: 3 },
+  ];
+  return checks
+    .map((ch) => ({ label: ch.label, ratio: Math.round(contrastRatio(ch.fg, ch.bg) * 10) / 10, min: ch.min }))
+    .filter((ch) => ch.ratio < ch.min);
+}
+
 export const FONTS = [
   'Anton', 'Archivo', 'Atkinson Hyperlegible', 'Bebas Neue', 'Bricolage Grotesque',
   'Cormorant Garamond', 'DM Serif Display', 'EB Garamond', 'Fraunces', 'IBM Plex Sans',

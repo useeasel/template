@@ -7,6 +7,7 @@
   } from '../../lib/design';
   import LivePreview from './LivePreview.svelte';
   import FontPicker from './FontPicker.svelte';
+  import ContrastNotice from './ContrastNotice.svelte';
 
   let {
     gh,
@@ -109,6 +110,7 @@
             <label class="ez-color"><input type="color" bind:value={d.color[c.key]} /><span>{c.label}</span></label>
           {/each}
         </div>
+        <ContrastNotice design={d} />
       </section>
 
       <section class="ez-block">

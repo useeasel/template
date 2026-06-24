@@ -5,6 +5,7 @@
   import { VIBES, SUGGESTED_FONTS, resolveDesign, type DesignTokens } from '../../lib/design';
   import LivePreview from './LivePreview.svelte';
   import FontPicker from './FontPicker.svelte';
+  import ContrastNotice from './ContrastNotice.svelte';
 
   let {
     gh,
@@ -97,6 +98,7 @@
           <label class="ez-color"><input type="color" bind:value={d.color.accent2} /><span>Second accent</span></label>
           <label class="ez-color"><input type="color" bind:value={d.color.border} /><span>Lines</span></label>
         </div>
+        <ContrastNotice design={d} />
       {:else if step === 3}
         <h1>Lay it out</h1>
         <label class="ez-field"><span class="ez-label">Navigation</span>
