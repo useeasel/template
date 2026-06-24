@@ -1,0 +1,70 @@
+---
+import EaselMark from './EaselMark.astro';
+
+interface Props {
+  logoText: string;
+  socialLinks?: { label: string; url: string }[];
+}
+const { logoText, socialLinks = [] } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="ez-footer">
+  <div class="ez-container ez-footer__inner">
+    <div class="ez-footer__brand">
+      <EaselMark size={28} title={logoText} />
+      <span>{logoText}</span>
+    </div>
+
+    {socialLinks.length > 0 && (
+      <ul class="ez-footer__social">
+        {socialLinks.map((link) => (
+          <li>
+            <a href={link.url} rel="me noopener" target="_blank">{link.label}</a>
+          </li>
+        ))}
+      </ul>
+    )}
+
+    <p class="ez-footer__meta">
+      © {year} {logoText}. Made with <a href="/admin">Easel</a>.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .ez-footer {
+    border-top: var(--ez-border-width) solid var(--ez-border);
+    margin-top: var(--ez-space-9);
+    background: var(--ez-white);
+  }
+  .ez-footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ez-space-5);
+    padding-block: var(--ez-space-6);
+  }
+  .ez-footer__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ez-space-3);
+    font-family: var(--ez-font-display);
+    font-weight: 800;
+    margin-right: auto;
+  }
+  .ez-footer__social {
+    display: flex;
+    gap: var(--ez-space-4);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-weight: 700;
+  }
+  .ez-footer__meta {
+    margin: 0;
+    color: var(--ez-stone);
+    font-size: var(--ez-text-sm);
+    width: 100%;
+  }
+</style>

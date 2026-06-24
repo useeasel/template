@@ -1,0 +1,192 @@
+# Sveltia CMS configuration for an Easel portfolio.
+# This mirrors src/content/config.ts so the editor and the build agree.
+#
+# Editing happens at /admin. Auth goes through the shared Easel relay (a
+# Cloudflare Worker in easel/web) so artists never touch git. The provisioning
+# flow rewrites `backend.repo` and `backend.base_url` to the artist's values.
+
+backend:
+  name: github
+  # Rewritten per-artist during provisioning (owner/repo).
+  repo: easel-org/REPLACED_AT_PROVISION
+  branch: main
+  # Shared Sveltia/Decap OAuth relay (Cloudflare Worker). Placeholder until the
+  # worker is deployed; replace with the real origin. Must be HTTPS — Sveltia
+  # only runs over HTTPS or localhost.
+  base_url: https://auth.easel.rosematcha.com
+
+# Local editing without the OAuth relay: when /admin is opened on localhost in a
+# Chromium browser, Sveltia edits the repo's files directly via the File System
+# Access API. Ignored on the deployed (HTTPS) site, where the github backend is
+# used — so this is safe to ship.
+local_backend: true
+
+# Default media location. Per-collection overrides below keep image paths
+# relative so they match astro:assets imports in frontmatter.
+media_folder: src/assets/uploads
+public_folder: /assets/uploads
+
+# Friendlier editorial workflow off by default (simple, direct commits).
+publish_mode: simple
+
+collections:
+  # --- Artworks: one entry per piece, drag to reorder ---
+  - name: artworks
+    label: Artworks
+    label_singular: Artwork
+    folder: src/content/artworks
+    create: true
+    # Sort the list by the manual order field; drag updates it.
+    sortable_fields: [order, title, year]
+    # Store uploaded images next to the other artwork assets, as relative paths.
+    media_folder: ../../assets/artworks
+    public_folder: ../../assets/artworks
+    summary: '{{title}} ({{year}}) — {{status}}'
+    fields:
+      - { name: image, label: Image, widget: image }
+      - { name: title, label: Title, widget: string }
+      - { name: year, label: Year, widget: number, required: false, value_type: int }
+      - { name: medium, label: Medium, widget: string, required: false }
+      - { name: dimensions, label: Dimensions, widget: string, required: false }
+      - name: status
+        label: Status
+        widget: select
+        default: available
+        options:
+          - { label: Available, value: available }
+          - { label: Sold, value: sold }
+          - { label: Inquire, value: inquire }
+          - { label: Not for sale, value: nfs }
+      - { name: price, label: Price (shown when available), widget: string, required: false }
+      - { name: alt, label: Alt text (describe the work — required), widget: string }
+      - name: collection
+        label: Series
+        widget: relation
+        required: false
+        collection: collections
+        value_field: '{{slug}}'
+        search_fields: [title]
+        display_fields: [title]
+      - { name: order, label: Sort order, widget: number, default: 0, value_type: int }
+      - { name: featured, label: Featured on homepage, widget: boolean, default: false }
+      - { name: body, label: Description, widget: markdown, required: false }
+
+  # --- Series / collections ---
+  - name: collections
+    label: Series
+    label_singular: Series
+    folder: src/content/collections
+    create: true
+    identifier_field: title
+    media_folder: ../../assets/collections
+    public_folder: ../../assets/collections
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: description, label: Description, widget: text, required: false }
+      - { name: cover, label: Cover image, widget: image, required: false }
+      - { name: order, label: Sort order, widget: number, default: 0, value_type: int }
+      - { name: body, label: Intro, widget: markdown, required: false }
+
+  # --- Pages (about, contact, cv, press) ---
+  - name: pages
+    label: Pages
+    files:
+      - name: about
+        label: About
+        file: src/content/pages/about.md
+        media_folder: ../../assets/site
+        public_folder: ../../assets/site
+        fields:
+          - { name: title, label: Title, widget: string }
+          - { name: portrait, label: Portrait, widget: image, required: false }
+          - { name: statement, label: Short statement, widget: text, required: false }
+          - { name: body, label: Bio, widget: markdown }
+      - name: contact
+        label: Contact
+        file: src/content/pages/contact.md
+        fields:
+          - { name: title, label: Title, widget: string }
+          - { name: intro, label: Intro, widget: text, required: false }
+          - { name: email, label: Email, widget: string, required: false }
+          - { name: formEnabled, label: Show contact form, widget: boolean, default: true }
+          - { name: body, label: Body, widget: markdown, required: false }
+      - name: cv
+        label: CV
+        file: src/content/pages/cv.md
+        fields:
+          - { name: title, label: Title, widget: string }
+          - name: cv
+            label: Sections
+            widget: list
+            fields:
+              - { name: heading, label: Heading, widget: string }
+              - name: items
+                label: Entries
+                widget: list
+                fields:
+                  - { name: year, label: Year, widget: string, required: false }
+                  - { name: text, label: Text, widget: string }
+      - name: press
+        label: Press
+        file: src/content/pages/press.md
+        fields:
+          - { name: title, label: Title, widget: string }
+          - name: press
+            label: Press items
+            widget: list
+            fields:
+              - { name: outlet, label: Outlet, widget: string }
+              - { name: title, label: Title, widget: string }
+              - { name: url, label: Link, widget: string, required: false }
+              - { name: date, label: Date, widget: string, required: false }
+              - { name: excerpt, label: Excerpt, widget: text, required: false }
+
+  # --- Site settings (singleton) ---
+  - name: site
+    label: Site settings
+    files:
+      - name: settings
+        label: Settings
+        file: src/content/site/settings.json
+        media_folder: ../../assets/site
+        public_folder: ../../assets/site
+        fields:
+          - { name: siteTitle, label: Site title, widget: string }
+          - { name: tagline, label: Tagline, widget: string, required: false }
+          - { name: logoText, label: Logo text, widget: string }
+          - name: theme
+            label: Theme
+            widget: select
+            default: default
+            options:
+              - { label: Default (paper), value: default }
+              - { label: Ink (dark), value: ink }
+          - name: portfolioLayout
+            label: Portfolio layout
+            widget: select
+            default: grid
+            options:
+              - { label: Grid, value: grid }
+              - { label: Masonry, value: masonry }
+          - { name: columns, label: Columns, widget: number, default: 3, min: 1, max: 6, value_type: int }
+          - name: motionDefault
+            label: Animations
+            widget: select
+            default: full
+            options:
+              - { label: Animated, value: full }
+              - { label: Reduced, value: reduced }
+          - { name: rightClickProtect, label: Discourage image saving, widget: boolean, default: false }
+          - { name: watermark, label: Watermark images, widget: boolean, default: false }
+          - { name: watermarkText, label: Watermark text, widget: string, required: false }
+          - { name: metaDescription, label: Search description, widget: text, required: false }
+          - { name: ogImage, label: Social preview image, widget: string, required: false }
+          - name: socialLinks
+            label: Social links
+            widget: list
+            required: false
+            fields:
+              - { name: label, label: Label, widget: string }
+              - { name: url, label: URL, widget: string }
+          - { name: customDomain, label: Custom domain, widget: string, required: false }
+          - { name: analyticsSnippet, label: Analytics snippet, widget: text, required: false }

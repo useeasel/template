@@ -1,0 +1,31 @@
+# Netlify build + deploy config for the Easel portfolio template.
+
+[build]
+  command = "astro build"
+  publish = "dist"
+
+[build.environment]
+  # Pin Node to keep builds reproducible across artist sites.
+  NODE_VERSION = "20"
+
+# Build caching note:
+# Netlify caches `node_modules` automatically between builds. To also cache
+# Astro's image-optimization output (and protect free build minutes), keep the
+# `node_modules/.astro` and `.astro` directories out of .gitignore-driven
+# cleanup. The official `netlify-plugin-cache` can extend this if needed:
+#   [[plugins]]
+#     package = "netlify-plugin-cache"
+#     [plugins.inputs]
+#       paths = ["node_modules/.astro", ".astro"]
+
+# Netlify Forms note:
+# The contact form in src/pages/contact.astro is a plain HTML <form> with the
+# `data-netlify="true"` attribute and a hidden `form-name` input. Netlify's
+# post-processing bot detects it in the built HTML and wires up submissions
+# automatically — no extra config required here. A honeypot field
+# (`netlify-honeypot="bot-field"`) guards against spam.
+
+[[redirects]]
+  from = "/admin"
+  to = "/admin/index.html"
+  status = 200

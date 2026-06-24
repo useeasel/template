@@ -1,0 +1,19 @@
+{
+  "siteTitle": "Studio Lina Marsh",
+  "tagline": "Paintings and works on paper",
+  "logoText": "Lina Marsh",
+  "theme": "default",
+  "fontPairing": "syne-space-grotesk",
+  "portfolioLayout": "grid",
+  "columns": 3,
+  "motionDefault": "full",
+  "rightClickProtect": false,
+  "watermark": false,
+  "watermarkText": "",
+  "ogImage": "/assets/og-default.jpg",
+  "metaDescription": "Lina Marsh is a painter working in oil and gouache, exploring geometric form and color.",
+  "socialLinks": [
+    { "label": "Instagram", "url": "https://instagram.com/example" },
+    { "label": "Email", "url": "mailto:hello@example.com" }
+  ]
+}

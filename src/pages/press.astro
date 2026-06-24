@@ -1,0 +1,58 @@
+---
+import { getEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const page = await getEntry('pages', 'press');
+const data = page!.data;
+const items = data.press ?? [];
+---
+
+<Base pageTitle={data.title}>
+  <div class="ez-container ez-press">
+    <h1>{data.title}</h1>
+    <ul class="ez-press__list">
+      {items.map((item) => (
+        <li class="ez-card ez-press__item">
+          <div class="ez-press__head">
+            <span class="ez-press__outlet">{item.outlet}</span>
+            {item.date && <span class="ez-press__date">{item.date}</span>}
+          </div>
+          <h2 class="ez-press__title">
+            {item.url ? (
+              <a href={item.url} target="_blank" rel="noopener">{item.title}</a>
+            ) : (
+              item.title
+            )}
+          </h2>
+          {item.excerpt && <p class="ez-press__excerpt">{item.excerpt}</p>}
+        </li>
+      ))}
+    </ul>
+  </div>
+</Base>
+
+<style>
+  .ez-press { max-width: 760px; }
+  .ez-press__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--ez-space-5);
+  }
+  .ez-press__item { padding: var(--ez-space-5); }
+  .ez-press__head {
+    display: flex;
+    justify-content: space-between;
+    color: var(--ez-stone);
+    font-size: var(--ez-text-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .ez-press__title {
+    font-size: var(--ez-text-xl);
+    margin: var(--ez-space-2) 0;
+  }
+  .ez-press__excerpt { margin: 0; color: var(--ez-ink); }
+</style>

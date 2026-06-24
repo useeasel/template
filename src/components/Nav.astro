@@ -1,0 +1,112 @@
+---
+import EaselMark from './EaselMark.astro';
+import MotionToggle from './MotionToggle.astro';
+
+interface Props {
+  logoText: string;
+}
+const { logoText } = Astro.props;
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const links = [
+  { href: '/', label: 'Work' },
+  { href: '/about', label: 'About' },
+  { href: '/cv', label: 'CV' },
+  { href: '/press', label: 'Press' },
+  { href: '/contact', label: 'Contact' },
+];
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path.startsWith(href);
+---
+
+<header class="ez-nav">
+  <div class="ez-container ez-nav__inner">
+    <a href="/" class="ez-nav__brand" aria-label={`${logoText} — home`}>
+      <EaselMark size={36} title={logoText} />
+      <span class="ez-nav__logotext">{logoText}</span>
+    </a>
+
+    <nav aria-label="Primary">
+      <ul class="ez-nav__list">
+        {links.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class:list={['ez-nav__link', { 'is-active': isActive(link.href) }]}
+              aria-current={isActive(link.href) ? 'page' : undefined}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="ez-nav__tools">
+      <MotionToggle />
+    </div>
+  </div>
+</header>
+
+<style>
+  .ez-nav {
+    background: var(--ez-paper);
+    border-bottom: var(--ez-border-width) solid var(--ez-border);
+  }
+  .ez-nav__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--ez-space-5);
+    padding-block: var(--ez-space-4);
+    flex-wrap: wrap;
+  }
+  .ez-nav__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ez-space-3);
+    text-decoration: none;
+    color: var(--ez-ink);
+    margin-right: auto;
+  }
+  .ez-nav__logotext {
+    font-family: var(--ez-font-display);
+    font-weight: 800;
+    font-size: var(--ez-text-xl);
+    letter-spacing: -0.02em;
+  }
+  .ez-nav__list {
+    display: flex;
+    gap: var(--ez-space-5);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ez-nav__link {
+    font-family: var(--ez-font-display);
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--ez-ink);
+    padding-bottom: 2px;
+    border-bottom: var(--ez-border-width) solid transparent;
+  }
+  .ez-nav__link:hover {
+    border-bottom-color: var(--ez-ink);
+  }
+  .ez-nav__link.is-active {
+    border-bottom-color: var(--ez-blue);
+    color: var(--ez-blue);
+  }
+  .ez-nav__tools {
+    display: flex;
+    align-items: center;
+  }
+  @media (max-width: 640px) {
+    .ez-nav__inner {
+      gap: var(--ez-space-3);
+    }
+    .ez-nav__list {
+      gap: var(--ez-space-4);
+      font-size: var(--ez-text-sm);
+    }
+  }
+</style>

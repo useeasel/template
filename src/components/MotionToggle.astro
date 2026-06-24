@@ -1,0 +1,45 @@
+---
+/**
+ * MotionToggle — lets a visitor turn motion on/off. The OS prefers-reduced-motion
+ * setting always wins; this only chooses between full/reduced when the OS has no
+ * preference. State persists via localStorage (see src/lib/motion.ts).
+ */
+---
+
+<button
+  type="button"
+  class="ez-btn ez-btn--icon ez-btn--ghost ez-motion-toggle"
+  data-ez-motion-toggle
+  aria-pressed="false"
+  title="Toggle motion"
+>
+  <span class="ez-visually-hidden">Toggle motion</span>
+  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M3 12h3M18 12h3M12 3v3M12 18v3" />
+  </svg>
+</button>
+
+<script>
+  import { getStored, setMotion, prefersReducedMotionOS, type MotionPref } from '../lib/motion';
+
+  const btn = document.querySelector<HTMLButtonElement>('[data-ez-motion-toggle]');
+  if (btn) {
+    const osLocked = prefersReducedMotionOS();
+    const sync = () => {
+      const current = (document.documentElement.getAttribute('data-motion') as MotionPref) ?? 'full';
+      btn.setAttribute('aria-pressed', String(current === 'full'));
+      if (osLocked) {
+        btn.disabled = true;
+        btn.title = 'Motion is off (system setting)';
+      }
+    };
+    sync();
+    btn.addEventListener('click', () => {
+      if (osLocked) return;
+      const current = (getStored() ?? document.documentElement.getAttribute('data-motion')) as MotionPref;
+      setMotion(current === 'full' ? 'reduced' : 'full');
+      sync();
+    });
+  }
+</script>

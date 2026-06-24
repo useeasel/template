@@ -1,0 +1,73 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, getEntry } from 'astro:content';
+import { getImage } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Grid from '../components/Grid.astro';
+import ArtworkCard from '../components/ArtworkCard.astro';
+import Lightbox from '../components/Lightbox.astro';
+
+// Astro 5 content-collection ids include the file extension; strip it for clean
+// URLs and for matching artwork series references.
+export const getStaticPaths = (async () => {
+  const series = await getCollection('collections');
+  return series.map((s) => ({
+    params: { collection: s.id.replace(/\.md$/, '') },
+    props: { series: s },
+  }));
+}) satisfies GetStaticPaths;
+
+const { series } = Astro.props;
+const slugify = (id: string) => id.replace(/\.md$/, '');
+const seriesSlug = slugify(series.id);
+const settings = (await getEntry('site', 'settings'))!.data;
+
+const artworks = (await getCollection('artworks'))
+  .filter((a) => a.data.collection && slugify(a.data.collection.id) === seriesSlug)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const lightboxItems = await Promise.all(
+  artworks.map(async (a) => {
+    const img = await getImage({ src: a.data.image, width: 1600 });
+    const meta = [a.data.year, a.data.medium, a.data.dimensions].filter(Boolean).join(' · ');
+    return { src: img.src, alt: a.data.alt, title: a.data.title, meta };
+  })
+);
+---
+
+<Base pageTitle={series.data.title} pageDescription={series.data.description}>
+  <div class="ez-container">
+    <p class="ez-back"><a href="/">← All work</a></p>
+    <h1>{series.data.title}</h1>
+    {series.data.description && <p class="ez-series-desc">{series.data.description}</p>}
+
+    <Grid columns={settings.columns}>
+      {artworks.map((a, i) => (
+        <ArtworkCard
+          image={a.data.image}
+          title={a.data.title}
+          alt={a.data.alt}
+          year={a.data.year}
+          medium={a.data.medium}
+          dimensions={a.data.dimensions}
+          price={a.data.price}
+          status={a.data.status}
+          columns={settings.columns}
+          index={i}
+        />
+      ))}
+    </Grid>
+  </div>
+
+  <Lightbox items={lightboxItems} />
+</Base>
+
+<style>
+  .ez-back { margin-bottom: var(--ez-space-4); font-weight: 700; }
+  .ez-series-desc {
+    color: var(--ez-stone);
+    font-size: var(--ez-text-lg);
+    max-width: 60ch;
+    margin-bottom: var(--ez-space-7);
+  }
+</style>

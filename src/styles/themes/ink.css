@@ -1,0 +1,15 @@
+/*
+ * Ink theme — a dark variant. Demonstrates that themes can flip surfaces while
+ * keeping the role-encoded accent colors. Select via `theme: "ink"` in
+ * site.json.
+ */
+:root[data-theme='ink'] {
+  --ez-blue: #5b8cff;
+  --ez-red: #ff6b76;
+  --ez-yellow: #f4c20d;
+  --ez-ink: #f7f4ec;   /* text becomes light */
+  --ez-paper: #161616; /* page becomes dark */
+  --ez-white: #232323; /* surface */
+  --ez-stone: #9a9a90;
+  --ez-border: #f7f4ec;
+}

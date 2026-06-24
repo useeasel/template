@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base pageTitle="Page not found">
+  <div class="ez-container ez-404">
+    <div class="ez-404__shapes" aria-hidden="true">
+      <span class="ez-shape ez-shape--circle"></span>
+      <span class="ez-shape ez-shape--square"></span>
+      <span class="ez-shape ez-shape--triangle"></span>
+    </div>
+    <h1>Page not found</h1>
+    <p>That page does not exist. The work, though, is this way.</p>
+    <a href="/" class="ez-btn ez-btn--primary">Back to the portfolio</a>
+  </div>
+</Base>
+
+<style>
+  .ez-404 {
+    text-align: center;
+    padding-block: var(--ez-space-9);
+  }
+  .ez-404__shapes {
+    display: flex;
+    gap: var(--ez-space-4);
+    justify-content: center;
+    margin-bottom: var(--ez-space-5);
+  }
+  .ez-404__shapes .ez-shape { width: 2rem; height: 2rem; }
+  .ez-404__shapes .ez-shape--triangle {
+    border-left-width: 1rem;
+    border-right-width: 1rem;
+    border-bottom-width: 2rem;
+    width: 0;
+    height: 0;
+  }
+</style>

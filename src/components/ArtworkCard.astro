@@ -1,0 +1,115 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import StatusPill from './StatusPill.astro';
+import { CARD_WIDTHS, cardSizes } from '../lib/images';
+
+interface Props {
+  image: ImageMetadata;
+  title: string;
+  alt: string;
+  year?: number;
+  medium?: string;
+  dimensions?: string;
+  price?: string;
+  status: 'available' | 'sold' | 'inquire' | 'nfs';
+  columns?: number;
+  /** Index used for the lightbox gallery. */
+  index?: number;
+}
+const {
+  image,
+  title,
+  alt,
+  year,
+  medium,
+  dimensions,
+  price,
+  status,
+  columns = 3,
+  index,
+} = Astro.props;
+
+const metaParts = [year, medium, dimensions].filter(Boolean);
+---
+
+<article class="ez-card ez-artcard">
+  <button
+    type="button"
+    class="ez-artcard__trigger"
+    data-ez-lightbox
+    data-index={index}
+    aria-label={`View ${title}`}
+  >
+    <Image
+      src={image}
+      alt={alt}
+      widths={CARD_WIDTHS}
+      sizes={cardSizes(columns)}
+      loading="lazy"
+      class="ez-artcard__img"
+    />
+  </button>
+
+  <div class="ez-artcard__body">
+    <div class="ez-artcard__head">
+      <h3 class="ez-artcard__title">{title}</h3>
+      <StatusPill status={status} />
+    </div>
+    {metaParts.length > 0 && (
+      <p class="ez-artcard__meta">{metaParts.join(' · ')}</p>
+    )}
+    {status === 'available' && price && (
+      <p class="ez-artcard__price">{price}</p>
+    )}
+  </div>
+</article>
+
+<style>
+  .ez-artcard {
+    overflow: hidden;
+    background: var(--ez-white);
+    transition: transform var(--ez-motion-base) var(--ez-ease);
+  }
+  .ez-artcard:hover {
+    transform: translate(-3px, -3px);
+  }
+  .ez-artcard__trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-bottom: var(--ez-border-width) solid var(--ez-border);
+    background: var(--ez-paper);
+    cursor: zoom-in;
+  }
+  .ez-artcard__img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .ez-artcard__body {
+    padding: var(--ez-space-4);
+  }
+  .ez-artcard__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ez-space-3);
+  }
+  .ez-artcard__title {
+    font-size: var(--ez-text-lg);
+    margin: 0;
+  }
+  .ez-artcard__meta {
+    margin: var(--ez-space-2) 0 0;
+    color: var(--ez-stone);
+    font-size: var(--ez-text-sm);
+  }
+  .ez-artcard__price {
+    margin: var(--ez-space-2) 0 0;
+    font-family: var(--ez-font-display);
+    font-weight: 700;
+    color: var(--ez-blue);
+  }
+</style>

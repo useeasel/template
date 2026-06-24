@@ -1,0 +1,90 @@
+---
+import '@fontsource-variable/syne';
+import '@fontsource/space-grotesk/400.css';
+import '@fontsource/space-grotesk/500.css';
+import '@fontsource/space-grotesk/700.css';
+import '../styles/tokens.css';
+import '../styles/themes/default.css';
+import '../styles/themes/ink.css';
+
+import { getEntry } from 'astro:content';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import SEO from '../components/SEO.astro';
+
+interface Props {
+  pageTitle?: string;
+  pageDescription?: string;
+  pageImage?: string;
+}
+const { pageTitle, pageDescription, pageImage } = Astro.props;
+
+// Global settings singleton.
+const siteEntry = await getEntry('site', 'settings');
+const settings = siteEntry!.data;
+
+// Inline style overrides for theme-driven font choices (optional).
+const fontVars: string[] = [];
+if (settings.headingFont) fontVars.push(`--ez-font-display:'${settings.headingFont}',sans-serif`);
+if (settings.bodyFont) fontVars.push(`--ez-font-body:'${settings.bodyFont}',sans-serif`);
+const rootStyle = fontVars.join(';');
+---
+
+<!doctype html>
+<html lang="en" data-theme={settings.theme} data-motion={settings.motionDefault} style={rootStyle}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="generator" content={Astro.generator} />
+
+    <SEO
+      siteTitle={settings.siteTitle}
+      metaDescription={settings.metaDescription}
+      ogImage={settings.ogImage}
+      pageTitle={pageTitle}
+      pageDescription={pageDescription}
+      pageImage={pageImage}
+    />
+
+    {/* Set motion attribute before paint to avoid a flash, honoring OS + stored pref. */}
+    <script is:inline define:vars={{ fallback: settings.motionDefault }}>
+      (function () {
+        try {
+          var os = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          var stored = localStorage.getItem('ez-motion');
+          var pref = os ? 'reduced' : stored === 'full' || stored === 'reduced' ? stored : fallback;
+          document.documentElement.setAttribute('data-motion', pref);
+        } catch (e) {}
+      })();
+    </script>
+
+    {settings.analyticsSnippet && <Fragment set:html={settings.analyticsSnippet} />}
+  </head>
+  <body>
+    <a href="#main" class="ez-skip-link">Skip to content</a>
+
+    <Nav logoText={settings.logoText} />
+
+    <main id="main" class="ez-main">
+      <slot />
+    </main>
+
+    <Footer logoText={settings.logoText} socialLinks={settings.socialLinks} />
+
+    {settings.rightClickProtect && (
+      <script is:inline>
+        document.addEventListener('contextmenu', function (e) {
+          if (e.target && e.target.closest('img')) e.preventDefault();
+        });
+      </script>
+    )}
+  </body>
+</html>
+
+<style>
+  .ez-main {
+    min-height: 50vh;
+    padding-block: var(--ez-space-7);
+  }
+</style>

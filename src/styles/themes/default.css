@@ -1,0 +1,17 @@
+/*
+ * Default theme — the baseline Bauhaus palette.
+ *
+ * This re-declares the same values as tokens.css so the structure for adding new
+ * themes is obvious: copy this file, change the values, and select it via the
+ * `theme` setting in site.json (Base.astro imports the matching file).
+ */
+:root[data-theme='default'] {
+  --ez-blue: #1d4ed8;
+  --ez-red: #e63946;
+  --ez-yellow: #f4c20d;
+  --ez-ink: #161616;
+  --ez-paper: #f7f4ec;
+  --ez-white: #ffffff;
+  --ez-stone: #6b6b63;
+  --ez-border: #161616;
+}

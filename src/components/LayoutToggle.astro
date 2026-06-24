@@ -1,0 +1,56 @@
+---
+/**
+ * LayoutToggle — switches the portfolio between grid and masonry on the client.
+ * The default comes from settings (portfolioLayout); this lets a visitor flip it
+ * for the current session. The portfolio container reads `data-layout`.
+ */
+interface Props {
+  initial: 'grid' | 'masonry';
+}
+const { initial } = Astro.props;
+---
+
+<div class="ez-layout-toggle" role="group" aria-label="Portfolio layout">
+  <button
+    type="button"
+    class="ez-btn ez-btn--sm ez-btn--outline"
+    data-ez-layout="grid"
+    aria-pressed={initial === 'grid'}
+  >
+    <span class="ez-shape ez-shape--square" aria-hidden="true"></span>
+    Grid
+  </button>
+  <button
+    type="button"
+    class="ez-btn ez-btn--sm ez-btn--outline"
+    data-ez-layout="masonry"
+    aria-pressed={initial === 'masonry'}
+  >
+    <span class="ez-shape ez-shape--circle" aria-hidden="true"></span>
+    Masonry
+  </button>
+</div>
+
+<style>
+  .ez-layout-toggle {
+    display: inline-flex;
+    gap: var(--ez-space-2);
+  }
+  .ez-layout-toggle .ez-btn[aria-pressed='true'] {
+    background: var(--ez-ink);
+    color: var(--ez-white);
+  }
+</style>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-ez-layout]');
+  const portfolio = document.querySelector<HTMLElement>('[data-ez-portfolio]');
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const layout = btn.dataset.ezLayout as 'grid' | 'masonry';
+      if (portfolio) portfolio.setAttribute('data-layout', layout);
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+    });
+  });
+</script>

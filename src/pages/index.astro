@@ -1,0 +1,74 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { getImage } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Grid from '../components/Grid.astro';
+import Masonry from '../components/Masonry.astro';
+import ArtworkCard from '../components/ArtworkCard.astro';
+import LayoutToggle from '../components/LayoutToggle.astro';
+import Lightbox from '../components/Lightbox.astro';
+
+const settings = (await getEntry('site', 'settings'))!.data;
+
+const artworks = (await getCollection('artworks')).sort(
+  (a, b) => a.data.order - b.data.order
+);
+
+// Build lightbox payload (resolved, full-size URLs + gallery labels).
+const lightboxItems = await Promise.all(
+  artworks.map(async (a) => {
+    const img = await getImage({ src: a.data.image, width: 1600 });
+    const meta = [a.data.year, a.data.medium, a.data.dimensions].filter(Boolean).join(' · ');
+    return { src: img.src, alt: a.data.alt, title: a.data.title, meta };
+  })
+);
+
+const Layout = settings.portfolioLayout === 'masonry' ? Masonry : Grid;
+---
+
+<Base pageDescription={settings.tagline}>
+  <div class="ez-container">
+    <header class="ez-home-head">
+      <div>
+        <h1>{settings.siteTitle}</h1>
+        {settings.tagline && <p class="ez-home-tagline">{settings.tagline}</p>}
+      </div>
+      <LayoutToggle initial={settings.portfolioLayout} />
+    </header>
+
+    <Layout columns={settings.columns}>
+      {artworks.map((a, i) => (
+        <ArtworkCard
+          image={a.data.image}
+          title={a.data.title}
+          alt={a.data.alt}
+          year={a.data.year}
+          medium={a.data.medium}
+          dimensions={a.data.dimensions}
+          price={a.data.price}
+          status={a.data.status}
+          columns={settings.columns}
+          index={i}
+        />
+      ))}
+    </Layout>
+  </div>
+
+  <Lightbox items={lightboxItems} />
+</Base>
+
+<style>
+  .ez-home-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--ez-space-5);
+    flex-wrap: wrap;
+    margin-bottom: var(--ez-space-7);
+  }
+  .ez-home-tagline {
+    color: var(--ez-stone);
+    font-size: var(--ez-text-lg);
+    margin: 0;
+  }
+</style>

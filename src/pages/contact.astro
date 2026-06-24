@@ -1,0 +1,71 @@
+---
+import { getEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const page = await getEntry('pages', 'contact');
+const { Content } = await page!.render();
+const data = page!.data;
+---
+
+<Base pageTitle={data.title} pageDescription={data.intro}>
+  <div class="ez-container ez-contact">
+    <h1>{data.title}</h1>
+    {data.intro && <p class="ez-contact__intro">{data.intro}</p>}
+    <Content />
+
+    {data.email && (
+      <p class="ez-contact__mailto">
+        Prefer email? Write to <a href={`mailto:${data.email}`}>{data.email}</a>.
+      </p>
+    )}
+
+    {data.formEnabled && (
+      <form
+        name="contact"
+        method="POST"
+        data-netlify="true"
+        netlify-honeypot="bot-field"
+        action="/?contact=sent"
+        class="ez-contact__form"
+      >
+        {/* Netlify needs this hidden field to match the form. */}
+        <input type="hidden" name="form-name" value="contact" />
+        {/* Honeypot — hidden from people, catches bots. */}
+        <p class="ez-visually-hidden" aria-hidden="true">
+          <label>Do not fill this out: <input name="bot-field" /></label>
+        </p>
+
+        <div class="ez-field">
+          <label class="ez-label" for="name">Name</label>
+          <input class="ez-input" type="text" id="name" name="name" required />
+        </div>
+
+        <div class="ez-field">
+          <label class="ez-label" for="email">Email</label>
+          <input class="ez-input" type="email" id="email" name="email" required />
+        </div>
+
+        <div class="ez-field">
+          <label class="ez-label" for="message">Message</label>
+          <textarea class="ez-textarea" id="message" name="message" required></textarea>
+        </div>
+
+        <button type="submit" class="ez-btn ez-btn--primary">Send message</button>
+      </form>
+    )}
+  </div>
+</Base>
+
+<style>
+  .ez-contact { max-width: 640px; }
+  .ez-contact__intro {
+    font-size: var(--ez-text-lg);
+    color: var(--ez-stone);
+  }
+  .ez-contact__form {
+    margin-top: var(--ez-space-6);
+    background: var(--ez-white);
+    border: var(--ez-border-width) solid var(--ez-border);
+    padding: var(--ez-space-6);
+  }
+</style>

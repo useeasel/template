@@ -1,0 +1,58 @@
+---
+/**
+ * Grid — a CSS grid portfolio layout. Column count comes from settings; the
+ * masonry alternative shares the same `data-ez-portfolio` container so the
+ * LayoutToggle can swap `data-layout` at runtime.
+ */
+interface Props {
+  columns?: number;
+}
+const { columns = 3 } = Astro.props;
+---
+
+<div
+  class="ez-portfolio"
+  data-ez-portfolio
+  data-layout="grid"
+  style={`--ez-columns:${columns}`}
+>
+  <slot />
+</div>
+
+<style>
+  .ez-portfolio {
+    --ez-columns: 3;
+  }
+  /* Grid mode */
+  .ez-portfolio[data-layout='grid'] {
+    display: grid;
+    grid-template-columns: repeat(var(--ez-columns), 1fr);
+    gap: var(--ez-gap);
+  }
+  /* Masonry mode (CSS columns) — applied when toggled at runtime. */
+  .ez-portfolio[data-layout='masonry'] {
+    column-count: var(--ez-columns);
+    column-gap: var(--ez-gap);
+  }
+  .ez-portfolio[data-layout='masonry'] > :global(*) {
+    break-inside: avoid;
+    margin-bottom: var(--ez-gap);
+  }
+
+  @media (max-width: 1024px) {
+    .ez-portfolio[data-layout='grid'] {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .ez-portfolio[data-layout='masonry'] {
+      column-count: 2;
+    }
+  }
+  @media (max-width: 640px) {
+    .ez-portfolio[data-layout='grid'] {
+      grid-template-columns: 1fr;
+    }
+    .ez-portfolio[data-layout='masonry'] {
+      column-count: 1;
+    }
+  }
+</style>

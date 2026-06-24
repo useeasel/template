@@ -1,0 +1,51 @@
+---
+import { getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+
+const page = await getEntry('pages', 'about');
+const { Content } = await page!.render();
+const data = page!.data;
+---
+
+<Base pageTitle={data.title} pageDescription={data.statement}>
+  <div class="ez-container ez-about">
+    {data.portrait && (
+      <Image
+        src={data.portrait}
+        alt="Portrait of the artist"
+        widths={[400, 600, 800]}
+        sizes="(max-width: 640px) 100vw, 360px"
+        class="ez-about__portrait"
+      />
+    )}
+    <div class="ez-about__body">
+      <h1>{data.title}</h1>
+      {data.statement && <p class="ez-about__statement">{data.statement}</p>}
+      <Content />
+    </div>
+  </div>
+</Base>
+
+<style>
+  .ez-about {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: var(--ez-space-7);
+    align-items: start;
+  }
+  .ez-about__portrait {
+    border: var(--ez-border-width) solid var(--ez-border);
+    width: 100%;
+    height: auto;
+  }
+  .ez-about__statement {
+    font-family: var(--ez-font-display);
+    font-size: var(--ez-text-xl);
+    font-weight: 700;
+    line-height: var(--ez-leading-tight);
+  }
+  @media (max-width: 768px) {
+    .ez-about { grid-template-columns: 1fr; }
+  }
+</style>
