@@ -73,24 +73,39 @@ export const DEFAULT_DESIGN: DesignTokens = {
   pages: { about: true, contact: true, cv: true, press: true },
 };
 
-/** Deep-merge a partial design over the defaults so old/partial settings still work. */
-export function withDefaults(partial: Partial<DesignTokens> | undefined): DesignTokens {
-  const d = partial ?? {};
+/** Deep-merge a partial design over a base token bundle. */
+function mergeOver(base: DesignTokens, partial: Partial<DesignTokens> | undefined): DesignTokens {
+  const d = (partial ?? {}) as Partial<DesignTokens>;
   return {
-    ...DEFAULT_DESIGN,
+    ...base,
     ...d,
-    preset: d.preset ?? DEFAULT_DESIGN.preset,
-    color: { ...DEFAULT_DESIGN.color, ...(d.color ?? {}) },
-    type: { ...DEFAULT_DESIGN.type, ...(d.type ?? {}) },
-    shape: { ...DEFAULT_DESIGN.shape, ...(d.shape ?? {}) },
-    nav: { ...DEFAULT_DESIGN.nav, ...(d.nav ?? {}) },
-    logo: { ...DEFAULT_DESIGN.logo, ...(d.logo ?? {}) },
-    background: { ...DEFAULT_DESIGN.background, ...(d.background ?? {}) },
-    thumb: { ...DEFAULT_DESIGN.thumb, ...(d.thumb ?? {}) },
-    lightbox: { ...DEFAULT_DESIGN.lightbox, ...(d.lightbox ?? {}) },
-    hero: { ...DEFAULT_DESIGN.hero, ...(d.hero ?? {}) },
-    pages: { ...DEFAULT_DESIGN.pages, ...(d.pages ?? {}) },
+    preset: d.preset ?? base.preset,
+    color: { ...base.color, ...(d.color ?? {}) },
+    type: { ...base.type, ...(d.type ?? {}) },
+    shape: { ...base.shape, ...(d.shape ?? {}) },
+    nav: { ...base.nav, ...(d.nav ?? {}) },
+    logo: { ...base.logo, ...(d.logo ?? {}) },
+    background: { ...base.background, ...(d.background ?? {}) },
+    thumb: { ...base.thumb, ...(d.thumb ?? {}) },
+    lightbox: { ...base.lightbox, ...(d.lightbox ?? {}) },
+    hero: { ...base.hero, ...(d.hero ?? {}) },
+    pages: { ...base.pages, ...(d.pages ?? {}) },
   };
+}
+
+/** Merge a partial design over the Bauhaus defaults (used to build presets). */
+export function withDefaults(partial: Partial<DesignTokens> | undefined): DesignTokens {
+  return mergeOver(DEFAULT_DESIGN, partial);
+}
+
+/**
+ * Resolve stored `settings.design` into a full token set: start from the named
+ * preset's bundle (or Bauhaus), then layer any granular overrides on top. So
+ * `{ preset: 'editorial' }` themes the whole site, and tweaks just add fields.
+ */
+export function resolveDesign(partial: Partial<DesignTokens> | undefined): DesignTokens {
+  const base = (partial?.preset && PRESETS[partial.preset]?.design) || DEFAULT_DESIGN;
+  return mergeOver(base, partial);
 }
 
 const DENSITY_GAP = { compact: '1rem', normal: '1.5rem', airy: '2.5rem' };

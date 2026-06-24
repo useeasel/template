@@ -26,7 +26,9 @@
 
   const currentPreset = $derived((s.design?.preset as string) ?? 'bauhaus');
   function applyPreset(id: string) {
-    s.design = structuredClone(PRESETS[id].design) as Record<string, any>;
+    // Store just the preset id; the site resolves the full bundle, and later
+    // granular tweaks layer on top as overrides.
+    s.design = { ...(s.design ?? {}), preset: id };
     notify(`Theme set to ${PRESETS[id].label}. Save to apply it.`);
   }
 
