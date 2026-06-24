@@ -97,39 +97,63 @@ export class GitHub {
   /**
    * Commit a set of file changes (create/update/delete) as a single commit on the
    * branch, via the Git Data API.
+   *
+   * The branch tip can move between reading it and updating it — GitHub has
+   * read-after-write lag on refs, and two saves in quick succession race — which
+   * makes the ref update fail 422 "not a fast forward". Blobs are content-addressed
+   * (safe to create once), so on a conflict we re-read the tip and rebuild the tree
+   * + commit on top of it, then retry the ref update.
    */
   async commit(changes: FileChange[], message: string): Promise<void> {
     const base = this.repoPath();
-    const ref = await this.api(`${base}/git/ref/heads/${this.ref.branch}`);
-    const latest = ref.object.sha;
-    const commit = await this.api(`${base}/git/commits/${latest}`);
-    const baseTree = commit.tree.sha;
 
-    const tree = [];
+    // Create blobs once — reused across retries.
+    const treeEntries = [];
     for (const c of changes) {
       if (c.remove) {
-        tree.push({ path: c.path, mode: '100644', type: 'blob', sha: null });
+        treeEntries.push({ path: c.path, mode: '100644', type: 'blob', sha: null });
         continue;
       }
       const blob = await this.api(`${base}/git/blobs`, {
         method: 'POST',
         body: JSON.stringify({ content: c.content ?? '', encoding: c.encoding ?? 'utf-8' }),
       });
-      tree.push({ path: c.path, mode: '100644', type: 'blob', sha: blob.sha });
+      treeEntries.push({ path: c.path, mode: '100644', type: 'blob', sha: blob.sha });
     }
 
-    const newTree = await this.api(`${base}/git/trees`, {
-      method: 'POST',
-      body: JSON.stringify({ base_tree: baseTree, tree }),
-    });
-    const newCommit = await this.api(`${base}/git/commits`, {
-      method: 'POST',
-      body: JSON.stringify({ message, tree: newTree.sha, parents: [latest] }),
-    });
-    await this.api(`${base}/git/refs/heads/${this.ref.branch}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ sha: newCommit.sha }),
-    });
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const ref = await this.api(`${base}/git/ref/heads/${this.ref.branch}`);
+      const latest = ref.object.sha;
+      const headCommit = await this.api(`${base}/git/commits/${latest}`);
+
+      const newTree = await this.api(`${base}/git/trees`, {
+        method: 'POST',
+        body: JSON.stringify({ base_tree: headCommit.tree.sha, tree: treeEntries }),
+      });
+      const newCommit = await this.api(`${base}/git/commits`, {
+        method: 'POST',
+        body: JSON.stringify({ message, tree: newTree.sha, parents: [latest] }),
+      });
+      try {
+        await this.api(`${base}/git/refs/heads/${this.ref.branch}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ sha: newCommit.sha }),
+        });
+        return;
+      } catch (e) {
+        lastErr = e;
+        // Only retry the fast-forward race; surface anything else immediately.
+        if (e instanceof Error && /\(422\)/.test(e.message) && /fast forward/i.test(e.message)) {
+          await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+          continue;
+        }
+        throw e;
+      }
+    }
+    throw lastErr instanceof Error
+      ? lastErr
+      : new Error('commit failed: branch kept moving (not a fast forward)');
   }
 }
 
