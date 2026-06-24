@@ -15,6 +15,9 @@ export interface DesignTokens {
     accent: string;
     accent2: string;
     border: string;
+    /** Optional overrides; default to accent / text per design at resolve time. */
+    link?: string;
+    heading?: string;
   };
   type: {
     headingFont: string;
@@ -120,7 +123,11 @@ export function withDefaults(partial: Partial<DesignTokens> | undefined): Design
  */
 export function resolveDesign(partial: Partial<DesignTokens> | undefined): DesignTokens {
   const base = (partial?.preset && PRESETS[partial.preset]?.design) || DEFAULT_DESIGN;
-  return mergeOver(base, partial);
+  const r = mergeOver(base, partial);
+  // Materialize link/heading so they default to this design's accent/text.
+  if (!r.color.link) r.color.link = r.color.accent;
+  if (!r.color.heading) r.color.heading = r.color.text;
+  return r;
 }
 
 const DENSITY_GAP = { compact: '1rem', normal: '1.5rem', airy: '2.5rem' };
@@ -145,6 +152,13 @@ export function designVars(d: DesignTokens): string {
     '--ez-red': d.color.accent2,
     '--ez-yellow': d.color.accent2,
     '--ez-border': d.color.border,
+    '--ez-link': d.color.link ?? d.color.accent,
+    '--ez-heading': d.color.heading ?? d.color.text,
+    // Adaptive pill text — readable on each status background, any theme.
+    '--ez-pill-available-text': readableOn(d.color.accent),
+    '--ez-pill-sold-text': readableOn(d.color.accent2),
+    '--ez-pill-inquire-text': readableOn(mixHex(d.color.accent, d.color.accent2)),
+    '--ez-pill-nfs-text': readableOn(d.color.muted),
     '--ez-font-display': `'${d.type.headingFont}', system-ui, sans-serif`,
     '--ez-font-body': `'${d.type.bodyFont}', system-ui, sans-serif`,
     '--ez-heading-weight': String(d.type.headingWeight),
@@ -241,6 +255,20 @@ export function contrastRatio(fg: string, bg: string): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
+/** Pick black or white text — whichever is more readable on the given background. */
+export function readableOn(bg: string): string {
+  return contrastRatio('#ffffff', bg) >= contrastRatio('#161616', bg) ? '#ffffff' : '#161616';
+}
+
+/** Average two hex colors (approximates the inquire pill's color-mix). */
+function mixHex(a: string, b: string): string {
+  const ra = hexToRgb(a);
+  const rb = hexToRgb(b);
+  if (!ra || !rb) return a;
+  const m = ra.map((v, i) => Math.round((v + rb[i]) / 2));
+  return '#' + m.map((x) => x.toString(16).padStart(2, '0')).join('');
+}
+
 export interface ContrastIssue {
   label: string;
   ratio: number;
@@ -255,8 +283,9 @@ export function contrastIssues(d: DesignTokens): ContrastIssue[] {
     { label: 'Body text on cards', fg: c.text, bg: c.surface, min: 4.5 },
     { label: 'Muted text on background', fg: c.muted, bg: c.background, min: 3 },
     { label: 'Accent on background', fg: c.accent, bg: c.background, min: 3 },
-    { label: 'Tag text on accent', fg: '#ffffff', bg: c.accent, min: 3 },
-    { label: 'Tag text on second accent', fg: '#ffffff', bg: c.accent2, min: 3 },
+    // Pill text is adaptive (readableOn), so this only warns for genuinely muddy accents.
+    { label: 'Tag text on accent', fg: readableOn(c.accent), bg: c.accent, min: 3 },
+    { label: 'Tag text on second accent', fg: readableOn(c.accent2), bg: c.accent2, min: 3 },
   ];
   return checks
     .map((ch) => ({ label: ch.label, ratio: Math.round(contrastRatio(ch.fg, ch.bg) * 10) / 10, min: ch.min }))

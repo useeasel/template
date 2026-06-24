@@ -80,6 +80,8 @@
     { key: 'accent', label: 'Accent' },
     { key: 'accent2', label: 'Second accent' },
     { key: 'border', label: 'Lines / borders' },
+    { key: 'heading', label: 'Headings' },
+    { key: 'link', label: 'Links' },
   ];
   const WEIGHTS = [300, 400, 500, 600, 700, 800];
 </script>
