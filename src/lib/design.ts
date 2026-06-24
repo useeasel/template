@@ -209,6 +209,16 @@ export function disciplineDesign(id: string): DesignTokens {
   return mergeOver(resolveDesign({ preset: disc.preset }), disc.overrides);
 }
 
+/** Vibes — the wizard's first question. Each maps to a theme preset. */
+export const VIBES: { preset: string; label: string; blurb: string }[] = [
+  { preset: 'minimal', label: 'Minimal & quiet', blurb: 'Clean, lots of space' },
+  { preset: 'editorial', label: 'Editorial & classic', blurb: 'Serif type, gallery feel' },
+  { preset: 'warm', label: 'Warm & handmade', blurb: 'Soft, earthy, rounded' },
+  { preset: 'bold', label: 'Bold & graphic', blurb: 'Big type, high impact' },
+  { preset: 'dark', label: 'Dark & moody', blurb: 'Low-light and dramatic' },
+  { preset: 'bauhaus', label: 'Playful & geometric', blurb: 'Primary colors, hard edges' },
+];
+
 /** Theme presets: each is a bundle layered over the defaults. */
 export const PRESETS: Record<string, { label: string; design: DesignTokens }> = {
   bauhaus: { label: 'Bauhaus', design: DEFAULT_DESIGN },
@@ -216,7 +226,7 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
     label: 'Minimal gallery',
     design: withDefaults({
       preset: 'minimal',
-      color: { background: '#ffffff', surface: '#ffffff', text: '#1a1a1a', muted: '#8a8a8a', accent: '#1a1a1a', accent2: '#1a1a1a', border: '#e5e5e5' },
+      color: { background: '#ffffff', surface: '#ffffff', text: '#1a1a1a', muted: '#8a8a8a', accent: '#1a1a1a', accent2: '#b0392f', border: '#e5e5e5' },
       type: { headingFont: 'Inter', bodyFont: 'Inter', headingWeight: 500, bodyWeight: 400, baseSize: 16, headingTransform: 'none', letterSpacing: -0.02 },
       shape: { radius: 0, borderWidth: 1, shadows: 'none' },
       density: 'airy',
@@ -227,7 +237,7 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
     label: 'Editorial',
     design: withDefaults({
       preset: 'editorial',
-      color: { background: '#fbfaf7', surface: '#ffffff', text: '#23201c', muted: '#7a7468', accent: '#9a3b2e', accent2: '#9a3b2e', border: '#23201c' },
+      color: { background: '#fbfaf7', surface: '#ffffff', text: '#23201c', muted: '#7a7468', accent: '#9a3b2e', accent2: '#2f6f5e', border: '#23201c' },
       type: { headingFont: 'Fraunces', bodyFont: 'Lora', headingWeight: 600, bodyWeight: 400, baseSize: 18, headingTransform: 'none', letterSpacing: 0 },
       shape: { radius: 0, borderWidth: 1, shadows: 'none' },
       density: 'airy',

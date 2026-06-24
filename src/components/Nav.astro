@@ -1,6 +1,4 @@
 ---
-import MotionToggle from './MotionToggle.astro';
-
 interface Props {
   logoText: string;
   logo?: { mode: 'none' | 'text' | 'image'; image?: string };
@@ -42,8 +40,6 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
         ))}
       </ul>
     </nav>
-
-    <div class="ez-nav__tools"><MotionToggle /></div>
   </div>
 </header>
 

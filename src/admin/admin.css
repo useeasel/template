@@ -161,8 +161,10 @@
 .ez-wiz__panel h1 { font-size: var(--ez-text-2xl); margin: 0; }
 .ez-wiz__preview { position: sticky; top: var(--ez-space-4); }
 .ez-wiz__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--ez-space-3); }
-.ez-wiz__card { font-family: var(--ez-font-display); font-weight: 700; background: var(--ez-white); border: var(--ez-border-width) solid var(--ez-border); padding: var(--ez-space-4); cursor: pointer; color: var(--ez-ink); text-align: left; }
+.ez-wiz__card { display: flex; flex-direction: column; gap: 4px; background: var(--ez-white); border: var(--ez-border-width) solid var(--ez-border); padding: var(--ez-space-4); cursor: pointer; color: var(--ez-ink); text-align: left; }
+.ez-wiz__card-title { font-family: var(--ez-font-display); font-weight: 700; }
 .ez-wiz__card--on { background: var(--ez-ink); color: var(--ez-white); }
+.ez-wiz__card--on .ez-help { color: #cfcfcf; }
 .ez-wiz__foot { display: flex; justify-content: space-between; gap: var(--ez-space-3); padding: var(--ez-space-4) var(--ez-space-5); border-top: var(--ez-border-width) solid var(--ez-border); background: var(--ez-white); }
 @media (max-width: 900px) {
   .ez-wiz__body { grid-template-columns: 1fr; }
