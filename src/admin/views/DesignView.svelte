@@ -7,7 +7,15 @@
   } from '../../lib/design';
   import LivePreview from './LivePreview.svelte';
 
-  let { gh, notify }: { gh: GitHub; notify: (m: string, k?: 'info' | 'error') => void } = $props();
+  let {
+    gh,
+    notify,
+    onWizard,
+  }: {
+    gh: GitHub;
+    notify: (m: string, k?: 'info' | 'error') => void;
+    onWizard: () => void;
+  } = $props();
 
   let s = $state<Settings | null>(null);
   let d = $state<DesignTokens>(resolveDesign(undefined));
@@ -25,10 +33,6 @@
     loading = false;
   }
   load();
-
-  function applyPreset(id: string) {
-    d = resolveDesign({ preset: id });
-  }
 
   function surprise() {
     const ids = Object.keys(PRESETS);
@@ -92,13 +96,9 @@
   <div class="ez-design">
     <div class="ez-design__controls">
       <section class="ez-block">
-        <strong>Theme</strong>
-        <p class="ez-help">A starting point. Tweak anything below.</p>
-        <div class="ez-presets">
-          {#each Object.keys(PRESETS) as id (id)}
-            <button class="ez-preset" class:ez-preset--on={d.preset === id} onclick={() => applyPreset(id)}>{PRESETS[id].label}</button>
-          {/each}
-        </div>
+        <strong>Start fresh</strong>
+        <p class="ez-help">The style wizard walks you through a whole look in about a minute. Or just tweak the details below.</p>
+        <button class="ez-btn ez-btn--primary" onclick={onWizard}>Open the style wizard</button>
       </section>
 
       <section class="ez-block">

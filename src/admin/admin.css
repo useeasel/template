@@ -147,6 +147,28 @@
   .ez-design__preview { position: static; }
 }
 
+/* Welcome / style wizard */
+.ez-wiz { min-height: 100vh; display: flex; flex-direction: column; }
+.ez-wiz__head { display: flex; align-items: center; gap: var(--ez-space-5); padding: var(--ez-space-3) var(--ez-space-5); border-bottom: var(--ez-border-width) solid var(--ez-border); background: var(--ez-white); flex-wrap: wrap; }
+.ez-wiz__brand { display: flex; align-items: baseline; gap: var(--ez-space-3); }
+.ez-wiz__brand strong { font-family: var(--ez-font-display); font-size: var(--ez-text-xl); }
+.ez-wiz__steps { display: flex; flex: 1; gap: var(--ez-space-4); list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.ez-wiz__steps li { font-family: var(--ez-font-display); font-weight: 700; font-size: var(--ez-text-sm); color: var(--ez-stone); }
+.ez-wiz__step--on { color: var(--ez-blue); }
+.ez-wiz__step--done { color: var(--ez-ink); }
+.ez-wiz__body { flex: 1; display: grid; grid-template-columns: 380px 1fr; gap: var(--ez-space-5); padding: var(--ez-space-5); align-items: start; }
+.ez-wiz__panel { display: grid; gap: var(--ez-space-4); align-content: start; }
+.ez-wiz__panel h1 { font-size: var(--ez-text-2xl); margin: 0; }
+.ez-wiz__preview { position: sticky; top: var(--ez-space-4); }
+.ez-wiz__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--ez-space-3); }
+.ez-wiz__card { font-family: var(--ez-font-display); font-weight: 700; background: var(--ez-white); border: var(--ez-border-width) solid var(--ez-border); padding: var(--ez-space-4); cursor: pointer; color: var(--ez-ink); text-align: left; }
+.ez-wiz__card--on { background: var(--ez-ink); color: var(--ez-white); }
+.ez-wiz__foot { display: flex; justify-content: space-between; gap: var(--ez-space-3); padding: var(--ez-space-4) var(--ez-space-5); border-top: var(--ez-border-width) solid var(--ez-border); background: var(--ez-white); }
+@media (max-width: 900px) {
+  .ez-wiz__body { grid-template-columns: 1fr; }
+  .ez-wiz__preview { position: static; }
+}
+
 /* Demo banner */
 .ez-demobar { background: var(--ez-yellow); color: var(--ez-ink); font-weight: 500; text-align: center; padding: var(--ez-space-2) var(--ez-space-4); border-bottom: var(--ez-border-width) solid var(--ez-border); font-size: var(--ez-text-sm); }
 

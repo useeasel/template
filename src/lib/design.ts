@@ -185,6 +185,30 @@ export const SUGGESTED_FONTS = {
   body: ['Space Grotesk', 'Inter', 'Work Sans', 'Outfit', 'Libre Baskerville', 'Lora', 'Nunito Sans'],
 };
 
+/**
+ * Discipline starter templates — a friendly first question in the wizard. Each
+ * maps to a base preset plus a couple of smart defaults for that medium.
+ */
+export const DISCIPLINES: {
+  id: string;
+  label: string;
+  preset: string;
+  overrides?: Partial<DesignTokens>;
+}[] = [
+  { id: 'painter', label: 'Painter', preset: 'editorial' },
+  { id: 'photographer', label: 'Photographer', preset: 'minimal', overrides: { thumb: { fit: 'cover', hover: 'zoom' } } },
+  { id: 'ceramicist', label: 'Ceramicist / sculptor', preset: 'warm', overrides: { thumb: { fit: 'cover', hover: 'lift' } } },
+  { id: 'illustrator', label: 'Illustrator', preset: 'bauhaus' },
+  { id: 'designer', label: 'Designer', preset: 'bold' },
+  { id: 'other', label: 'Something else', preset: 'minimal' },
+];
+
+/** Resolve a discipline id into a full token set (preset + its smart defaults). */
+export function disciplineDesign(id: string): DesignTokens {
+  const disc = DISCIPLINES.find((d) => d.id === id) ?? DISCIPLINES[0];
+  return mergeOver(resolveDesign({ preset: disc.preset }), disc.overrides);
+}
+
 /** Theme presets: each is a bundle layered over the defaults. */
 export const PRESETS: Record<string, { label: string; design: DesignTokens }> = {
   bauhaus: { label: 'Bauhaus', design: DEFAULT_DESIGN },

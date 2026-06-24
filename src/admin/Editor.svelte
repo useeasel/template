@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { GitHub } from './lib/github';
   import type { Series } from './lib/content';
-  import { loadSeries } from './lib/store';
+  import { loadSeries, loadSettings } from './lib/store';
   import { getToken, setToken, clearToken, signIn } from './lib/auth';
   import { makeDemoClient } from './lib/demo';
   import Artworks from './views/Artworks.svelte';
@@ -10,6 +10,7 @@
   import PagesView from './views/PagesView.svelte';
   import DesignView from './views/DesignView.svelte';
   import SettingsView from './views/SettingsView.svelte';
+  import Wizard from './views/Wizard.svelte';
 
   type Status = 'loading' | 'signin' | 'ready' | 'error' | 'unconfigured';
   type View = 'artworks' | 'series' | 'pages' | 'design' | 'settings';
@@ -24,6 +25,7 @@
   let siteUrl = $state('/');
 
   let demo = $state(false);
+  let wizard = $state(false);
   let toast = $state<{ msg: string; kind: 'info' | 'error' } | null>(null);
   let toastTimer: number | undefined;
   function notify(msg: string, kind: 'info' | 'error' = 'info') {
@@ -94,6 +96,13 @@
     } catch {
       seriesList = [];
     }
+    // First-time setup: if no design has been chosen yet, open the style wizard.
+    try {
+      const st = await loadSettings(client);
+      if (!st.design || Object.keys(st.design).length === 0) wizard = true;
+    } catch {
+      /* ignore — wizard can be opened from the Design tab */
+    }
     status = 'ready';
   }
 
@@ -127,6 +136,9 @@
 </script>
 
 <div class="ez-admin">
+  {#if status === 'ready' && wizard && gh}
+    <Wizard {gh} {notify} onClose={() => (wizard = false)} />
+  {:else}
   <header class="ez-topbar">
     <div class="ez-brand">
       <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true">
@@ -185,12 +197,13 @@
       {:else if view === 'pages'}
         <PagesView {gh} {notify} />
       {:else if view === 'design'}
-        <DesignView {gh} {notify} />
+        <DesignView {gh} {notify} onWizard={() => (wizard = true)} />
       {:else if view === 'settings'}
         <SettingsView {gh} {notify} />
       {/if}
     {/if}
   </main>
+  {/if}
 
   {#if toast}
     <div class="ez-toast ez-toast--{toast.kind}" role="status">{toast.msg}</div>
