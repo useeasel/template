@@ -13,6 +13,9 @@ import { getContext, setContext } from 'svelte';
 
 export type PublishState = 'idle' | 'saving' | 'publishing' | 'live' | 'error';
 
+/** What a deploy probe reports for the most recent push. */
+export type DeployState = 'building' | 'live' | 'error' | 'unknown';
+
 export interface SectionRegistration {
   /** True when the section has edits that aren't committed yet. */
   isDirty: () => boolean;
@@ -47,12 +50,46 @@ export function createShell(notify: Notify, opts: { demo?: boolean } = {}) {
   let pendingNav = $state<(() => void) | null>(null);
   let publishTimer: ReturnType<typeof setTimeout> | undefined;
 
+  // Optional real-deploy probe (set once the GitHub client exists). When present,
+  // the publishing chip tracks the actual build instead of a blind timer.
+  let probe: (() => Promise<DeployState>) | null = null;
+  // Bumped on every publish so an in-flight poll from an earlier save bails the
+  // moment a newer save supersedes it.
+  let publishSeq = 0;
+
   function beginPublishing() {
     publishState = 'publishing';
     clearTimeout(publishTimer);
-    publishTimer = setTimeout(() => {
-      publishState = 'live';
-    }, publishMs);
+    const seq = ++publishSeq;
+
+    // No probe (demo, or before the client is wired): keep the simple optimistic
+    // timer — we can't know the real build state.
+    if (!probe) {
+      publishTimer = setTimeout(() => {
+        if (seq === publishSeq) publishState = 'live';
+      }, publishMs);
+      return;
+    }
+
+    // Poll the real deploy until it's live/failed, or until publishMs elapses — at
+    // which point we optimistically call it live rather than spin forever (the
+    // host may simply not report status; see GitHub.deployState).
+    const deadline = Date.now() + publishMs;
+    const tick = async () => {
+      if (seq !== publishSeq) return; // superseded by a newer save
+      let state: DeployState = 'unknown';
+      try {
+        state = await probe!();
+      } catch {
+        /* network blip — treat as still-unknown and keep waiting */
+      }
+      if (seq !== publishSeq) return;
+      if (state === 'live') return void (publishState = 'live');
+      if (state === 'error') return void (publishState = 'error');
+      if (Date.now() >= deadline) return void (publishState = 'live');
+      publishTimer = setTimeout(tick, 4000);
+    };
+    publishTimer = setTimeout(tick, 4000);
   }
 
   async function runSave(): Promise<boolean> {
@@ -82,6 +119,15 @@ export function createShell(notify: Notify, opts: { demo?: boolean } = {}) {
     /** Switch to the short demo publishing window (demo mode is detected late). */
     demoTiming() {
       publishMs = 2500;
+    },
+
+    /**
+     * Wire a real-deploy probe (returns the live build state for the most recent
+     * push). Once set, the publishing chip reflects the actual deploy instead of a
+     * fixed timer. Safe to leave unset — the timer is the fallback.
+     */
+    setProbe(fn: () => Promise<DeployState>) {
+      probe = fn;
     },
 
     /** A view registers its behaviour; the returned fn unregisters it. */

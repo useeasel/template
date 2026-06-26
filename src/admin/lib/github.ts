@@ -68,6 +68,9 @@ export class GitHub {
    */
   private commitChain: Promise<unknown> = Promise.resolve();
 
+  /** SHA of the last commit this client pushed — what deploy status is polled for. */
+  lastCommitSha: string | null = null;
+
   private async api(path: string, init: RequestInit = {}): Promise<any> {
     const res = await fetch(`${API}${path}`, {
       ...init,
@@ -259,6 +262,7 @@ export class GitHub {
           if (c.remove) this.overlay.set(c.path, { removed: true });
           else this.overlay.set(c.path, { content: c.content ?? '', encoding: c.encoding ?? 'utf-8' });
         }
+        this.lastCommitSha = newCommit.sha;
         return;
       } catch (e) {
         lastErr = e;
@@ -273,6 +277,34 @@ export class GitHub {
     throw lastErr instanceof Error
       ? lastErr
       : new Error('commit failed: branch kept moving (not a fast forward)');
+  }
+
+  /**
+   * Best-effort deploy state for a pushed commit, read from GitHub's commit
+   * status + check-runs. The host's CI reports here: GitHub Pages writes an
+   * Actions check; Netlify writes a commit status *if* it reports to GitHub.
+   * Returns 'unknown' when nothing reports (e.g. the Netlify deploy-key path) so
+   * the caller can fall back to a time-based estimate instead of hanging.
+   */
+  async deployState(sha: string): Promise<'building' | 'live' | 'error' | 'unknown'> {
+    const base = this.repoPath();
+    try {
+      const [status, checks] = await Promise.all([
+        this.api(`${base}/commits/${sha}/status`).catch(() => ({ total_count: 0, state: '' })),
+        this.api(`${base}/commits/${sha}/check-runs`).catch(() => ({ check_runs: [] })),
+      ]);
+      const states: string[] = [];
+      if (status.total_count > 0) states.push(status.state); // success | pending | failure | error
+      for (const c of checks.check_runs ?? []) {
+        states.push(c.status === 'completed' ? c.conclusion : 'pending');
+      }
+      if (!states.length) return 'unknown';
+      if (states.some((s) => s === 'failure' || s === 'error' || s === 'timed_out')) return 'error';
+      if (states.every((s) => s === 'success')) return 'live';
+      return 'building';
+    } catch {
+      return 'unknown';
+    }
   }
 }
 

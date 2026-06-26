@@ -130,6 +130,14 @@
       return;
     }
     gh = client;
+    // The status chip now tracks the real deploy: poll GitHub's build status for
+    // whatever commit the editor last pushed. Falls back to a timer where the host
+    // reports nothing (see GitHub.deployState).
+    shell.setProbe(() =>
+      client.lastCommitSha
+        ? client.deployState(client.lastCommitSha)
+        : Promise.resolve('unknown' as const),
+    );
     try {
       seriesList = await loadSeries(client);
     } catch {
