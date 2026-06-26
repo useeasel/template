@@ -76,9 +76,22 @@ export function signIn(authBaseUrl: string): Promise<string> {
       }
     }, 500);
 
+    // Backstop: never hang forever. If the popup minted a token but its messages
+    // can't reach us (a wedged handshake on a very slow/flaky connection), fail
+    // with a clear, retryable error instead of leaving the artist staring at an
+    // open popup. The popup re-announces every 500ms, so 2 minutes is many
+    // chances to connect.
+    const timeout = window.setTimeout(() => {
+      if (!done) {
+        finish();
+        reject(new Error("Sign-in is taking too long — your connection may be slow. Please close the pop-up and try again."));
+      }
+    }, 120_000);
+
     function finish() {
       done = true;
       window.clearInterval(poll);
+      window.clearTimeout(timeout);
       window.removeEventListener('message', onMessage);
       try {
         popup && popup.close();
