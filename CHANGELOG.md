@@ -7,7 +7,20 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
-## 1.1.0
+## 0.3.0
+
+- **A site that starts as yours.** New sites now open empty with a friendly prompt to
+  add your first piece, instead of shipping placeholder demo artwork you have to clear out.
+- **Guided first run.** The style wizard now opens by asking your name (and any brand or
+  pen name) and what kind of work you make, then sets you up with a fitting layout.
+- **Better defaults.** Galleries now default to a masonry layout that keeps each piece's
+  original shape, rather than cropping everything to squares.
+- **More distinct styles.** Theme presets now vary their layout and cropping so each one
+  feels more like its own template.
+- **Smoother wizard.** Fixed the setup wizard so its navigation buttons stay in view, and
+  added a heads-up that steers setup to a desktop where it's easier to work.
+
+## 0.2.0
 
 - **Redesigned editor.** The `/admin` editor has a new sidebar layout that groups
   everything into clear sections — Home, Work, Design, Pages, News, and Settings — so
@@ -22,6 +35,6 @@ always preserved, and new features stay off until you turn them on.
 - **Refreshed typography.** Updated to the Jost + Hanken Grotesk type pairing for a
   cleaner, bolder look.
 
-## 1.0.0
+## 0.1.0
 
 - The first release of your Easel site.

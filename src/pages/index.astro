@@ -35,25 +35,36 @@ const lightboxItems = await Promise.all(
       </div>
     </header>
 
-    <div class="ez-portfolio">
-      {artworks.map((a, i) => (
-        <ArtworkCard
-          image={a.data.image}
-          title={a.data.title}
-          alt={a.data.alt}
-          year={a.data.year}
-          medium={a.data.medium}
-          dimensions={a.data.dimensions}
-          price={a.data.price}
-          status={a.data.status}
-          index={i}
-          href={linkToPage ? withBase(`/work/${slugify(a.id)}/`) : undefined}
-        />
-      ))}
-    </div>
+    {artworks.length === 0 ? (
+      <div class="ez-firstrun">
+        <h2 class="ez-firstrun__title">Your portfolio is ready.</h2>
+        <p class="ez-firstrun__body">
+          This is your new site. Add your first piece in the editor and it will
+          appear right here.
+        </p>
+        <a class="ez-btn ez-btn--primary ez-btn--lg" href={withBase('/admin')}>Open your editor</a>
+      </div>
+    ) : (
+      <div class="ez-portfolio">
+        {artworks.map((a, i) => (
+          <ArtworkCard
+            image={a.data.image}
+            title={a.data.title}
+            alt={a.data.alt}
+            year={a.data.year}
+            medium={a.data.medium}
+            dimensions={a.data.dimensions}
+            price={a.data.price}
+            status={a.data.status}
+            index={i}
+            href={linkToPage ? withBase(`/work/${slugify(a.id)}/`) : undefined}
+          />
+        ))}
+      </div>
+    )}
   </div>
 
-  {!linkToPage && <Lightbox items={lightboxItems} />}
+  {!linkToPage && artworks.length > 0 && <Lightbox items={lightboxItems} />}
 </Base>
 
 <style>
@@ -68,6 +79,28 @@ const lightboxItems = await Promise.all(
   .ez-home-tagline {
     color: var(--ez-stone);
     font-size: var(--ez-text-lg);
+    margin: 0;
+  }
+  .ez-firstrun {
+    border: var(--ez-border-width) solid var(--ez-border);
+    box-shadow: var(--ez-shadow);
+    background: var(--ez-white);
+    padding: var(--ez-space-7) var(--ez-space-5);
+    text-align: center;
+    display: grid;
+    justify-items: center;
+    gap: var(--ez-space-4);
+    max-width: 560px;
+    margin: var(--ez-space-6) auto;
+  }
+  .ez-firstrun__title {
+    font-family: var(--ez-font-display);
+    margin: 0;
+  }
+  .ez-firstrun__body {
+    color: var(--ez-stone);
+    font-size: var(--ez-text-lg);
+    max-width: 42ch;
     margin: 0;
   }
 </style>

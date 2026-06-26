@@ -2,7 +2,7 @@
   import type { GitHub } from '../lib/github';
   import type { Settings } from '../lib/content';
   import { loadSettings, saveSettings } from '../lib/store';
-  import { VIBES, SUGGESTED_FONTS, resolveDesign, type DesignTokens } from '../../lib/design';
+  import { VIBES, DISCIPLINES, disciplineDesign, SUGGESTED_FONTS, resolveDesign, type DesignTokens } from '../../lib/design';
   import LivePreview from './LivePreview.svelte';
   import FontPicker from './FontPicker.svelte';
   import ContrastNotice from './ContrastNotice.svelte';
@@ -27,7 +27,19 @@
     if (res.design) d = resolveDesign(res.design);
   });
 
-  const STEPS = ['Vibe', 'Type', 'Colors', 'Layout', 'Done'];
+  const STEPS = ['You', 'Craft', 'Vibe', 'Type', 'Colors', 'Layout', 'Done'];
+
+  let craft = $state('');
+  let penEdited = $state(false);
+
+  function onName() {
+    if (s && !penEdited) s.logoText = s.siteTitle;
+  }
+
+  function pickCraft(id: string) {
+    craft = id;
+    d = disciplineDesign(id);
+  }
 
   function pickVibe(preset: string) {
     d = resolveDesign({ preset });
@@ -67,6 +79,26 @@
   <div class="ez-wiz__body">
     <div class="ez-wiz__panel">
       {#if step === 0}
+        <h1>First, the basics.</h1>
+        <p class="ez-help">This names your site. You can change it any time.</p>
+        {#if s}
+          <label class="ez-field"><span class="ez-label">Your name</span>
+            <input class="ez-input" bind:value={s.siteTitle} oninput={onName} placeholder="e.g. Alex Rivera" /></label>
+          <label class="ez-field"><span class="ez-label">Go by a different name?</span>
+            <input class="ez-input" bind:value={s.logoText} oninput={() => (penEdited = true)} placeholder="Pen name, brand, or studio (optional)" />
+            <span class="ez-help">Shown as your site's title. Leave blank to use your name.</span></label>
+        {/if}
+      {:else if step === 1}
+        <h1>What do you make?</h1>
+        <p class="ez-help">We'll start you with a layout that suits your work. You can change everything next.</p>
+        <div class="ez-wiz__grid">
+          {#each DISCIPLINES as c (c.id)}
+            <button class="ez-wiz__card" class:ez-wiz__card--on={craft === c.id} onclick={() => pickCraft(c.id)}>
+              <span class="ez-wiz__card-title">{c.label}</span>
+            </button>
+          {/each}
+        </div>
+      {:else if step === 2}
         <h1>What's the vibe?</h1>
         <p class="ez-help">Pick the feeling you're after. You can fine-tune everything next.</p>
         <div class="ez-wiz__grid">
@@ -77,7 +109,7 @@
             </button>
           {/each}
         </div>
-      {:else if step === 1}
+      {:else if step === 3}
         <h1>Choose your type</h1>
         <label class="ez-field"><span class="ez-label">Heading font</span>
           <FontPicker value={d.type.headingFont} fonts={SUGGESTED_FONTS.heading} onpick={(f) => (d.type.headingFont = f)} /></label>
@@ -88,7 +120,7 @@
           <select class="ez-input" bind:value={d.type.headingWeight}>{#each WEIGHTS as w}<option value={w}>{w}</option>{/each}</select></label>
         <label class="ez-field"><span class="ez-label">Text size — {d.type.baseSize}px</span>
           <input type="range" min="14" max="22" step="1" bind:value={d.type.baseSize} /></label>
-      {:else if step === 2}
+      {:else if step === 4}
         <h1>Set your colors</h1>
         <p class="ez-help">The essentials. More slots live in the Design tab later.</p>
         <div class="ez-colorgrid">
@@ -99,7 +131,7 @@
           <label class="ez-color"><input type="color" bind:value={d.color.border} /><span>Lines</span></label>
         </div>
         <ContrastNotice design={d} />
-      {:else if step === 3}
+      {:else if step === 5}
         <h1>Lay it out</h1>
         <label class="ez-field"><span class="ez-label">Navigation</span>
           <select class="ez-input" bind:value={d.nav.layout}>

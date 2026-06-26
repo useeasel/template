@@ -34,6 +34,8 @@
   let demo = $state(false);
   let wizard = $state(false);
   let navOpen = $state(false);
+  let isNarrow = $state(false);
+  let mobileBypass = $state(false);
   let toast = $state<{ msg: string; kind: 'info' | 'error' } | null>(null);
   let toastTimer: number | undefined;
   function notify(msg: string, kind: 'info' | 'error' = 'info') {
@@ -55,6 +57,11 @@
   } | null = null;
 
   onMount(async () => {
+    const mq = window.matchMedia('(max-width: 820px)');
+    isNarrow = mq.matches;
+    mq.addEventListener('change', (e) => (isNarrow = e.matches));
+    mobileBypass = sessionStorage.getItem('easel_mobile_ok') === '1';
+
     try {
       const res = await fetch('/admin/config.json', { cache: 'no-store' });
       config = await res.json();
@@ -167,6 +174,11 @@
     view = 'home';
   }
 
+  function bypassMobile() {
+    sessionStorage.setItem('easel_mobile_ok', '1');
+    mobileBypass = true;
+  }
+
   // Warn on hard close/refresh while there are unsaved edits.
   $effect(() => {
     if (!shell.dirty) return;
@@ -189,7 +201,21 @@
 </script>
 
 <div class="ez-admin">
-  {#if status === 'ready' && wizard && gh}
+  {#if isNarrow && !mobileBypass}
+    <div class="ez-mobilegate">
+      <div class="ez-mobilegate__card">
+        <h1>Open this on a computer</h1>
+        <p>
+          The Easel editor is built for a real screen — you'll be dragging in
+          photos, arranging your work, and fine-tuning your design. On a phone
+          it's cramped and easy to make a mess of.
+        </p>
+        <p><strong>Switch to a laptop or desktop and come back to this page.</strong></p>
+        <button class="ez-btn ez-btn--primary ez-btn--lg" onclick={() => (location.href = siteUrl)}>Take me back</button>
+        <button class="ez-mobilegate__bypass" onclick={bypassMobile}>Continue anyway — I know it'll be rough</button>
+      </div>
+    </div>
+  {:else if status === 'ready' && wizard && gh}
     <Wizard {gh} {notify} onClose={finishWizard} />
   {:else if status === 'ready' && gh}
     <div class="ez-shell" class:ez-shell--navopen={navOpen}>

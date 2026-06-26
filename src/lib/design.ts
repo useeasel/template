@@ -84,8 +84,8 @@ export const DEFAULT_DESIGN: DesignTokens = {
   nav: { layout: 'side' },
   logo: { mode: 'none' },
   background: { type: 'solid' },
-  thumb: { fit: 'cover', hover: 'zoom' },
-  gallery: { layout: 'grid', size: 'medium', gutter: 'normal', caption: 'below', featureFirst: false, click: 'lightbox' },
+  thumb: { fit: 'contain', hover: 'zoom' },
+  gallery: { layout: 'masonry', size: 'medium', gutter: 'normal', caption: 'below', featureFirst: false, click: 'lightbox' },
   lightbox: { transition: 'fade' },
   hero: { enabled: false, align: 'left', size: 'small' },
   footer: { socials: true, credit: true },
@@ -338,11 +338,11 @@ export const DISCIPLINES: {
   preset: string;
   overrides?: Partial<DesignTokens>;
 }[] = [
-  { id: 'painter', label: 'Painter', preset: 'editorial' },
-  { id: 'photographer', label: 'Photographer', preset: 'minimal', overrides: { thumb: { fit: 'cover', hover: 'zoom' } } },
-  { id: 'ceramicist', label: 'Ceramicist / sculptor', preset: 'warm', overrides: { thumb: { fit: 'cover', hover: 'lift' } } },
-  { id: 'illustrator', label: 'Illustrator', preset: 'bauhaus' },
-  { id: 'designer', label: 'Designer', preset: 'bold' },
+  { id: 'painter', label: 'Painter', preset: 'editorial', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'contain', hover: 'zoom' } } },
+  { id: 'photographer', label: 'Photographer', preset: 'minimal', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'contain', hover: 'zoom' } } },
+  { id: 'ceramicist', label: 'Ceramicist / sculptor', preset: 'warm', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'cover', hover: 'lift' } } },
+  { id: 'illustrator', label: 'Illustrator', preset: 'bauhaus', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'contain', hover: 'zoom' } } },
+  { id: 'designer', label: 'Designer', preset: 'bold', overrides: { gallery: { layout: 'grid' }, thumb: { fit: 'cover', hover: 'zoom' } } },
   { id: 'other', label: 'Something else', preset: 'minimal' },
 ];
 
@@ -386,7 +386,8 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Inter', bodyFont: 'Inter', headingWeight: 500, bodyWeight: 400, baseSize: 16, headingTransform: 'none', letterSpacing: -0.02 },
       shape: { radius: 0, borderWidth: 1, shadows: 'none' },
       density: 'airy',
-      thumb: { fit: 'cover', hover: 'none' },
+      thumb: { fit: 'contain', hover: 'none' },
+      gallery: { layout: 'masonry' },
     }),
   },
   editorial: {
@@ -408,6 +409,7 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       shape: { radius: 14, borderWidth: 1, shadows: 'soft' },
       density: 'normal',
       thumb: { fit: 'cover', hover: 'lift' },
+      gallery: { layout: 'masonry' },
     }),
   },
   dark: {
@@ -428,6 +430,8 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Anton', bodyFont: 'Work Sans', headingWeight: 400, bodyWeight: 400, baseSize: 18, headingTransform: 'uppercase', letterSpacing: 0 },
       shape: { radius: 0, borderWidth: 3, shadows: 'hard' },
       density: 'normal',
+      thumb: { fit: 'cover', hover: 'zoom' },
+      gallery: { layout: 'grid' },
     }),
   },
   noir: {
@@ -438,6 +442,8 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Archivo', bodyFont: 'Inter', headingWeight: 800, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: -0.02 },
       shape: { radius: 0, borderWidth: 2, shadows: 'none' },
       density: 'normal',
+      thumb: { fit: 'contain', hover: 'zoom' },
+      gallery: { layout: 'masonry' },
     }),
   },
   pastel: {
@@ -490,6 +496,8 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Space Grotesk', bodyFont: 'Space Grotesk', headingWeight: 700, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: -0.01 },
       shape: { radius: 0, borderWidth: 2, shadows: 'none' },
       density: 'normal',
+      thumb: { fit: 'cover', hover: 'zoom' },
+      gallery: { layout: 'grid' },
     }),
   },
   newsprint: {
@@ -541,6 +549,8 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'DM Serif Display', bodyFont: 'Lora', headingWeight: 400, bodyWeight: 400, baseSize: 18, headingTransform: 'none', letterSpacing: 0 },
       shape: { radius: 14, borderWidth: 1, shadows: 'soft' },
       density: 'airy',
+      thumb: { fit: 'cover', hover: 'lift' },
+      gallery: { layout: 'masonry' },
     }),
   },
   brutalist: {
@@ -551,6 +561,8 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Archivo', bodyFont: 'IBM Plex Sans', headingWeight: 800, bodyWeight: 400, baseSize: 17, headingTransform: 'uppercase', letterSpacing: 0 },
       shape: { radius: 0, borderWidth: 3, shadows: 'hard' },
       density: 'compact',
+      thumb: { fit: 'cover', hover: 'zoom' },
+      gallery: { layout: 'grid' },
     }),
   },
   classic: {
