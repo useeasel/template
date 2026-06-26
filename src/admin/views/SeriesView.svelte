@@ -2,6 +2,7 @@
   import type { GitHub } from '../lib/github';
   import type { Series } from '../lib/content';
   import { loadSeries, saveSeries, deleteSeries } from '../lib/store';
+  import { useShell } from '../lib/shell.svelte';
 
   let {
     gh,
@@ -13,12 +14,30 @@
     onChange: () => void;
   } = $props();
 
+  const shell = useShell();
+
   let items = $state<Series[]>([]);
   let loading = $state(true);
   let editing = $state<Series | null>(null);
+  let editBaseline = $state('');
   let saving = $state(false);
 
   const blank = (): Series => ({ id: '', title: '', description: '', order: 0, body: '' });
+
+  function open(s: Series) {
+    editing = s;
+    editBaseline = JSON.stringify($state.snapshot(s));
+  }
+
+  $effect(() => {
+    if (!editing) return;
+    return shell.register({
+      isDirty: () => editing != null && JSON.stringify($state.snapshot(editing)) !== editBaseline,
+      save,
+      discard: () => (editing = null),
+      silent: true,
+    });
+  });
 
   async function refresh() {
     loading = true;
@@ -31,26 +50,31 @@
   }
   refresh();
 
-  async function save() {
-    if (!editing) return;
-    if (!editing.title.trim()) return notify('Please add a name.', 'error');
+  async function save(): Promise<boolean> {
+    if (!editing) return true;
+    if (!editing.title.trim()) { notify('Please add a name.', 'error'); return false; }
     saving = true;
     try {
       await saveSeries(gh, $state.snapshot(editing) as Series, editing.id === '');
+      shell.markCommitted();
       notify('Series saved.');
       editing = null;
       await refresh();
       onChange();
+      saving = false;
+      return true;
     } catch (e) {
       notify(e instanceof Error ? e.message : 'Could not save.', 'error');
+      saving = false;
+      return false;
     }
-    saving = false;
   }
 
   async function remove(s: Series) {
     if (!confirm(`Delete the “${s.title}” series? Your artwork stays; it's just ungrouped.`)) return;
     try {
       await deleteSeries(gh, s);
+      shell.markCommitted();
       notify('Series deleted.');
       await refresh();
       onChange();
@@ -64,7 +88,7 @@
   <div class="ez-form">
     <div class="ez-form__head">
       <h2>{editing.id === '' ? 'Add series' : 'Edit series'}</h2>
-      <button class="ez-btn ez-btn--ghost" onclick={() => (editing = null)} disabled={saving}>Cancel</button>
+      <button class="ez-btn ez-btn--ghost" onclick={() => shell.guard(() => (editing = null))} disabled={saving}>Cancel</button>
     </div>
     <label class="ez-field">
       <span class="ez-label">Name</span>
@@ -89,7 +113,7 @@
       <h2>Series</h2>
       <p class="ez-help">Group your work into bodies or collections.</p>
     </div>
-    <button class="ez-btn ez-btn--primary" onclick={() => (editing = blank())}>Add series</button>
+    <button class="ez-btn ez-btn--primary" onclick={() => open(blank())}>Add series</button>
   </div>
 
   {#if loading}
@@ -105,7 +129,7 @@
             {#if s.description}<span class="ez-help">{s.description}</span>{/if}
           </div>
           <div class="ez-tile__actions">
-            <button class="ez-btn ez-btn--sm" onclick={() => (editing = { ...s })}>Edit</button>
+            <button class="ez-btn ez-btn--sm" onclick={() => open({ ...s })}>Edit</button>
             <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => remove(s)}>Delete</button>
           </div>
         </li>

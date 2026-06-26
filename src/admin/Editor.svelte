@@ -5,28 +5,35 @@
   import { loadSeries, loadSettings } from './lib/store';
   import { getToken, setToken, clearToken, signIn } from './lib/auth';
   import { makeDemoClient } from './lib/demo';
-  import Artworks from './views/Artworks.svelte';
-  import SeriesView from './views/SeriesView.svelte';
+  import { createShell, provideShell } from './lib/shell.svelte';
+  import Sidebar, { type NavId } from './Sidebar.svelte';
+  import EaselMark from './EaselMark.svelte';
+  import StatusChip from './views/StatusChip.svelte';
+  import UnsavedDialog from './views/UnsavedDialog.svelte';
+  import HomeView from './views/HomeView.svelte';
+  import WorkView from './views/WorkView.svelte';
   import PagesView from './views/PagesView.svelte';
-  import NewsView from './views/NewsView.svelte';
   import DesignView from './views/DesignView.svelte';
   import SettingsView from './views/SettingsView.svelte';
+  import UpdatesView from './views/UpdatesView.svelte';
   import Wizard from './views/Wizard.svelte';
 
   type Status = 'loading' | 'signin' | 'ready' | 'error' | 'unconfigured';
-  type View = 'artworks' | 'series' | 'pages' | 'news' | 'design' | 'settings';
 
   let status = $state<Status>('loading');
-  let view = $state<View>('artworks');
+  let view = $state<NavId>('home');
+  let pendingTab = $state<string | null>(null);
   let gh = $state<GitHub | null>(null);
   let login = $state('');
   let seriesList = $state<Series[]>([]);
   let errorMsg = $state('');
   let authBaseUrl = $state('');
   let siteUrl = $state('/');
+  let designEmpty = $state(false);
 
   let demo = $state(false);
   let wizard = $state(false);
+  let navOpen = $state(false);
   let toast = $state<{ msg: string; kind: 'info' | 'error' } | null>(null);
   let toastTimer: number | undefined;
   function notify(msg: string, kind: 'info' | 'error' = 'info') {
@@ -35,7 +42,17 @@
     toastTimer = window.setTimeout(() => (toast = null), 5000);
   }
 
-  let config: { repo: string; branch: string; authBaseUrl: string } | null = null;
+  // The shared editor shell (save/dirty/guard/publish-status). Created once and
+  // provided to every section view via context.
+  const shell = createShell(notify, { demo: false });
+  provideShell(shell);
+
+  let config: {
+    repo: string;
+    branch: string;
+    authBaseUrl: string;
+    easelVersion?: string;
+  } | null = null;
 
   onMount(async () => {
     try {
@@ -53,6 +70,7 @@
     // Demo mode: explore the whole UI with sample data, no sign-in, no repo.
     if (wantsDemo && unconfigured) {
       demo = true;
+      shell.demoTiming();
       gh = makeDemoClient();
       login = 'demo-artist';
       try {
@@ -60,6 +78,7 @@
       } catch {
         seriesList = [];
       }
+      await checkDesign(gh);
       status = 'ready';
       return;
     }
@@ -79,6 +98,18 @@
     else status = 'signin';
   });
 
+  async function checkDesign(client: GitHub) {
+    try {
+      const st = await loadSettings(client);
+      designEmpty = !st.design || Object.keys(st.design).length === 0;
+      if (st.customDomain) siteUrl = `https://${st.customDomain}`;
+      // First-time setup: open the style wizard if no design has been chosen.
+      if (designEmpty) wizard = true;
+    } catch {
+      /* ignore — wizard can be opened from Design later */
+    }
+  }
+
   async function start(token: string) {
     status = 'loading';
     const [owner, repo] = config!.repo.split('/');
@@ -97,13 +128,7 @@
     } catch {
       seriesList = [];
     }
-    // First-time setup: if no design has been chosen yet, open the style wizard.
-    try {
-      const st = await loadSettings(client);
-      if (!st.design || Object.keys(st.design).length === 0) wizard = true;
-    } catch {
-      /* ignore — wizard can be opened from the Design tab */
-    }
+    await checkDesign(client);
     status = 'ready';
   }
 
@@ -127,86 +152,119 @@
     if (gh) seriesList = await loadSeries(gh);
   }
 
-  const NAV: { id: View; label: string }[] = [
-    { id: 'artworks', label: 'Artwork' },
-    { id: 'series', label: 'Series' },
-    { id: 'pages', label: 'Pages' },
-    { id: 'news', label: 'News' },
-    { id: 'design', label: 'Design' },
-    { id: 'settings', label: 'Settings' },
-  ];
+  // Navigation always runs through the shell's unsaved-changes guard.
+  function go(target: NavId, tab: string | null = null) {
+    shell.guard(() => {
+      view = target;
+      pendingTab = tab;
+      navOpen = false;
+    });
+  }
+
+  function finishWizard() {
+    wizard = false;
+    designEmpty = false;
+    view = 'home';
+  }
+
+  // Warn on hard close/refresh while there are unsaved edits.
+  $effect(() => {
+    if (!shell.dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  });
+
+  const TITLES: Record<NavId, string> = {
+    home: 'Home',
+    work: 'Your work',
+    pages: 'Pages',
+    design: 'Design',
+    settings: 'Settings',
+    updates: 'Updates',
+  };
 </script>
 
 <div class="ez-admin">
   {#if status === 'ready' && wizard && gh}
-    <Wizard {gh} {notify} onClose={() => (wizard = false)} />
-  {:else}
-  <header class="ez-topbar">
-    <div class="ez-brand">
-      <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true">
-        <g stroke="#161616" stroke-width="3" stroke-linecap="square">
-          <line x1="14" y1="10" x2="8" y2="60" /><line x1="50" y1="10" x2="56" y2="60" />
-          <line x1="32" y1="40" x2="32" y2="60" /><line x1="11" y1="44" x2="53" y2="44" />
-        </g>
-        <rect x="12" y="8" width="40" height="32" fill="#fff" stroke="#161616" stroke-width="3" />
-        <rect x="16" y="20" width="14" height="14" fill="#e63946" />
-        <circle cx="42" cy="18" r="7" fill="#1d4ed8" />
-        <polygon points="40,34 50,34 45,22" fill="#f4c20d" />
-      </svg>
-      <strong>Easel</strong>
-    </div>
-    {#if status === 'ready'}
-      <nav class="ez-nav">
-        {#each NAV as n (n.id)}
-          <button class="ez-navbtn" class:ez-navbtn--on={view === n.id} onclick={() => (view = n.id)}>{n.label}</button>
-        {/each}
-      </nav>
-      <div class="ez-topbar__right">
-        <a class="ez-btn ez-btn--sm ez-btn--ghost" href={siteUrl} target="_blank" rel="noopener">View site</a>
-        {#if !demo}
-          <span class="ez-who">@{login}</span>
-          <button class="ez-btn ez-btn--sm" onclick={signOut}>Sign out</button>
-        {/if}
-      </div>
-    {/if}
-  </header>
+    <Wizard {gh} {notify} onClose={finishWizard} />
+  {:else if status === 'ready' && gh}
+    <div class="ez-shell" class:ez-shell--navopen={navOpen}>
+      <Sidebar {view} nav={(id) => go(id)} {login} {demo} {siteUrl} bind:open={navOpen} onSignOut={signOut} />
 
-  {#if demo}
-    <div class="ez-demobar">Demo mode — explore freely. Changes here aren't saved anywhere.</div>
+      <div class="ez-shell__main">
+        <header class="ez-mobilebar">
+          <button class="ez-hamburger" aria-label="Open menu" onclick={() => (navOpen = true)}>
+            <span></span><span></span><span></span>
+          </button>
+          <div class="ez-mobilebar__brand"><EaselMark size={24} /><strong>easel</strong></div>
+          <StatusChip />
+        </header>
+
+        {#if demo}
+          <div class="ez-demobar">Demo mode — explore freely. Changes here aren't saved anywhere.</div>
+        {/if}
+
+        <div class="ez-sectionbar">
+          <h1>{TITLES[view]}</h1>
+          <div class="ez-sectionbar__right">
+            <span class="ez-sectionbar__chip"><StatusChip /></span>
+            {#if shell.canSave}
+              <button
+                class="ez-btn ez-btn--primary ez-btn--depth"
+                onclick={shell.save}
+                disabled={!shell.dirty || shell.saving}
+              >{shell.saving ? 'Saving…' : 'Save'}</button>
+            {/if}
+          </div>
+        </div>
+
+        <main class="ez-main" id="ez-main">
+          {#if view === 'home'}
+            <HomeView {gh} {go} {siteUrl} {designEmpty} onWizard={() => (wizard = true)} />
+          {:else if view === 'work'}
+            <WorkView {gh} {seriesList} onSeriesChange={refreshSeries} initialTab={pendingTab} />
+          {:else if view === 'pages'}
+            <PagesView {gh} {notify} initialTab={pendingTab} />
+          {:else if view === 'design'}
+            <DesignView {gh} {notify} onWizard={() => (wizard = true)} />
+          {:else if view === 'settings'}
+            <SettingsView {gh} {notify} />
+          {:else if view === 'updates'}
+            <UpdatesView {gh} {notify} currentVersion={config?.easelVersion ?? null} />
+          {/if}
+        </main>
+      </div>
+    </div>
+  {:else}
+    <header class="ez-topbar ez-topbar--bare">
+      <div class="ez-brand"><EaselMark size={28} /><strong>easel</strong></div>
+    </header>
+    <main class="ez-main">
+      {#if status === 'loading'}
+        <p class="ez-help">Loading…</p>
+      {:else if status === 'signin'}
+        <div class="ez-signin">
+          <h1>Welcome back</h1>
+          <p>Sign in with the GitHub account you used to set up your site. That's all you need — no passwords to remember here.</p>
+          <button class="ez-btn ez-btn--primary ez-btn--lg ez-btn--depth" onclick={doSignIn}>Sign in with GitHub</button>
+        </div>
+      {:else if status === 'unconfigured'}
+        <div class="ez-signin">
+          <h1>Editor not set up yet</h1>
+          <p>This editor becomes active once your site is created through Easel. If you just signed up, give it a minute and refresh.</p>
+        </div>
+      {:else if status === 'error'}
+        <div class="ez-signin"><h1>Something went wrong</h1><p>{errorMsg}</p></div>
+      {/if}
+    </main>
   {/if}
 
-  <main class="ez-main">
-    {#if status === 'loading'}
-      <p class="ez-help">Loading…</p>
-    {:else if status === 'signin'}
-      <div class="ez-signin">
-        <h1>Welcome back</h1>
-        <p>Sign in with the GitHub account you used to set up your site. That's all you need — no passwords to remember here.</p>
-        <button class="ez-btn ez-btn--primary ez-btn--lg" onclick={doSignIn}>Sign in with GitHub</button>
-      </div>
-    {:else if status === 'unconfigured'}
-      <div class="ez-signin">
-        <h1>Editor not set up yet</h1>
-        <p>This editor becomes active once your site is created through Easel. If you just signed up, give it a minute and refresh.</p>
-      </div>
-    {:else if status === 'error'}
-      <div class="ez-signin"><h1>Something went wrong</h1><p>{errorMsg}</p></div>
-    {:else if status === 'ready' && gh}
-      {#if view === 'artworks'}
-        <Artworks {gh} {seriesList} {notify} />
-      {:else if view === 'series'}
-        <SeriesView {gh} {notify} onChange={refreshSeries} />
-      {:else if view === 'pages'}
-        <PagesView {gh} {notify} />
-      {:else if view === 'news'}
-        <NewsView {gh} {notify} />
-      {:else if view === 'design'}
-        <DesignView {gh} {notify} onWizard={() => (wizard = true)} />
-      {:else if view === 'settings'}
-        <SettingsView {gh} {notify} />
-      {/if}
-    {/if}
-  </main>
+  {#if shell.hasPendingNav}
+    <UnsavedDialog />
   {/if}
 
   {#if toast}

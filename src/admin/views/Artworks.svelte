@@ -2,6 +2,7 @@
   import type { GitHub } from '../lib/github';
   import { resolveAssetPath, type Artwork, type Series } from '../lib/content';
   import { loadArtworks, deleteArtwork, reorderArtworks, bulkAddArtworks } from '../lib/store';
+  import { useShell } from '../lib/shell.svelte';
   import ArtworkForm from './ArtworkForm.svelte';
 
   let {
@@ -13,6 +14,8 @@
     seriesList: Series[];
     notify: (msg: string, kind?: 'info' | 'error') => void;
   } = $props();
+
+  const shell = useShell();
 
   let items = $state<Artwork[]>([]);
   let loading = $state(true);
@@ -98,20 +101,31 @@
     dragId = null;
   }
 
-  async function saveOrder() {
+  async function saveOrder(): Promise<boolean> {
     try {
       await reorderArtworks(gh, $state.snapshot(items) as Artwork[]);
       orderDirty = false;
+      shell.markCommitted();
       notify('Order saved. Your site will update shortly.');
+      return true;
     } catch (e) {
       notify(e instanceof Error ? e.message : 'Could not save order.', 'error');
+      return false;
     }
   }
+
+  // While there's an unsaved reorder, the section-bar Save persists it; navigating
+  // away prompts via the shared guard. Discard reloads the on-disk order.
+  $effect(() => {
+    if (!orderDirty) return;
+    return shell.register({ isDirty: () => orderDirty, save: saveOrder, discard: refresh });
+  });
 
   async function remove(a: Artwork) {
     if (!confirm(`Delete “${a.title}”? This can't be undone.`)) return;
     try {
       await deleteArtwork(gh, a);
+      shell.markCommitted();
       notify('Artwork deleted.');
       await refresh();
     } catch (e) {
@@ -122,7 +136,10 @@
   function onFormDone(changed: boolean) {
     editing = null;
     adding = false;
-    if (changed) refresh();
+    if (changed) {
+      shell.markCommitted();
+      refresh();
+    }
   }
 
   async function onBulkPick(e: Event) {
@@ -133,6 +150,7 @@
     bulkBusy = true;
     try {
       const n = await bulkAddArtworks(gh, files);
+      shell.markCommitted();
       notify(`Added ${n} piece${n === 1 ? '' : 's'}. Add titles and details any time — your site will update shortly.`);
       await refresh();
     } catch (err) {
@@ -151,9 +169,6 @@
       <p class="ez-help">Drag pieces to reorder how they appear on your homepage.</p>
     </div>
     <div class="ez-view__actions">
-      {#if orderDirty}
-        <button class="ez-btn ez-btn--accent" onclick={saveOrder}>Save order</button>
-      {/if}
       <input
         type="file"
         accept="image/*"

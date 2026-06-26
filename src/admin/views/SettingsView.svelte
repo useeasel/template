@@ -2,20 +2,26 @@
   import type { GitHub } from '../lib/github';
   import type { Settings } from '../lib/content';
   import { loadSettings, saveSettings } from '../lib/store';
+  import { useShell } from '../lib/shell.svelte';
 
   let { gh, notify }: { gh: GitHub; notify: (m: string, k?: 'info' | 'error') => void } = $props();
+
+  const shell = useShell();
 
   let s = $state<Settings>({
     siteTitle: '', logoText: '', theme: 'default', portfolioLayout: 'grid',
     columns: 3, motionDefault: 'full', rightClickProtect: false, watermark: false, socialLinks: [],
   });
   let loading = $state(true);
-  let saving = $state(false);
+  let savedJson = $state('');
+
+  const isDirty = () => !loading && JSON.stringify($state.snapshot(s)) !== savedJson;
 
   async function load() {
     loading = true;
     try {
       s = await loadSettings(gh);
+      savedJson = JSON.stringify($state.snapshot(s));
     } catch (e) {
       notify(e instanceof Error ? e.message : 'Could not load settings.', 'error');
     }
@@ -23,25 +29,25 @@
   }
   load();
 
-  async function save() {
-    saving = true;
+  async function save(): Promise<boolean> {
     try {
       await saveSettings(gh, $state.snapshot(s) as Settings);
+      savedJson = JSON.stringify($state.snapshot(s));
       notify('Settings saved. Your site will update shortly.');
+      return true;
     } catch (e) {
       notify(e instanceof Error ? e.message : 'Could not save.', 'error');
+      return false;
     }
-    saving = false;
   }
 
-</script>
+  function discard() {
+    if (savedJson) s = JSON.parse(savedJson) as Settings;
+  }
 
-<div class="ez-view__head">
-  <h2>Settings</h2>
-  {#if !loading}
-    <button class="ez-btn ez-btn--primary" onclick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>
-  {/if}
-</div>
+  // The section bar drives Save; we just expose dirty/save/discard to the shell.
+  $effect(() => shell.register({ isDirty, save, discard }));
+</script>
 
 {#if loading}
   <p class="ez-help">Loading…</p>

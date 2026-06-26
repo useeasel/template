@@ -4,7 +4,7 @@
  * be explored on localhost without signing in or touching a repo. Changes are
  * kept in memory only (a banner makes that clear).
  */
-import type { GitHub, DirEntry } from './github';
+import type { GitHub, DirEntry, RepoRef, TreeEntry } from './github';
 
 function md(data: Record<string, string | number | boolean>, body = ''): string {
   const fm = Object.entries(data)
@@ -102,6 +102,18 @@ class DemoGitHub {
   }
   rawUrl(path: string): string {
     return placeholder(path);
+  }
+  // --- Update-check surface (in-memory; the demo is always "up to date"). ---
+  async getFileFrom(_over: RepoRef, path: string): Promise<string | null> {
+    if (path === 'package.json') return JSON.stringify({ version: '1.0.0' });
+    if (path === 'CHANGELOG.md') return '## 1.0.0\n\n- The first release of your Easel site.\n';
+    return null;
+  }
+  async treeRecursive(): Promise<TreeEntry[]> {
+    return [];
+  }
+  async getBlobBase64(): Promise<string> {
+    return '';
   }
   async commit(changes: { path: string; content?: string; encoding?: string; remove?: boolean }[]): Promise<void> {
     await new Promise((r) => setTimeout(r, 400)); // feel like a real save

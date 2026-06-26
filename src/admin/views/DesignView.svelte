@@ -5,6 +5,7 @@
   import {
     PRESETS, SUGGESTED_FONTS, resolveDesign, type DesignTokens,
   } from '../../lib/design';
+  import { useShell } from '../lib/shell.svelte';
   import LivePreview from './LivePreview.svelte';
   import FontPicker from './FontPicker.svelte';
   import ContrastNotice from './ContrastNotice.svelte';
@@ -19,10 +20,12 @@
     onWizard: () => void;
   } = $props();
 
+  const shell = useShell();
+
   let s = $state<Settings | null>(null);
   let d = $state<DesignTokens>(resolveDesign(undefined));
   let loading = $state(true);
-  let saving = $state(false);
+  let savedJson = $state('');
   let logoPreview = $state('');
   let faviconPreview = $state('');
   let uploading = $state(false);
@@ -43,6 +46,7 @@
         d.favicon.image = path;
         d.favicon.mode = 'image';
       }
+      shell.markCommitted();
       notify(`${kind === 'logo' ? 'Logo' : 'Favicon'} uploaded.`);
     } catch (err) {
       notify(err instanceof Error ? err.message : 'Could not upload.', 'error');
@@ -55,12 +59,22 @@
     try {
       s = await loadSettings(gh);
       d = resolveDesign(s.design);
+      savedJson = JSON.stringify($state.snapshot(d));
     } catch (e) {
       notify(e instanceof Error ? e.message : 'Could not load.', 'error');
     }
     loading = false;
   }
   load();
+
+  const isDirty = () => !loading && JSON.stringify($state.snapshot(d)) !== savedJson;
+
+  function discard() {
+    if (savedJson) d = JSON.parse(savedJson) as DesignTokens;
+  }
+
+  // The section bar drives Save; expose dirty/save/discard to the shell.
+  $effect(() => shell.register({ isDirty, save, discard }));
 
   function surprise() {
     const ids = Object.keys(PRESETS);
@@ -85,17 +99,18 @@
     return `#${to(f(0))}${to(f(8))}${to(f(4))}`;
   }
 
-  async function save() {
-    if (!s) return;
-    saving = true;
+  async function save(): Promise<boolean> {
+    if (!s) return false;
     try {
       s.design = $state.snapshot(d) as Record<string, any>;
       await saveSettings(gh, $state.snapshot(s) as Settings);
+      savedJson = JSON.stringify($state.snapshot(d));
       notify('Design saved. Your site will update shortly.');
+      return true;
     } catch (e) {
       notify(e instanceof Error ? e.message : 'Could not save.', 'error');
+      return false;
     }
-    saving = false;
   }
 
   const COLORS: { key: keyof DesignTokens['color']; label: string }[] = [
@@ -116,10 +131,9 @@
   <p class="ez-help">Loading…</p>
 {:else}
   <div class="ez-view__head">
-    <div><h2>Design</h2><p class="ez-help">Change anything — the preview updates as you go.</p></div>
+    <p class="ez-help">Change anything — the preview updates as you go. Save when you're happy.</p>
     <div class="ez-view__actions">
       <button class="ez-btn" onclick={surprise}>Surprise me</button>
-      <button class="ez-btn ez-btn--primary" onclick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>
     </div>
   </div>
 

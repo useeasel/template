@@ -5,18 +5,36 @@
     loadAbout, saveAbout, loadContact, saveContact,
     loadCv, saveCv, loadPress, savePress,
   } from '../lib/store';
+  import { useShell } from '../lib/shell.svelte';
+  import NewsView from './NewsView.svelte';
 
-  let { gh, notify }: { gh: GitHub; notify: (m: string, k?: 'info' | 'error') => void } = $props();
+  let {
+    gh,
+    notify,
+    initialTab = null,
+  }: {
+    gh: GitHub;
+    notify: (m: string, k?: 'info' | 'error') => void;
+    initialTab?: string | null;
+  } = $props();
 
-  type Tab = 'about' | 'contact' | 'cv' | 'press';
-  let tab = $state<Tab>('about');
+  const shell = useShell();
+
+  type Tab = 'about' | 'contact' | 'cv' | 'press' | 'news';
+  const isTab = (t: string | null): t is Tab =>
+    t === 'about' || t === 'contact' || t === 'cv' || t === 'press' || t === 'news';
+  let tab = $state<Tab>(isTab(initialTab) ? initialTab : 'about');
   let loading = $state(true);
-  let saving = $state(false);
 
   let about = $state<AboutPage>({ title: 'About', body: '' });
   let contact = $state<ContactPage>({ title: 'Contact', formEnabled: true, body: '' });
   let cv = $state<CvPage>({ title: 'CV', cv: [] });
   let press = $state<PressPage>({ title: 'Press', press: [] });
+
+  // Per-tab baselines so each form's dirty/save is independent (and each save
+  // stays one commit per page, matching store.ts).
+  let baseline = $state<Record<string, string>>({});
+  const snap = (v: unknown) => JSON.stringify($state.snapshot(v as any));
 
   async function load() {
     loading = true;
@@ -24,6 +42,9 @@
       [about, contact, cv, press] = await Promise.all([
         loadAbout(gh), loadContact(gh), loadCv(gh), loadPress(gh),
       ]);
+      baseline = {
+        about: snap(about), contact: snap(contact), cv: snap(cv), press: snap(press),
+      };
     } catch (e) {
       notify(e instanceof Error ? e.message : 'Could not load pages.', 'error');
     }
@@ -31,18 +52,47 @@
   }
   load();
 
-  async function save() {
-    saving = true;
+  function current() {
+    return tab === 'about' ? about : tab === 'contact' ? contact : tab === 'cv' ? cv : press;
+  }
+
+  const isDirty = () => !loading && tab !== 'news' && snap(current()) !== baseline[tab];
+
+  async function save(): Promise<boolean> {
     try {
       if (tab === 'about') await saveAbout(gh, $state.snapshot(about));
       else if (tab === 'contact') await saveContact(gh, $state.snapshot(contact));
       else if (tab === 'cv') await saveCv(gh, $state.snapshot(cv) as CvPage);
-      else await savePress(gh, $state.snapshot(press) as PressPage);
+      else if (tab === 'press') await savePress(gh, $state.snapshot(press) as PressPage);
+      else return true; // news manages its own saves
+      baseline[tab] = snap(current());
       notify('Saved. Your site will update shortly.');
+      return true;
     } catch (e) {
       notify(e instanceof Error ? e.message : 'Could not save.', 'error');
+      return false;
     }
-    saving = false;
+  }
+
+  function discard() {
+    if (tab === 'news' || !baseline[tab]) return;
+    const b = JSON.parse(baseline[tab]);
+    if (tab === 'about') about = b;
+    else if (tab === 'contact') contact = b;
+    else if (tab === 'cv') cv = b;
+    else if (tab === 'press') press = b;
+  }
+
+  // Register the active form tab with the shell. News drives its own saves, so we
+  // skip registration there (NewsView registers itself when an editor is open).
+  $effect(() => {
+    if (tab === 'news') return;
+    return shell.register({ isDirty, save, discard });
+  });
+
+  function switchTab(t: Tab) {
+    if (t === tab) return;
+    shell.guard(() => (tab = t));
   }
 
   const TABS: { id: Tab; label: string }[] = [
@@ -50,19 +100,13 @@
     { id: 'contact', label: 'Contact' },
     { id: 'cv', label: 'CV' },
     { id: 'press', label: 'Press' },
+    { id: 'news', label: 'News' },
   ];
 </script>
 
-<div class="ez-view__head">
-  <h2>Pages</h2>
-  {#if !loading}
-    <button class="ez-btn ez-btn--primary" onclick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>
-  {/if}
-</div>
-
 <div class="ez-tabs">
   {#each TABS as t (t.id)}
-    <button class="ez-tab" class:ez-tab--on={tab === t.id} onclick={() => (tab = t.id)}>{t.label}</button>
+    <button class="ez-tab" class:ez-tab--on={tab === t.id} onclick={() => switchTab(t.id)}>{t.label}</button>
   {/each}
 </div>
 
@@ -99,7 +143,7 @@
     </div>
   {/each}
   <button class="ez-btn" onclick={() => (cv.cv = [...cv.cv, { heading: '', items: [] }])}>Add section</button>
-{:else}
+{:else if tab === 'press'}
   {#each press.press as item, pi (pi)}
     <div class="ez-block">
       <div class="ez-block__head">
@@ -115,4 +159,6 @@
     </div>
   {/each}
   <button class="ez-btn" onclick={() => (press.press = [...press.press, { outlet: '', title: '' }])}>Add mention</button>
+{:else}
+  <NewsView {gh} {notify} />
 {/if}

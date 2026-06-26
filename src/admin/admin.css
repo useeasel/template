@@ -5,6 +5,41 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+
+  /* Admin-only depth language, matched to the marketing site (committed hard
+     offset shadows + thicker ink borders). Scoped to .ez-admin so published
+     artist sites — which share tokens.css — are never affected. */
+  --ez-shadow-hard: 6px 6px 0 var(--ez-ink);
+  --ez-shadow-hard-sm: 4px 4px 0 var(--ez-ink);
+  --ez-border-bold: 3px;
+  --ez-border-thick: 4px;
+  --ez-side-w: 244px;
+}
+
+/* Display headings run lowercase in the admin too (Bayer spirit), matching the
+   marketing pages. Only affects admin chrome, never the live site. */
+.ez-admin h1,
+.ez-admin h2 {
+  text-transform: lowercase;
+}
+
+/* Opt-in depth for primary CTAs — layered on top of the existing hover-translate
+   from tokens.css. Applied deliberately (not to every button) so small ghost/×
+   buttons stay quiet. */
+.ez-admin .ez-btn--depth {
+  box-shadow: var(--ez-shadow-hard-sm);
+  border-width: var(--ez-border-bold);
+}
+.ez-admin .ez-btn--depth:hover {
+  box-shadow: var(--ez-shadow-hard);
+}
+.ez-admin .ez-btn--depth:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ez-ink);
+}
+.ez-admin .ez-btn--depth:disabled {
+  box-shadow: none;
+  transform: none;
 }
 
 /* Top bar */
@@ -55,7 +90,8 @@
 
 /* Artwork grid */
 .ez-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--ez-space-4); }
-.ez-tile { border: var(--ez-border-width) solid var(--ez-border); background: var(--ez-white); display: flex; flex-direction: column; cursor: grab; touch-action: none; transition: opacity var(--ez-motion-fast) var(--ez-ease); }
+.ez-tile { border: var(--ez-border-bold, var(--ez-border-width)) solid var(--ez-border); background: var(--ez-white); display: flex; flex-direction: column; cursor: grab; touch-action: none; box-shadow: var(--ez-shadow-hard-sm); transition: transform var(--ez-motion-fast) var(--ez-ease), box-shadow var(--ez-motion-fast) var(--ez-ease), opacity var(--ez-motion-fast) var(--ez-ease); }
+.ez-tile:hover { transform: translate(-2px, -2px); box-shadow: var(--ez-shadow-hard); }
 .ez-tile:active { cursor: grabbing; }
 .ez-tile img { -webkit-user-drag: none; user-select: none; }
 
@@ -198,5 +234,140 @@
 .ez-demobar { background: var(--ez-yellow); color: var(--ez-ink); font-weight: 500; text-align: center; padding: var(--ez-space-2) var(--ez-space-4); border-bottom: var(--ez-border-width) solid var(--ez-border); font-size: var(--ez-text-sm); }
 
 /* Toast */
-.ez-toast { position: fixed; left: 50%; bottom: var(--ez-space-5); transform: translateX(-50%); background: var(--ez-ink); color: var(--ez-white); font-weight: 500; padding: var(--ez-space-3) var(--ez-space-5); border: var(--ez-border-width) solid var(--ez-border); max-width: 90vw; z-index: 50; }
+.ez-toast { position: fixed; left: 50%; bottom: var(--ez-space-5); transform: translateX(-50%); background: var(--ez-ink); color: var(--ez-white); font-weight: 500; padding: var(--ez-space-3) var(--ez-space-5); border: var(--ez-border-width) solid var(--ez-border); box-shadow: var(--ez-shadow-hard-sm); max-width: 90vw; z-index: 90; }
 .ez-toast--error { background: var(--ez-red); }
+
+/* ============================================================
+   Editor shell — sidebar nav, mobile drawer, section bar, chip
+   ============================================================ */
+
+.ez-shell { display: flex; align-items: stretch; min-height: 100vh; }
+.ez-shell__main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* Bare top bar for the pre-app states (loading / sign-in / error). */
+.ez-topbar--bare { justify-content: flex-start; }
+.ez-brand { display: flex; align-items: center; gap: var(--ez-space-2); }
+.ez-brand strong { font-family: var(--ez-font-display); font-size: var(--ez-text-xl); }
+
+/* Sidebar (desktop: sticky rail; mobile: off-canvas drawer) */
+.ez-side {
+  width: var(--ez-side-w); flex: none;
+  display: flex; flex-direction: column; gap: var(--ez-space-5);
+  padding: var(--ez-space-5) var(--ez-space-4);
+  background: var(--ez-white);
+  border-right: var(--ez-border-thick) solid var(--ez-border);
+  position: sticky; top: 0; height: 100vh;
+}
+.ez-side__brand { display: flex; align-items: center; gap: var(--ez-space-2); }
+.ez-side__brand strong { font-family: var(--ez-font-display); font-size: var(--ez-text-xl); }
+.ez-side__nav { display: flex; flex-direction: column; gap: var(--ez-space-2); flex: 1; }
+.ez-sidebtn {
+  display: flex; flex-direction: column; gap: 2px; text-align: left;
+  font-family: var(--ez-font-display); font-weight: 700;
+  background: var(--ez-white); color: var(--ez-ink);
+  border: var(--ez-border-width) solid transparent;
+  padding: var(--ez-space-3);
+  cursor: pointer;
+  transition: transform var(--ez-motion-fast) var(--ez-ease), box-shadow var(--ez-motion-fast) var(--ez-ease), background-color var(--ez-motion-fast) var(--ez-ease);
+}
+.ez-sidebtn:hover { border-color: var(--ez-border); transform: translate(-2px, -2px); box-shadow: var(--ez-shadow-hard-sm); }
+.ez-sidebtn__label { font-size: var(--ez-text-lg); }
+.ez-sidebtn__hint { font-family: var(--ez-font-body); font-weight: 500; font-size: var(--ez-text-xs); color: var(--ez-stone); }
+.ez-sidebtn--on { background: var(--ez-ink); color: var(--ez-white); border-color: var(--ez-ink); box-shadow: var(--ez-shadow-hard-sm); }
+.ez-sidebtn--on:hover { transform: none; }
+.ez-sidebtn--on .ez-sidebtn__hint { color: #cfcfcf; }
+.ez-side__foot { display: flex; flex-direction: column; gap: var(--ez-space-3); border-top: var(--ez-border-width) solid var(--ez-border); padding-top: var(--ez-space-4); }
+.ez-side__view { justify-content: center; }
+.ez-side__account { display: flex; align-items: center; justify-content: space-between; gap: var(--ez-space-2); }
+
+/* Drawer scrim + mobile bar (hidden on desktop) */
+.ez-scrim { display: none; }
+.ez-mobilebar { display: none; }
+.ez-hamburger {
+  display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  width: 2.6rem; height: 2.6rem; padding: 0 0.6rem; flex: none;
+  background: var(--ez-white); border: var(--ez-border-width) solid var(--ez-border); cursor: pointer;
+}
+.ez-hamburger span { display: block; height: 2px; background: var(--ez-ink); }
+
+/* Section bar — title · status chip · single Save */
+.ez-sectionbar {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--ez-space-4);
+  padding: var(--ez-space-4) var(--ez-space-5);
+  background: var(--ez-paper);
+  border-bottom: var(--ez-border-width) solid var(--ez-border);
+  position: sticky; top: 0; z-index: 20;
+}
+.ez-sectionbar h1 { font-size: var(--ez-text-2xl); margin: 0; }
+.ez-sectionbar__right { display: flex; align-items: center; gap: var(--ez-space-4); }
+
+/* Status chip */
+.ez-chip {
+  display: inline-flex; align-items: center; gap: var(--ez-space-2);
+  font-family: var(--ez-font-display); font-weight: 700; font-size: var(--ez-text-sm);
+  padding: var(--ez-space-1) var(--ez-space-3);
+  border: var(--ez-border-width) solid var(--ez-border); background: var(--ez-white);
+  white-space: nowrap;
+}
+.ez-chip__dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ez-stone); flex: none; }
+.ez-chip__dot--live { background: var(--ez-blue); }
+.ez-chip__dot--dirty { background: var(--ez-yellow); }
+.ez-chip__dot--busy { background: var(--ez-yellow); animation: ezChipPulse 1s ease-in-out infinite; }
+.ez-chip__dot--error { background: var(--ez-red); }
+.ez-chip--error { border-color: var(--ez-red); color: var(--ez-red); }
+@keyframes ezChipPulse { 50% { opacity: 0.25; } }
+
+/* Modal (unsaved-changes dialog) */
+.ez-modal { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; padding: var(--ez-space-4); }
+.ez-modal__scrim { position: absolute; inset: 0; background: rgba(22, 24, 29, 0.5); border: 0; cursor: pointer; }
+.ez-modal__panel { position: relative; width: 100%; max-width: 26rem; background: var(--ez-white); border: var(--ez-border-thick) solid var(--ez-border); box-shadow: var(--ez-shadow-hard); padding: var(--ez-space-5); }
+.ez-modal__panel h2 { font-size: var(--ez-text-xl); margin: 0 0 var(--ez-space-3); }
+.ez-modal__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--ez-space-3); margin-top: var(--ez-space-5); }
+
+/* Segmented control (Work: Artwork / Series) */
+.ez-seg { display: inline-flex; border: var(--ez-border-bold) solid var(--ez-border); box-shadow: var(--ez-shadow-hard-sm); margin-bottom: var(--ez-space-5); }
+.ez-seg__btn { font-family: var(--ez-font-display); font-weight: 700; background: var(--ez-white); color: var(--ez-ink); border: 0; border-right: var(--ez-border-width) solid var(--ez-border); padding: var(--ez-space-2) var(--ez-space-5); cursor: pointer; }
+.ez-seg__btn:last-child { border-right: 0; }
+.ez-seg__btn--on { background: var(--ez-ink); color: var(--ez-white); }
+
+/* Home dashboard */
+.ez-home { display: grid; gap: var(--ez-space-6); max-width: 820px; }
+.ez-home__h { font-size: var(--ez-text-xl); margin-bottom: var(--ez-space-4); }
+.ez-callout { display: flex; align-items: center; justify-content: space-between; gap: var(--ez-space-4); flex-wrap: wrap; padding: var(--ez-space-4) var(--ez-space-5); border: var(--ez-border-bold) solid var(--ez-border); box-shadow: var(--ez-shadow-hard-sm); }
+.ez-callout strong { display: block; font-family: var(--ez-font-display); font-size: var(--ez-text-lg); }
+.ez-callout p { margin: var(--ez-space-1) 0 0; }
+.ez-callout--accent { background: var(--ez-yellow); color: var(--ez-ink); }
+.ez-callout--blue { background: var(--ez-blue); color: var(--ez-white); }
+.ez-callout--blue .ez-help { color: rgba(255, 255, 255, 0.85); }
+
+.ez-statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--ez-space-4); }
+.ez-stat { display: flex; flex-direction: column; gap: var(--ez-space-1); align-items: flex-start; text-align: left; background: var(--ez-white); border: var(--ez-border-bold) solid var(--ez-border); box-shadow: var(--ez-shadow-hard-sm); padding: var(--ez-space-4); cursor: pointer; transition: transform var(--ez-motion-fast) var(--ez-ease), box-shadow var(--ez-motion-fast) var(--ez-ease); }
+.ez-stat:hover { transform: translate(-2px, -2px); box-shadow: var(--ez-shadow-hard); }
+.ez-stat__num { font-family: var(--ez-font-display); font-weight: 800; font-size: var(--ez-text-3xl); line-height: 1; }
+.ez-stat__label { font-family: var(--ez-font-display); font-weight: 700; color: var(--ez-stone); }
+
+.ez-quickgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--ez-space-4); }
+.ez-quick { display: flex; align-items: center; gap: var(--ez-space-3); text-align: left; background: var(--ez-white); border: var(--ez-border-width) solid var(--ez-border); padding: var(--ez-space-4); cursor: pointer; transition: transform var(--ez-motion-fast) var(--ez-ease), box-shadow var(--ez-motion-fast) var(--ez-ease); }
+.ez-quick:hover { transform: translate(-2px, -2px); box-shadow: var(--ez-shadow-hard-sm); }
+.ez-quick > span:last-child { display: flex; flex-direction: column; }
+.ez-quick strong { font-family: var(--ez-font-display); }
+.ez-quick .ez-shape { flex: none; }
+
+/* Responsive: collapse the sidebar into a drawer below 880px. */
+@media (max-width: 879px) {
+  .ez-side {
+    position: fixed; top: 0; left: 0; bottom: 0; height: 100vh; z-index: 70;
+    width: min(82vw, var(--ez-side-w));
+    transform: translateX(-100%);
+    box-shadow: var(--ez-shadow-hard);
+    transition: transform var(--ez-motion-base) var(--ez-ease);
+  }
+  .ez-side--open { transform: translateX(0); }
+  .ez-scrim { display: block; position: fixed; inset: 0; z-index: 60; background: rgba(22, 24, 29, 0.5); border: 0; opacity: 0; pointer-events: none; transition: opacity var(--ez-motion-base) var(--ez-ease); }
+  .ez-scrim--on { opacity: 1; pointer-events: auto; }
+  .ez-mobilebar { display: flex; align-items: center; gap: var(--ez-space-3); padding: var(--ez-space-3) var(--ez-space-4); background: var(--ez-white); border-bottom: var(--ez-border-width) solid var(--ez-border); }
+  .ez-mobilebar__brand { display: flex; align-items: center; gap: var(--ez-space-2); flex: 1; }
+  .ez-mobilebar__brand strong { font-family: var(--ez-font-display); font-size: var(--ez-text-lg); }
+  .ez-sectionbar { position: static; }
+  .ez-sectionbar__chip { display: none; }
+}

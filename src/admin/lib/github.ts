@@ -28,6 +28,13 @@ export interface DirEntry {
   type: 'file' | 'dir';
 }
 
+export interface TreeEntry {
+  path: string;
+  sha: string;
+  type: 'blob' | 'tree' | 'commit';
+  mode: string;
+}
+
 export class GitHub {
   constructor(
     private token: string,
@@ -86,6 +93,55 @@ export class GitHub {
       if (e instanceof Error && /\(404\)/.test(e.message)) return null;
       throw e;
     }
+  }
+
+  /**
+   * Read a UTF-8 file from any repo (defaults to this one) via the contents API.
+   * Returns null if the file is missing. Used by the update check to read the
+   * upstream template's package.json + CHANGELOG.
+   */
+  async getFileFrom(over: RepoRef, path: string): Promise<string | null> {
+    try {
+      const data = await this.api(
+        `/repos/${over.owner}/${over.repo}/contents/${path}?ref=${over.branch}`,
+      );
+      return decodeBase64(data.content);
+    } catch (e) {
+      if (e instanceof Error && /\(404\)/.test(e.message)) return null;
+      throw e;
+    }
+  }
+
+  /** Resolve a branch to its root tree SHA (defaults to this.ref). */
+  private async treeShaForRef(over?: Partial<RepoRef>): Promise<string> {
+    const owner = over?.owner ?? this.ref.owner;
+    const repo = over?.repo ?? this.ref.repo;
+    const branch = over?.branch ?? this.ref.branch;
+    const ref = await this.api(`/repos/${owner}/${repo}/git/ref/heads/${branch}`);
+    const commit = await this.api(`/repos/${owner}/${repo}/git/commits/${ref.object.sha}`);
+    return commit.tree.sha;
+  }
+
+  /**
+   * Every blob (path + content-addressed sha) under a ref, recursively. Defaults to
+   * this.ref. Trees/submodules are filtered out — only files. The site-update merge
+   * compares these blob shas across the artist repo and the upstream template.
+   */
+  async treeRecursive(over?: Partial<RepoRef>): Promise<TreeEntry[]> {
+    const owner = over?.owner ?? this.ref.owner;
+    const repo = over?.repo ?? this.ref.repo;
+    const treeSha = await this.treeShaForRef(over);
+    const data = await this.api(`/repos/${owner}/${repo}/git/trees/${treeSha}?recursive=1`);
+    const tree: TreeEntry[] = Array.isArray(data.tree) ? data.tree : [];
+    return tree.filter((t) => t.type === 'blob');
+  }
+
+  /** A blob's base64 content (newlines stripped), from any repo. */
+  async getBlobBase64(sha: string, over?: Partial<RepoRef>): Promise<string> {
+    const owner = over?.owner ?? this.ref.owner;
+    const repo = over?.repo ?? this.ref.repo;
+    const data = await this.api(`/repos/${owner}/${repo}/git/blobs/${sha}`);
+    return (data.content as string).replace(/\n/g, '');
   }
 
   /** Raw public URL for displaying a repo asset in the editor. */

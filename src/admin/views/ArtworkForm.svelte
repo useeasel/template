@@ -2,6 +2,7 @@
   import type { GitHub } from '../lib/github';
   import { resolveAssetPath, type Artwork, type Series } from '../lib/content';
   import { saveArtwork } from '../lib/store';
+  import { useShell } from '../lib/shell.svelte';
 
   let {
     gh,
@@ -17,6 +18,7 @@
     notify: (msg: string, kind?: 'info' | 'error') => void;
   } = $props();
 
+  const shell = useShell();
   const isNew = art === null;
   const blank: Artwork = {
     id: '',
@@ -38,6 +40,14 @@
     imagePreview = gh.rawUrl(resolveAssetPath('src/content/artworks', art.image));
   }
 
+  const formBaseline = JSON.stringify($state.snapshot(form));
+  const isDirty = () => imageFile !== null || JSON.stringify($state.snapshot(form)) !== formBaseline;
+
+  // Take part in the unsaved-changes guard. Silent: this form has its own footer.
+  $effect(() =>
+    shell.register({ isDirty, save, discard: () => onDone(false), silent: true }),
+  );
+
   function onPickImage(e: Event) {
     const input = e.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
@@ -45,18 +55,20 @@
     if (file) imagePreview = URL.createObjectURL(file);
   }
 
-  async function save() {
-    if (!form.title.trim()) return notify('Please add a title.', 'error');
-    if (!form.alt.trim()) return notify('Please add a photo description.', 'error');
-    if (isNew && !imageFile) return notify('Please choose a photo.', 'error');
+  async function save(): Promise<boolean> {
+    if (!form.title.trim()) { notify('Please add a title.', 'error'); return false; }
+    if (!form.alt.trim()) { notify('Please add a photo description.', 'error'); return false; }
+    if (isNew && !imageFile) { notify('Please choose a photo.', 'error'); return false; }
     saving = true;
     try {
       await saveArtwork(gh, $state.snapshot(form), imageFile, isNew);
       notify('Saved. Your site will update in a minute or two.');
       onDone(true);
+      return true;
     } catch (e) {
       notify(e instanceof Error ? e.message : 'Could not save.', 'error');
       saving = false;
+      return false;
     }
   }
 </script>
@@ -64,7 +76,7 @@
 <div class="ez-form">
   <div class="ez-form__head">
     <h2>{isNew ? 'Add artwork' : 'Edit artwork'}</h2>
-    <button class="ez-btn ez-btn--ghost" onclick={() => onDone(false)} disabled={saving}>Cancel</button>
+    <button class="ez-btn ez-btn--ghost" onclick={() => shell.guard(() => onDone(false))} disabled={saving}>Cancel</button>
   </div>
 
   <label class="ez-field">

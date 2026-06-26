@@ -60,17 +60,17 @@ export interface DesignTokens {
 export const DEFAULT_DESIGN: DesignTokens = {
   preset: 'bauhaus',
   color: {
-    background: '#f7f4ec',
+    background: '#f5f1e6',
     surface: '#ffffff',
-    text: '#161616',
-    muted: '#6b6b63',
-    accent: '#1d4ed8',
-    accent2: '#e63946',
-    border: '#161616',
+    text: '#16181d',
+    muted: '#57564f',
+    accent: '#1235d6',
+    accent2: '#e8132b',
+    border: '#16181d',
   },
   type: {
-    headingFont: 'Syne',
-    bodyFont: 'Space Grotesk',
+    headingFont: 'Jost',
+    bodyFont: 'Hanken Grotesk',
     headingWeight: 700,
     bodyWeight: 400,
     baseSize: 17,
@@ -313,10 +313,10 @@ export function contrastIssues(d: DesignTokens): ContrastIssue[] {
 
 export const FONTS = [
   'Anton', 'Archivo', 'Atkinson Hyperlegible', 'Bebas Neue', 'Bricolage Grotesque',
-  'Cormorant Garamond', 'DM Serif Display', 'EB Garamond', 'Fraunces', 'IBM Plex Sans',
-  'Inter', 'Karla', 'Libre Baskerville', 'Libre Franklin', 'Lora', 'Mulish',
-  'Nunito Sans', 'Outfit', 'Playfair Display', 'Sora', 'Source Sans 3', 'Space Grotesk',
-  'Spectral', 'Syne', 'Work Sans',
+  'Cormorant Garamond', 'DM Serif Display', 'EB Garamond', 'Fraunces', 'Hanken Grotesk',
+  'IBM Plex Sans', 'Inter', 'Jost', 'Karla', 'Libre Baskerville', 'Libre Franklin',
+  'Lora', 'Mulish', 'Nunito Sans', 'Outfit', 'Playfair Display', 'Sora', 'Source Sans 3',
+  'Space Grotesk', 'Spectral', 'Syne', 'Work Sans',
 ];
 
 /** Both pickers use the same full list. */

@@ -125,7 +125,7 @@ const site = defineCollection({
     logoText: z.string(),
     // look
     theme: z.string().default('default'),
-    fontPairing: z.string().default('syne-space-grotesk'),
+    fontPairing: z.string().default('jost-hanken-grotesk'),
     headingFont: z.string().optional(),
     bodyFont: z.string().optional(),
     // layout (backend — chosen by us, not surfaced in the editor)

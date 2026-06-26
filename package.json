@@ -1,7 +1,7 @@
 {
   "name": "easel-template",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Easel portfolio template — a Bauhaus-styled Astro static site for artists, editable via the custom Easel editor at /admin.",
   "scripts": {
@@ -13,8 +13,8 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.2.1",
     "@astrojs/svelte": "^7.0.0",
-    "@fontsource-variable/syne": "^5.1.0",
-    "@fontsource/space-grotesk": "^5.1.0",
+    "@fontsource-variable/hanken-grotesk": "^5.2.8",
+    "@fontsource-variable/jost": "^5.2.8",
     "astro": "^5.1.0",
     "js-yaml": "^4.1.0",
     "sharp": "^0.33.5",
