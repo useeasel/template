@@ -1,7 +1,12 @@
 # Netlify build + deploy config for the Easel portfolio template.
 
 [build]
-  command = "astro build"
+  # Install dependencies in the build command, then run via npm (which puts
+  # node_modules/.bin on PATH). A bare `astro build` fails with `astro: command
+  # not found` when Netlify's automatic dependency-install step doesn't run —
+  # e.g. on sites the Easel provisioner creates through the Netlify API. Keep this
+  # in sync with the `cmd` in useeasel/web → workers/provision/src/netlify.ts.
+  command = "npm install && npm run build"
   publish = "dist"
 
 [build.environment]
