@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import { withBase } from '../lib/href';
 ---
 
 <Base pageTitle="Page not found">
@@ -11,7 +12,7 @@ import Base from '../layouts/Base.astro';
     </div>
     <h1>Page not found</h1>
     <p>That page does not exist. The work, though, is this way.</p>
-    <a href="/" class="ez-btn ez-btn--primary">Back to the portfolio</a>
+    <a href={withBase('/')} class="ez-btn ez-btn--primary">Back to the portfolio</a>
   </div>
 </Base>
 

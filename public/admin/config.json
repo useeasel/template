@@ -1,5 +1,7 @@
 {
   "repo": "REPLACED_AT_PROVISION",
   "branch": "main",
-  "authBaseUrl": "https://auth.easel.rosematcha.com"
+  "authBaseUrl": "https://auth.easel.rosematcha.com",
+  "host": "netlify",
+  "formEndpoint": ""
 }

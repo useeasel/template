@@ -19,6 +19,14 @@
   let loaded = $state(false);
   let viewport = $state<'desktop' | 'mobile'>('desktop');
 
+  // The site root, derived from the editor's own URL. On Netlify the editor lives at
+  // /admin/ so this is '/'; on a GitHub Pages subpath it's /<repo>/admin/, so the
+  // site root is /<repo>/. Hard-coding '/' would point the preview at the domain root.
+  const previewSrc =
+    typeof window !== 'undefined'
+      ? `${window.location.pathname.replace(/\/admin(\/.*)?$/, '')}/`
+      : '/';
+
   // Re-theme the live site inside the iframe by writing the same CSS variables +
   // structural classes the real build uses. No rebuild — instant preview.
   function apply() {
@@ -74,7 +82,7 @@
   <div class="ez-preview__stage" class:ez-preview__stage--mobile={viewport === 'mobile'}>
     <iframe
       bind:this={iframe}
-      src="/"
+      src={previewSrc}
       title="Live preview of your site"
       onload={() => {
         loaded = true;

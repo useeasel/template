@@ -1,10 +1,14 @@
 ---
+import { withBase } from '../lib/href';
+
 interface Props {
   logoText: string;
   logo?: { mode: 'none' | 'text' | 'image'; image?: string };
 }
 const { logoText, logo = { mode: 'none' } } = Astro.props;
 
+// Compare against base-aware hrefs — under a GitHub Pages subpath, Astro.url.pathname
+// includes the /<repo> base, so the raw '/about' wouldn't match.
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 // All links always render; disabled pages are hidden via a root class so the
 // editor can toggle them live. `key` matches the ez-page-<key>-off classes.
@@ -16,12 +20,15 @@ const links = [
   { href: '/news', label: 'News', key: 'news' },
   { href: '/contact', label: 'Contact', key: 'contact' },
 ];
-const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+const isActive = (href: string) => {
+  const target = withBase(href).replace(/\/$/, '') || '/';
+  return target === '/' ? path === (withBase('/').replace(/\/$/, '') || '/') : path.startsWith(target);
+};
 ---
 
 <header class="ez-nav">
   <div class="ez-container ez-nav__inner">
-    <a href="/" class="ez-nav__brand" aria-label={`${logoText} — home`}>
+    <a href={withBase('/')} class="ez-nav__brand" aria-label={`${logoText} — home`}>
       <img class="ez-nav__logoimg" src={logo.image || undefined} alt={logoText} />
       <span class="ez-nav__logotext">{logoText}</span>
     </a>
@@ -31,7 +38,7 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
         {links.map((link) => (
           <li class={`ez-pagelink-${link.key}`}>
             <a
-              href={link.href}
+              href={withBase(link.href)}
               class:list={['ez-nav__link', { 'is-active': isActive(link.href) }]}
               aria-current={isActive(link.href) ? 'page' : undefined}
             >

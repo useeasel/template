@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import { withBase } from '../../lib/href';
 
 const settings = (await getEntry('site', 'settings'))!.data;
 const slugify = (id: string) => id.replace(/\.md$/, '');
@@ -24,7 +25,7 @@ const fmtDate = (iso: string) => {
     <ul class="ez-news__list" role="list">
       {posts.map((p) => (
         <li class="ez-news__item">
-          <a class="ez-news__link" href={`/news/${slugify(p.id)}/`}>
+          <a class="ez-news__link" href={withBase(`/news/${slugify(p.id)}/`)}>
             <time class="ez-news__date" datetime={p.data.date}>{fmtDate(p.data.date)}</time>
             <h2 class="ez-news__title">{p.data.title}</h2>
             {p.data.excerpt && <p class="ez-news__excerpt">{p.data.excerpt}</p>}

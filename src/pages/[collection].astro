@@ -6,6 +6,7 @@ import Base from '../layouts/Base.astro';
 import ArtworkCard from '../components/ArtworkCard.astro';
 import Lightbox from '../components/Lightbox.astro';
 import { resolveDesign } from '../lib/design';
+import { withBase } from '../lib/href';
 
 // Astro 5 content-collection ids include the file extension; strip it for clean
 // URLs and for matching artwork series references.
@@ -39,7 +40,7 @@ const lightboxItems = await Promise.all(
 
 <Base pageTitle={series.data.title} pageDescription={series.data.description}>
   <div class="ez-container">
-    <p class="ez-back"><a href="/">← All work</a></p>
+    <p class="ez-back"><a href={withBase('/')}>← All work</a></p>
     <h1>{series.data.title}</h1>
     {series.data.description && <p class="ez-series-desc">{series.data.description}</p>}
 
@@ -55,7 +56,7 @@ const lightboxItems = await Promise.all(
           price={a.data.price}
           status={a.data.status}
           index={i}
-          href={linkToPage ? `/work/${slugify(a.id)}/` : undefined}
+          href={linkToPage ? withBase(`/work/${slugify(a.id)}/`) : undefined}
         />
       ))}
     </div>

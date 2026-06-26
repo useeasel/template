@@ -83,7 +83,7 @@
 
   <div class="ez-block">
     <strong>Newsletter</strong>
-    <p class="ez-help">Collect email addresses from visitors. Signups arrive in your Netlify dashboard under Forms.</p>
+    <p class="ez-help">Collect email addresses from visitors. Signups are delivered to your inbox (or, if your site is on Netlify, to your Netlify dashboard under Forms).</p>
     <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={s.newsletterEnabled} />
       <span>Show a newsletter signup on my contact page</span></label>
     {#if s.newsletterEnabled}
@@ -103,15 +103,16 @@
 
   <div class="ez-block">
     <strong>Custom domain</strong>
-    <p class="ez-help">Use your own web address (like your-name.com) instead of the Netlify one. Optional, and free with Netlify.</p>
+    <p class="ez-help">Use your own web address (like your-name.com) instead of the default one. Optional, and free on both Netlify and GitHub Pages.</p>
     <label class="ez-field"><span class="ez-label">Your domain</span>
       <input class="ez-input" bind:value={s.customDomain} placeholder="your-name.com" /></label>
     <ol class="ez-steps">
       <li>Buy a domain if you don't have one — Porkbun, Namecheap, or similar, usually about $10–20 a year.</li>
-      <li>In Netlify, open your site, then <strong>Domain management → Add a domain</strong>, and enter your domain.</li>
-      <li>Follow Netlify's prompts to point your domain at Netlify (or use Netlify DNS). HTTPS is set up automatically.</li>
+      <li>Add it on your host: in <strong>Netlify → Domain management → Add a domain</strong>, or in your repo's <strong>GitHub → Settings → Pages → Custom domain</strong>.</li>
+      <li>Point your domain at your host with the DNS records it shows you. HTTPS is set up automatically.</li>
       <li>Pop your domain in the box above and save, so links and search results use it.</li>
     </ol>
+    <p class="ez-help">Full walkthrough: <a href="https://easel.rosematcha.com/custom-domain/" target="_blank" rel="noopener">easel.rosematcha.com/custom-domain</a>.</p>
   </div>
 
   <details class="ez-advanced">

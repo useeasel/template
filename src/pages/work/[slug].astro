@@ -7,6 +7,7 @@ import StatusPill from '../../components/StatusPill.astro';
 import { FULL_WIDTHS } from '../../lib/images';
 import { visualArtworkLd, breadcrumbLd } from '../../lib/structured-data';
 import { toEmbedSrc } from '../../lib/embed';
+import { withBase } from '../../lib/href';
 
 // One indexable, shareable page per artwork. Linked from the gallery when the
 // design's gallery.click is 'page' (otherwise the lightbox handles clicks). Even
@@ -65,7 +66,7 @@ const jsonLd = [
 
 <Base pageTitle={a.title} pageDescription={a.alt} pageImage={ogImg.src} jsonLd={jsonLd}>
   <div class="ez-container ez-work">
-    <p class="ez-back"><a href="/">← All work</a></p>
+    <p class="ez-back"><a href={withBase('/')}>← All work</a></p>
 
     <div class="ez-work__grid">
       <div class="ez-work__media">
@@ -98,8 +99,8 @@ const jsonLd = [
     </div>
 
     <nav class="ez-work__nav" aria-label="More work">
-      {prev ? <a class="ez-work__navlink" href={`/work/${prev.slug}/`} rel="prev">← {prev.title}</a> : <span />}
-      {next ? <a class="ez-work__navlink ez-work__navlink--next" href={`/work/${next.slug}/`} rel="next">{next.title} →</a> : <span />}
+      {prev ? <a class="ez-work__navlink" href={withBase(`/work/${prev.slug}/`)} rel="prev">← {prev.title}</a> : <span />}
+      {next ? <a class="ez-work__navlink ez-work__navlink--next" href={withBase(`/work/${next.slug}/`)} rel="next">{next.title} →</a> : <span />}
     </nav>
   </div>
 </Base>

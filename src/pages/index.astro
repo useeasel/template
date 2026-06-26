@@ -5,6 +5,7 @@ import Base from '../layouts/Base.astro';
 import ArtworkCard from '../components/ArtworkCard.astro';
 import Lightbox from '../components/Lightbox.astro';
 import { resolveDesign } from '../lib/design';
+import { withBase } from '../lib/href';
 
 const settings = (await getEntry('site', 'settings'))!.data;
 const design = resolveDesign(settings.design as any);
@@ -46,7 +47,7 @@ const lightboxItems = await Promise.all(
           price={a.data.price}
           status={a.data.status}
           index={i}
-          href={linkToPage ? `/work/${slugify(a.id)}/` : undefined}
+          href={linkToPage ? withBase(`/work/${slugify(a.id)}/`) : undefined}
         />
       ))}
     </div>

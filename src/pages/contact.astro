@@ -2,11 +2,16 @@
 import { getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
+import { hostConfig } from '../lib/host';
 
 const page = await getEntry('pages', 'contact');
 const { Content } = await page!.render();
 const data = page!.data;
 const settings = (await getEntry('site', 'settings'))!.data;
+
+// On Netlify the form uses native Netlify Forms; on hosts without a forms backend
+// (GitHub Pages) it POSTs to a FormSubmit endpoint keyed to the artist's email.
+const { useNetlifyForms, formEndpoint } = hostConfig();
 ---
 
 <Base pageTitle={data.title} pageDescription={data.intro}>
@@ -25,17 +30,36 @@ const settings = (await getEntry('site', 'settings'))!.data;
       <form
         name="contact"
         method="POST"
-        data-netlify="true"
-        netlify-honeypot="bot-field"
-        action="/?contact=sent"
+        action={useNetlifyForms ? '/?contact=sent' : formEndpoint}
         class="ez-contact__form"
+        {...(useNetlifyForms ? { 'data-netlify': 'true', 'netlify-honeypot': 'bot-field' } : {})}
       >
-        {/* Netlify needs this hidden field to match the form. */}
-        <input type="hidden" name="form-name" value="contact" />
-        {/* Honeypot — hidden from people, catches bots. */}
-        <p class="ez-visually-hidden" aria-hidden="true">
-          <label>Do not fill this out: <input name="bot-field" /></label>
-        </p>
+        {useNetlifyForms ? (
+          <>
+            {/* Netlify needs this hidden field to match the form. */}
+            <input type="hidden" name="form-name" value="contact" />
+            {/* Honeypot — hidden from people, catches bots. */}
+            <p class="ez-visually-hidden" aria-hidden="true">
+              <label>Do not fill this out: <input name="bot-field" /></label>
+            </p>
+          </>
+        ) : (
+          <>
+            {/* FormSubmit settings: a nicer subject + email, no captcha page, and a
+                honeypot field (`_honey`) that quietly drops bot submissions. */}
+            <input type="hidden" name="_subject" value="New message from your portfolio" />
+            <input type="hidden" name="_template" value="table" />
+            <input type="hidden" name="_captcha" value="false" />
+            <input
+              type="text"
+              name="_honey"
+              class="ez-visually-hidden"
+              tabindex="-1"
+              autocomplete="off"
+              aria-hidden="true"
+            />
+          </>
+        )}
 
         <div class="ez-field">
           <label class="ez-label" for="name">Name</label>
@@ -55,6 +79,12 @@ const settings = (await getEntry('site', 'settings'))!.data;
         <button type="submit" class="ez-btn ez-btn--primary">Send message</button>
       </form>
     )}
+    {data.formEnabled && !useNetlifyForms && (
+      <p class="ez-contact__formnote">
+        Messages are delivered straight to your inbox by FormSubmit, a free form service.
+        The first message you receive will ask you to confirm your address once.
+      </p>
+    )}
 
     {settings.newsletterEnabled && (
       <NewsletterSignup heading={settings.newsletterHeading} blurb={settings.newsletterBlurb} />
@@ -73,5 +103,10 @@ const settings = (await getEntry('site', 'settings'))!.data;
     background: var(--ez-white);
     border: var(--ez-border-width) solid var(--ez-border);
     padding: var(--ez-space-6);
+  }
+  .ez-contact__formnote {
+    margin-top: var(--ez-space-3);
+    font-size: var(--ez-text-sm);
+    color: var(--ez-stone);
   }
 </style>

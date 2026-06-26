@@ -4,6 +4,7 @@ import { getCollection, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { FULL_WIDTHS } from '../../lib/images';
+import { withBase } from '../../lib/href';
 
 export const getStaticPaths = (async () => {
   const slug = (id: string) => id.replace(/\.md$/, '');
@@ -25,7 +26,7 @@ const fmtDate = (iso: string) => {
 
 <Base pageTitle={p.title} pageDescription={p.excerpt}>
   <article class="ez-container ez-post">
-    <p class="ez-back"><a href="/news/">← All news</a></p>
+    <p class="ez-back"><a href={withBase('/news/')}>← All news</a></p>
     <time class="ez-post__date" datetime={p.date}>{fmtDate(p.date)}</time>
     <h1 class="ez-post__title">{p.title}</h1>
     {p.cover && <Image src={p.cover} alt={p.title} widths={FULL_WIDTHS} sizes="(max-width: 720px) 100vw, 720px" class="ez-post__cover" />}
