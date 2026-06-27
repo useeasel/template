@@ -140,6 +140,11 @@ export interface Settings {
   linksBio?: string;
   links?: { label: string; url: string; icon?: string; thumbnail?: string; featured?: boolean }[];
   searchEnabled?: boolean;
+  /** Commissions page (toggled via design.pages.commissions). */
+  commissionsMode?: 'form' | 'vgen';
+  commissionsIntro?: string;
+  commissionsTerms?: string;
+  commissionsVgenUrl?: string;
   cfAnalyticsToken?: string;
   analyticsSnippet?: string;
   sellEnabled?: boolean;

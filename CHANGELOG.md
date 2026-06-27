@@ -7,6 +7,14 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.29.0
+
+- **Take commissions properly.** Turn on a Commissions page that asks for what you need up
+  front, medium, size, budget, deadline, subject, and reference links, so requests arrive
+  ready to quote. Prefer vGen? Switch to vGen mode and the page sends people straight to
+  your vGen profile instead. Add an intro, your terms, and a few featured pieces as
+  examples. Off by default; turn it on under Design.
+
 ## 0.28.0
 
 - **Post from your phone in a few taps.** A new Quick post option lets you take or pick a

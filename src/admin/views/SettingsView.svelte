@@ -228,6 +228,24 @@
   </div>
 
   <div class="ez-block">
+    <strong>Commissions</strong>
+    <p class="ez-help">Turn the Commissions page on under <strong>Design</strong>. It can show a request form that asks for the details you need, or point straight to your vGen page.</p>
+    <label class="ez-field"><span class="ez-label">How people request a commission</span>
+      <select class="ez-input" bind:value={s.commissionsMode}>
+        <option value="form">A request form on my site</option>
+        <option value="vgen">Send them to my vGen page</option>
+      </select></label>
+    {#if s.commissionsMode === 'vgen'}
+      <label class="ez-field"><span class="ez-label">Your vGen page address</span>
+        <input class="ez-input ez-mono" bind:value={s.commissionsVgenUrl} placeholder="https://vgen.co/yourname" /></label>
+    {/if}
+    <label class="ez-field"><span class="ez-label">Intro (optional)</span>
+      <textarea class="ez-input" rows="2" bind:value={s.commissionsIntro} placeholder="A line about what you take on and your style."></textarea></label>
+    <label class="ez-field"><span class="ez-label">Terms, steps, or deposit (optional)</span>
+      <textarea class="ez-input" rows="3" bind:value={s.commissionsTerms} placeholder="How it works, timelines, deposit, what you don't take on."></textarea></label>
+  </div>
+
+  <div class="ez-block">
     <strong>Search</strong>
     <p class="ez-help">Add a search box to your header so visitors can find pieces, series, and posts by typing. Best once you have a good number of works. It runs in the browser, with nothing to set up.</p>
     <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={s.searchEnabled} />

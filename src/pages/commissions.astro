@@ -1,0 +1,169 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { hostConfig } from '../lib/host';
+import { CARD_WIDTHS, cardSizes } from '../lib/images';
+import { withBase } from '../lib/href';
+
+// Commissions page. Hidden from the menu until the artist turns it on under
+// Design (design.pages.commissions). Two modes, set in Settings: a structured
+// request form that posts through the same backend as the contact form (Netlify
+// Forms, or FormSubmit on hosts without one), or "vGen mode" that points the
+// visitor at the artist's vGen page instead. Easel never processes the request
+// or any money — it only collects the details or hands off.
+const settings = (await getEntry('site', 'settings'))!.data;
+const { useNetlifyForms, formEndpoint } = hostConfig();
+
+const mode = settings.commissionsMode ?? 'form';
+const vgenUrl = settings.commissionsVgenUrl;
+const intro = settings.commissionsIntro;
+const terms = settings.commissionsTerms;
+
+// Example gallery: the pieces the artist has featured (same star used for the
+// homepage), so they choose what represents their commission work.
+const slug = (id: string) => id.replace(/\.md$/, '');
+const examples = (await getCollection('artworks'))
+  .filter((a) => a.data.featured)
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 6);
+---
+
+<Base pageTitle="Commissions" pageDescription={intro}>
+  <div class="ez-container ez-commissions">
+    <h1>Commissions</h1>
+    {intro && <p class="ez-commissions__intro">{intro}</p>}
+
+    {terms && (
+      <section class="ez-commissions__terms">
+        <h2>How it works</h2>
+        <p>{terms}</p>
+      </section>
+    )}
+
+    {mode === 'vgen' && vgenUrl ? (
+      <p class="ez-commissions__vgen">
+        <a class="ez-btn ez-btn--primary ez-btn--lg" href={vgenUrl} rel="noopener" target="_blank">
+          Request a commission on vGen
+        </a>
+      </p>
+    ) : (
+      <form
+        name="commission"
+        method="POST"
+        action={useNetlifyForms ? '/?commission=sent' : formEndpoint}
+        class="ez-commissions__form"
+        {...(useNetlifyForms ? { 'data-netlify': 'true', 'netlify-honeypot': 'bot-field' } : {})}
+      >
+        {useNetlifyForms ? (
+          <>
+            <input type="hidden" name="form-name" value="commission" />
+            <p class="ez-visually-hidden" aria-hidden="true">
+              <label>Do not fill this out: <input name="bot-field" /></label>
+            </p>
+          </>
+        ) : (
+          <>
+            <input type="hidden" name="_subject" value="New commission request" />
+            <input type="hidden" name="_template" value="table" />
+            <input type="hidden" name="_captcha" value="false" />
+            <input type="text" name="_honey" class="ez-visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          </>
+        )}
+
+        <div class="ez-commissions__row">
+          <div class="ez-field">
+            <label class="ez-label" for="c-name">Name</label>
+            <input class="ez-input" type="text" id="c-name" name="name" required />
+          </div>
+          <div class="ez-field">
+            <label class="ez-label" for="c-email">Email</label>
+            <input class="ez-input" type="email" id="c-email" name="email" required />
+          </div>
+        </div>
+
+        <div class="ez-commissions__row">
+          <div class="ez-field">
+            <label class="ez-label" for="c-medium">Medium</label>
+            <input class="ez-input" type="text" id="c-medium" name="medium" placeholder="Oil, digital, ink…" />
+          </div>
+          <div class="ez-field">
+            <label class="ez-label" for="c-size">Size</label>
+            <input class="ez-input" type="text" id="c-size" name="size" placeholder="A3, 24×30 in, full body…" />
+          </div>
+        </div>
+
+        <div class="ez-commissions__row">
+          <div class="ez-field">
+            <label class="ez-label" for="c-budget">Budget</label>
+            <input class="ez-input" type="text" id="c-budget" name="budget" placeholder="Your range" />
+          </div>
+          <div class="ez-field">
+            <label class="ez-label" for="c-deadline">Deadline</label>
+            <input class="ez-input" type="text" id="c-deadline" name="deadline" placeholder="Any date in mind?" />
+          </div>
+        </div>
+
+        <div class="ez-field">
+          <label class="ez-label" for="c-subject">Subject</label>
+          <input class="ez-input" type="text" id="c-subject" name="subject" placeholder="What would you like?" />
+        </div>
+
+        <div class="ez-field">
+          <label class="ez-label" for="c-references">Reference links</label>
+          <textarea class="ez-textarea" id="c-references" name="references" rows="2" placeholder="Paste links to references or inspiration"></textarea>
+        </div>
+
+        <div class="ez-field">
+          <label class="ez-label" for="c-details">Details</label>
+          <textarea class="ez-textarea" id="c-details" name="details" rows="4" required></textarea>
+        </div>
+
+        <button type="submit" class="ez-btn ez-btn--primary">Send request</button>
+      </form>
+    )}
+
+    {mode !== 'vgen' && !useNetlifyForms && (
+      <p class="ez-commissions__formnote">
+        Requests are delivered straight to your inbox by FormSubmit, a free form service.
+        The first one will ask you to confirm your address once.
+      </p>
+    )}
+
+    {examples.length > 0 && (
+      <section class="ez-commissions__examples">
+        <h2>Recent work</h2>
+        <div class="ez-commissions__grid">
+          {examples.map((a) => (
+            <a class="ez-commissions__ex" href={withBase(`/work/${slug(a.id)}/`)}>
+              <Image src={a.data.image} alt={a.data.alt} widths={CARD_WIDTHS} sizes={cardSizes(3)} loading="lazy" />
+              <span>{a.data.title}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</Base>
+
+<style>
+  .ez-commissions { max-width: 720px; }
+  .ez-commissions__intro { font-size: var(--ez-text-lg); color: var(--ez-stone); }
+  .ez-commissions__terms { margin: var(--ez-space-6) 0; }
+  .ez-commissions__terms p { white-space: pre-line; }
+  .ez-commissions__vgen { margin: var(--ez-space-6) 0; }
+  .ez-commissions__form {
+    margin-top: var(--ez-space-6);
+    background: var(--ez-white);
+    border: var(--ez-border-width) solid var(--ez-border);
+    padding: var(--ez-space-6);
+  }
+  .ez-commissions__row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ez-space-4); }
+  @media (max-width: 540px) { .ez-commissions__row { grid-template-columns: 1fr; } }
+  .ez-commissions__formnote { margin-top: var(--ez-space-3); font-size: var(--ez-text-sm); color: var(--ez-stone); }
+  .ez-commissions__examples { margin-top: var(--ez-space-8); }
+  .ez-commissions__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ez-space-4); }
+  @media (max-width: 540px) { .ez-commissions__grid { grid-template-columns: repeat(2, 1fr); } }
+  .ez-commissions__ex { text-decoration: none; color: var(--ez-ink); font-weight: 700; font-size: var(--ez-text-sm); }
+  .ez-commissions__ex img { width: 100%; height: auto; display: block; border: var(--ez-border-width) solid var(--ez-border); margin-bottom: var(--ez-space-2); }
+</style>

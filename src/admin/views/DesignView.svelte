@@ -297,6 +297,7 @@
           <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.news} /><span>News</span></label>
           <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.available} /><span>Available work</span></label>
           <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.presskit} /><span>Press kit</span></label>
+          <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.commissions} /><span>Commissions</span></label>
         </div>
       </section>
 

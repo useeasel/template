@@ -218,6 +218,13 @@ const site = defineCollection({
     linksDisplayName: z.string().optional(),
     linksBio: z.string().optional(),
     links: z.array(bioLink).default([]),
+    // Optional /commissions page (toggled on via design.pages.commissions). Drives
+    // a structured request form, or — in vGen mode — points at the artist's vGen
+    // page instead. The page itself stays hidden from the menu until turned on.
+    commissionsMode: z.enum(['form', 'vgen']).default('form'),
+    commissionsIntro: z.string().optional(),
+    commissionsTerms: z.string().optional(),
+    commissionsVgenUrl: z.string().url().optional(),
     // Client-side search (Pagefind). When on, a search box shows in the header and
     // visitors can search across your work, series, and news. Off by default.
     searchEnabled: z.boolean().default(false),
