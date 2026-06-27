@@ -7,6 +7,13 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.34.0
+
+- **Use the analytics tool you like.** Pick from Google Analytics, Plausible, Fathom,
+  Umami, GoatCounter, Simple Analytics, Matomo, or Cloudflare, paste your site's id, and
+  Easel adds it for you. Your visitor numbers go straight to that tool, never through
+  Easel. Off until you choose one.
+
 ## 0.33.0
 
 - **Share a piece in a tap.** Every artwork page now has a Share button that opens your

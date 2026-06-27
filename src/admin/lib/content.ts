@@ -152,6 +152,9 @@ export interface Settings {
   commissionsTerms?: string;
   commissionsVgenUrl?: string;
   cfAnalyticsToken?: string;
+  analyticsProvider?: 'none' | 'ga4' | 'plausible' | 'fathom' | 'umami' | 'goatcounter' | 'simpleanalytics' | 'matomo' | 'cloudflare';
+  analyticsId?: string;
+  analyticsHost?: string;
   analyticsSnippet?: string;
   sellEnabled?: boolean;
   newsletterEnabled?: boolean;

@@ -7,6 +7,7 @@ import { getEntry } from 'astro:content';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import SEO from '../components/SEO.astro';
+import Analytics from '../components/Analytics.astro';
 import { resolveDesign, designVars, designClasses, motionAttr, googleFontsHref, faviconDataUri, readableOn } from '../lib/design';
 import { websiteLd, personLd } from '../lib/structured-data';
 import { withBase } from '../lib/href';
@@ -114,6 +115,7 @@ const rssHref = design.pages.news ? withBase('/rss.xml') : undefined;
         data-cf-beacon={`{"token": "${settings.cfAnalyticsToken}"}`}
       ></script>
     )}
+    <Analytics provider={settings.analyticsProvider} id={settings.analyticsId} host={settings.analyticsHost} />
     {settings.analyticsSnippet && <Fragment set:html={settings.analyticsSnippet} />}
     {settings.customCss && <style set:html={settings.customCss}></style>}
 

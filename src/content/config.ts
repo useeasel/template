@@ -243,6 +243,15 @@ const site = defineCollection({
     // inject the beacon (no cookie banner needed). The raw snippet below stays for
     // power users who want GA/Plausible/etc.
     cfAnalyticsToken: z.string().optional(),
+    // Analytics provider preset. Pick one and paste its site id; we inject the
+    // right snippet. No visitor data passes through Easel. 'none' (default) and the
+    // legacy cfAnalyticsToken/analyticsSnippet keep older sites working untouched.
+    analyticsProvider: z
+      .enum(['none', 'ga4', 'plausible', 'fathom', 'umami', 'goatcounter', 'simpleanalytics', 'matomo', 'cloudflare'])
+      .default('none'),
+    analyticsId: z.string().optional(),
+    // Self-hosted host URL for providers that need one (Umami, Matomo).
+    analyticsHost: z.string().optional(),
     analyticsSnippet: z.string().optional(),
     // Commerce: when on, available/inquire pieces show a Buy or Inquire button
     // (Buy when the piece carries a buyLink, otherwise a prefilled contact link).

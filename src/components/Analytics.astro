@@ -1,0 +1,62 @@
+---
+/**
+ * Privacy-respecting analytics, injected by provider preset. The artist picks a
+ * provider and pastes its site id in Settings; we render that provider's official
+ * snippet. No visitor data passes through Easel — the script talks straight to the
+ * provider. 'none' renders nothing. The legacy raw-snippet escape hatch
+ * (analyticsSnippet) and the standalone Cloudflare token still work alongside this.
+ */
+interface Props {
+  provider?: string;
+  id?: string;
+  host?: string;
+}
+const { provider = 'none', id = '', host = '' } = Astro.props;
+
+// Values land inside attributes and JS strings, so keep them to the characters
+// real ids/domains use. Anything else is dropped rather than escaped, so a stray
+// quote can never break out of the snippet.
+const safe = (s: string) => (s || '').replace(/[^a-zA-Z0-9._:/\-]/g, '');
+const sid = safe(id);
+const shost = safe(host).replace(/\/+$/, '');
+
+// Sensible defaults for the cloud-hosted options so an id alone is enough.
+const umamiHost = shost || 'https://cloud.umami.is';
+const matomoHost = shost; // Matomo is always self-hosted, so a host is required.
+const ready = provider !== 'none' && (provider === 'simpleanalytics' || !!sid);
+---
+
+{ready && provider === 'ga4' && (
+  <>
+    <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${sid}`}></script>
+    <script is:inline set:html={`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${sid}');`}></script>
+  </>
+)}
+
+{ready && provider === 'plausible' && (
+  <script is:inline defer data-domain={sid} src="https://plausible.io/js/script.js"></script>
+)}
+
+{ready && provider === 'fathom' && (
+  <script is:inline defer src="https://cdn.usefathom.com/script.js" data-site={sid}></script>
+)}
+
+{ready && provider === 'umami' && (
+  <script is:inline defer src={`${umamiHost}/script.js`} data-website-id={sid}></script>
+)}
+
+{ready && provider === 'goatcounter' && (
+  <script is:inline data-goatcounter={`https://${sid}.goatcounter.com/count`} async src="//gc.zgo.at/count.js"></script>
+)}
+
+{ready && provider === 'simpleanalytics' && (
+  <script is:inline async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+)}
+
+{ready && provider === 'matomo' && matomoHost && (
+  <script is:inline set:html={`var _paq=window._paq=window._paq||[];_paq.push(['trackPageView']);_paq.push(['enableLinkTracking']);(function(){var u='${matomoHost}/';_paq.push(['setTrackerUrl',u+'matomo.php']);_paq.push(['setSiteId','${sid}']);var d=document,g=d.createElement('script'),s=d.getElementsByTagName('script')[0];g.async=true;g.src=u+'matomo.js';s.parentNode.insertBefore(g,s);})();`}></script>
+)}
+
+{ready && provider === 'cloudflare' && (
+  <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={`{"token": "${sid}"}`}></script>
+)}

@@ -261,9 +261,47 @@
 
   <div class="ez-block">
     <strong>Visitor analytics</strong>
-    <p class="ez-help">See how many people visit, privately — no cookie banner needed. Turn on Web Analytics in your Cloudflare dashboard, then paste the token here.</p>
-    <label class="ez-field"><span class="ez-label">Cloudflare Web Analytics token</span>
-      <input class="ez-input ez-mono" bind:value={s.cfAnalyticsToken} placeholder="abc123…" /></label>
+    <p class="ez-help">See how many people visit. Pick the tool you use and paste your site's id, we add it for you. Your visitor data goes straight to that tool, never through Easel.</p>
+    <label class="ez-field"><span class="ez-label">Analytics tool</span>
+      <select class="ez-input" bind:value={s.analyticsProvider}>
+        <option value="none">None</option>
+        <option value="ga4">Google Analytics (GA4)</option>
+        <option value="plausible">Plausible</option>
+        <option value="fathom">Fathom</option>
+        <option value="umami">Umami</option>
+        <option value="goatcounter">GoatCounter</option>
+        <option value="simpleanalytics">Simple Analytics</option>
+        <option value="matomo">Matomo</option>
+        <option value="cloudflare">Cloudflare Web Analytics</option>
+      </select></label>
+    {#if s.analyticsProvider === 'ga4'}
+      <label class="ez-field"><span class="ez-label">Measurement ID</span>
+        <input class="ez-input ez-mono" bind:value={s.analyticsId} placeholder="G-XXXXXXXXXX" /></label>
+    {:else if s.analyticsProvider === 'plausible'}
+      <label class="ez-field"><span class="ez-label">Your site's domain</span>
+        <input class="ez-input ez-mono" bind:value={s.analyticsId} placeholder="your-site.com" /></label>
+    {:else if s.analyticsProvider === 'fathom'}
+      <label class="ez-field"><span class="ez-label">Site ID</span>
+        <input class="ez-input ez-mono" bind:value={s.analyticsId} placeholder="ABCDEFGH" /></label>
+    {:else if s.analyticsProvider === 'umami'}
+      <label class="ez-field"><span class="ez-label">Website ID</span>
+        <input class="ez-input ez-mono" bind:value={s.analyticsId} placeholder="xxxxxxxx-xxxx-…" /></label>
+      <label class="ez-field"><span class="ez-label">Server address (blank for Umami Cloud)</span>
+        <input class="ez-input ez-mono" bind:value={s.analyticsHost} placeholder="https://analytics.your-site.com" /></label>
+    {:else if s.analyticsProvider === 'goatcounter'}
+      <label class="ez-field"><span class="ez-label">Your GoatCounter code</span>
+        <input class="ez-input ez-mono" bind:value={s.analyticsId} placeholder="yourname (from yourname.goatcounter.com)" /></label>
+    {:else if s.analyticsProvider === 'matomo'}
+      <label class="ez-field"><span class="ez-label">Site ID</span>
+        <input class="ez-input ez-mono" bind:value={s.analyticsId} placeholder="1" /></label>
+      <label class="ez-field"><span class="ez-label">Server address</span>
+        <input class="ez-input ez-mono" bind:value={s.analyticsHost} placeholder="https://analytics.your-site.com" /></label>
+    {:else if s.analyticsProvider === 'cloudflare'}
+      <label class="ez-field"><span class="ez-label">Web Analytics token</span>
+        <input class="ez-input ez-mono" bind:value={s.analyticsId} placeholder="abc123…" /></label>
+    {:else if s.analyticsProvider === 'simpleanalytics'}
+      <p class="ez-help">Nothing to paste, just make sure your site's domain is added in Simple Analytics.</p>
+    {/if}
   </div>
 
   <div class="ez-block">
