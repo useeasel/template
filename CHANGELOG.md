@@ -7,6 +7,13 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.11.0
+
+- **Edit from your phone.** The editor now welcomes you on mobile instead of turning you
+  away — add photos, update your pages, and publish right from your phone. Your choice to
+  keep editing is remembered, and the full-screen style wizard no longer gets in the way on
+  a small screen (designing your site’s look is still easiest on a computer).
+
 ## 0.10.0
 
 - **More than one photo per piece.** Add detail shots, other angles, or process photos to

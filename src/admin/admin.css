@@ -376,6 +376,11 @@
 .ez-gs__text strong { font-family: var(--ez-font-display); }
 .ez-gs__item.is-done .ez-gs__text strong { color: var(--ez-stone); text-decoration: line-through; }
 .ez-gs__cta { flex: none; }
+/* On phones, drop the step's CTA to its own full-width row so the text isn't squeezed. */
+@media (max-width: 560px) {
+  .ez-gs__item { flex-wrap: wrap; }
+  .ez-gs__cta { width: 100%; margin-top: var(--ez-space-2); }
+}
 
 /* Responsive: collapse the sidebar into a drawer below 880px. */
 @media (max-width: 879px) {

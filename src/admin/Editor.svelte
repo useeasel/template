@@ -60,7 +60,7 @@
     const mq = window.matchMedia('(max-width: 820px)');
     isNarrow = mq.matches;
     mq.addEventListener('change', (e) => (isNarrow = e.matches));
-    mobileBypass = sessionStorage.getItem('easel_mobile_ok') === '1';
+    mobileBypass = localStorage.getItem('easel_mobile_ok') === '1';
 
     try {
       const res = await fetch('/admin/config.json', { cache: 'no-store' });
@@ -110,8 +110,10 @@
       const st = await loadSettings(client);
       designEmpty = !st.design || Object.keys(st.design).length === 0;
       if (st.customDomain) siteUrl = `https://${st.customDomain}`;
-      // First-time setup: open the style wizard if no design has been chosen.
-      if (designEmpty) wizard = true;
+      // First-time setup: open the style wizard if no design has been chosen — but
+      // not on a phone, where the full-screen wizard is cramped. Mobile users land on
+      // the editor and can add work; design is best done later on a computer.
+      if (designEmpty && !isNarrow) wizard = true;
     } catch {
       /* ignore — wizard can be opened from Design later */
     }
@@ -183,7 +185,7 @@
   }
 
   function bypassMobile() {
-    sessionStorage.setItem('easel_mobile_ok', '1');
+    localStorage.setItem('easel_mobile_ok', '1');
     mobileBypass = true;
   }
 
@@ -212,18 +214,17 @@
   {#if isNarrow && !mobileBypass}
     <div class="ez-mobilegate">
       <div class="ez-mobilegate__card">
-        <h1>Open this on a computer</h1>
+        <h1>Editing on your phone</h1>
         <p>
-          The Easel editor is built for a real screen — you'll be dragging in
-          photos, arranging your work, and fine-tuning your design. On a phone
-          it's cramped and easy to make a mess of.
+          You can add photos, update your pages, and publish right here. For
+          fine-tuning your design — fonts, colours, and layout — a computer gives
+          you more room to work.
         </p>
-        <p><strong>Switch to a laptop or desktop and come back to this page.</strong></p>
-        <button class="ez-btn ez-btn--primary ez-btn--lg" onclick={() => (location.href = siteUrl)}>Take me back</button>
-        <button class="ez-mobilegate__bypass" onclick={bypassMobile}>Continue anyway — I know it'll be rough</button>
+        <button class="ez-btn ez-btn--primary ez-btn--lg" onclick={bypassMobile}>Start editing</button>
+        <button class="ez-mobilegate__bypass" onclick={() => (location.href = siteUrl)}>Go to my site instead</button>
       </div>
     </div>
-  {:else if status === 'ready' && wizard && gh}
+  {:else if status === 'ready' && wizard && gh && !isNarrow}
     <Wizard {gh} {notify} onClose={finishWizard} />
   {:else if status === 'ready' && gh}
     <div class="ez-shell" class:ez-shell--navopen={navOpen}>
