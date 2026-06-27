@@ -1,0 +1,35 @@
+---
+import { getEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+// Shop page. Hidden from the menu until the artist turns it on under Design
+// (design.pages.shop). It renders a store embed the artist pastes in Settings — a
+// Gumroad, Big Cartel, or Shopify Buy Button snippet — so buyers check out through
+// the artist's own store, on the artist's own domain. Easel never touches the
+// transaction (same paste-an-embed trust model as the custom-code field). The
+// snippet is the artist's own; it's written into the page at build, so any script
+// it carries runs as the store intends.
+const settings = (await getEntry('site', 'settings'))!.data;
+const intro = settings.shopIntro;
+const embed = settings.shopEmbed;
+---
+
+<Base pageTitle="Shop" pageDescription={intro}>
+  <div class="ez-container ez-shop">
+    <h1>Shop</h1>
+    {intro && <p class="ez-shop__intro">{intro}</p>}
+
+    {embed ? (
+      <div class="ez-shop__embed" set:html={embed}></div>
+    ) : (
+      <p class="ez-shop__empty">This shop isn't set up yet.</p>
+    )}
+  </div>
+</Base>
+
+<style>
+  .ez-shop { max-width: 960px; }
+  .ez-shop__intro { font-size: var(--ez-text-lg); color: var(--ez-stone); }
+  .ez-shop__embed { margin-top: var(--ez-space-6); }
+  .ez-shop__empty { color: var(--ez-stone); }
+</style>

@@ -253,6 +253,16 @@
   </div>
 
   <div class="ez-block">
+    <strong>Shop</strong>
+    <p class="ez-help">Turn the Shop page on under <strong>Design</strong>, then paste a store embed from Gumroad, Big Cartel, or Shopify. People buy through your store, on your own site. Easel never touches the payment.</p>
+    <label class="ez-field"><span class="ez-label">Intro (optional)</span>
+      <textarea class="ez-input" rows="2" bind:value={s.shopIntro} placeholder="A line about your shop."></textarea></label>
+    <label class="ez-field"><span class="ez-label">Store embed code</span>
+      <textarea class="ez-input ez-mono" rows="4" bind:value={s.shopEmbed} placeholder="Paste the embed snippet from your shop (Gumroad, Big Cartel, Shopify Buy Button)."></textarea>
+      <span class="ez-help">Copy this from your shop's "embed" or "buy button" option.</span></label>
+  </div>
+
+  <div class="ez-block">
     <strong>Search</strong>
     <p class="ez-help">Add a search box to your header so visitors can find pieces, series, and posts by typing. Best once you have a good number of works. It runs in the browser, with nothing to set up.</p>
     <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={s.searchEnabled} />

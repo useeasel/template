@@ -7,6 +7,13 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.37.0
+
+- **Sell on your own site.** Turn on a Shop page and paste in a store embed from Gumroad,
+  Big Cartel, or Shopify. Buyers shop and check out right on your site instead of being
+  sent away. The payment runs through your own store, Easel never touches it. Off by
+  default; turn the page on under Design and add your embed under Settings.
+
 ## 0.36.0
 
 - **Show sizes, editions, and prices clearly.** A piece can now list several options, like

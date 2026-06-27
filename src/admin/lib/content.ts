@@ -153,6 +153,9 @@ export interface Settings {
   commissionsIntro?: string;
   commissionsTerms?: string;
   commissionsVgenUrl?: string;
+  /** Shop page (toggled via design.pages.shop): a pasted store embed. */
+  shopIntro?: string;
+  shopEmbed?: string;
   cfAnalyticsToken?: string;
   analyticsProvider?: 'none' | 'ga4' | 'plausible' | 'fathom' | 'umami' | 'goatcounter' | 'simpleanalytics' | 'matomo' | 'cloudflare';
   analyticsId?: string;

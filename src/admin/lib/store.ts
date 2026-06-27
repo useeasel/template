@@ -458,6 +458,8 @@ export async function loadSettings(gh: GitHub): Promise<Settings> {
     commissionsIntro: data.commissionsIntro,
     commissionsTerms: data.commissionsTerms,
     commissionsVgenUrl: data.commissionsVgenUrl,
+    shopIntro: data.shopIntro,
+    shopEmbed: data.shopEmbed,
     cfAnalyticsToken: data.cfAnalyticsToken,
     analyticsProvider: data.analyticsProvider ?? 'none',
     analyticsId: data.analyticsId,

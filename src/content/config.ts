@@ -249,6 +249,12 @@ const site = defineCollection({
     commissionsIntro: z.string().optional(),
     commissionsTerms: z.string().optional(),
     commissionsVgenUrl: z.string().url().optional(),
+    // Optional /shop page (toggled on via design.pages.shop). Renders a pasted
+    // store embed — a Gumroad/Big Cartel/Shopify Buy Button snippet — so the artist
+    // sells through their own store without leaving their site. Easel never touches
+    // the transaction. Empty until the artist pastes a snippet.
+    shopIntro: z.string().optional(),
+    shopEmbed: z.string().optional(),
     // When on, the CV page's exhibitions sections are generated from the
     // Exhibitions you've entered (split into solo/group), so the CV stays current
     // without retyping. Off by default, so existing hand-typed CVs are unchanged.
