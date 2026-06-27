@@ -5,6 +5,7 @@
  * kept in memory only (a banner makes that clear).
  */
 import type { GitHub, DirEntry, RepoRef, TreeEntry } from './github';
+import { shapeImage } from './filler';
 
 function md(data: Record<string, string | number | boolean>, body = ''): string {
   const fm = Object.entries(data)
@@ -69,17 +70,6 @@ function seed(): Map<string, string> {
   return f;
 }
 
-function placeholder(path: string): string {
-  const palette = ['#1d4ed8', '#e63946', '#f4c20d'];
-  let h = 0;
-  for (let i = 0; i < path.length; i++) h = (h * 31 + path.charCodeAt(i)) >>> 0;
-  const bg = '#f7f4ec';
-  const a = palette[h % 3];
-  const b = palette[(h >> 3) % 3];
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="${bg}"/><circle cx="150" cy="160" r="90" fill="${a}"/><rect x="200" y="180" width="150" height="150" fill="${b}"/></svg>`;
-  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
-}
-
 class DemoGitHub {
   ref = { owner: 'demo', repo: 'portfolio', branch: 'main' };
   files = seed();
@@ -101,7 +91,7 @@ class DemoGitHub {
     return t != null ? { text: t, sha: 'demo' } : null;
   }
   rawUrl(path: string): string {
-    return placeholder(path);
+    return shapeImage(path);
   }
   // --- Update-check surface (in-memory; the demo is always "up to date"). ---
   async getFileFrom(_over: RepoRef, path: string): Promise<string | null> {

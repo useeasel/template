@@ -306,7 +306,7 @@
     </div>
 
     <div class="ez-design__preview">
-      <LivePreview design={d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline, footerText: d.footer.text, logoImage: d.logo.image }} />
+      <LivePreview design={d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline, footerText: d.footer.text, logoImage: d.logo.image }} filler />
     </div>
   </div>
 {/if}

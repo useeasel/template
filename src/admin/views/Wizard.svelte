@@ -166,7 +166,7 @@
     </div>
 
     <div class="ez-wiz__preview">
-      <LivePreview design={d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline, footerText: d.footer.text }} />
+      <LivePreview design={d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline, footerText: d.footer.text }} filler />
     </div>
   </div>
 
