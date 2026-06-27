@@ -52,7 +52,7 @@ export interface DesignTokens {
     /** Show filter chips on the home gallery (by series + availability). */
     filters: boolean;
   };
-  lightbox: { transition: 'fade' | 'slide' };
+  lightbox: { transition: 'fade' | 'slide'; zoom: boolean };
   hero: { enabled: boolean; align: 'left' | 'center'; size: 'small' | 'large' };
   footer: { socials: boolean; credit: boolean; text?: string };
   favicon: { mode: 'initials' | 'image'; image?: string };
@@ -88,7 +88,7 @@ export const DEFAULT_DESIGN: DesignTokens = {
   background: { type: 'solid' },
   thumb: { fit: 'contain', hover: 'zoom' },
   gallery: { layout: 'masonry', size: 'medium', gutter: 'normal', caption: 'below', featureFirst: false, click: 'lightbox', filters: false },
-  lightbox: { transition: 'fade' },
+  lightbox: { transition: 'fade', zoom: false },
   hero: { enabled: false, align: 'left', size: 'small' },
   footer: { socials: true, credit: true },
   favicon: { mode: 'initials' },
@@ -193,6 +193,7 @@ export function designClasses(d: DesignTokens): string {
     `ez-layout-${d.gallery.layout}`,
     `ez-bg-${d.background.type}`,
     `ez-light-${d.lightbox.transition}`,
+    d.lightbox.zoom ? 'ez-lbzoom' : '',
     `ez-cap-${d.gallery.caption}`,
     `ez-heroalign-${d.hero.align}`,
     `ez-herosize-${d.hero.size}`,

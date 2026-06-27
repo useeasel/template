@@ -113,6 +113,14 @@ const { items } = Astro.props;
     border: var(--ez-border-width) solid var(--ez-white);
     background: var(--ez-white);
   }
+  /* Click-to-zoom (only when the theme enables it). The stage clips the scaled
+     image; transform-origin tracks the pointer so moving the mouse pans the view. */
+  .ez-lightbox__img.ez-lb-zoomable { cursor: zoom-in; }
+  .ez-lightbox__img.is-zoomed {
+    cursor: zoom-out;
+    transform: scale(2.6);
+    transition: none;
+  }
   .ez-lightbox__label {
     text-align: center;
     display: flex;
@@ -151,9 +159,19 @@ const { items } = Astro.props;
     let current = 0;
     let lastFocused: HTMLElement | null = null;
 
+    // Click-to-zoom, only when the theme turns it on (root class ez-lbzoom).
+    const zoomOn = document.documentElement.classList.contains('ez-lbzoom');
+    let zoomed = false;
+    const setZoom = (on: boolean) => {
+      zoomed = on;
+      img.classList.toggle('is-zoomed', on);
+      if (!on) img.style.transformOrigin = 'center center';
+    };
+
     const render = () => {
       const item = items[current];
       if (!item) return;
+      if (zoomOn) setZoom(false); // reset zoom whenever the image changes
       img.src = item.src;
       img.alt = item.alt;
       titleEl.textContent = item.title;
@@ -163,6 +181,21 @@ const { items } = Astro.props;
       void img.offsetWidth;
       img.classList.add('ez-anim');
     };
+
+    if (zoomOn) {
+      img.classList.add('ez-lb-zoomable');
+      img.addEventListener('click', (e) => {
+        e.stopPropagation(); // don't bubble to the backdrop-close handler
+        setZoom(!zoomed);
+      });
+      img.addEventListener('mousemove', (e) => {
+        if (!zoomed) return;
+        const r = img.getBoundingClientRect();
+        const x = ((e.clientX - r.left) / r.width) * 100;
+        const y = ((e.clientY - r.top) / r.height) * 100;
+        img.style.transformOrigin = `${Math.max(0, Math.min(100, x))}% ${Math.max(0, Math.min(100, y))}%`;
+      });
+    }
 
     const open = (index: number) => {
       current = index;

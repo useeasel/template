@@ -234,6 +234,8 @@
             <select class="ez-input" bind:value={d.lightbox.transition}>
               <option value="fade">Fade</option><option value="slide">Slide</option></select></label>
         </div>
+        <label class="ez-field--check"><input type="checkbox" bind:checked={d.lightbox.zoom} />
+          <span>Let visitors click to zoom into fine detail</span></label>
         <div class="ez-row">
           <label class="ez-field"><span class="ez-label">Clicking a piece</span>
             <select class="ez-input" bind:value={d.gallery.click}>

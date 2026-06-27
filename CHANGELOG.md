@@ -7,6 +7,12 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.19.0
+
+- **Click to zoom into detail.** Turn on zoom and visitors can click an image in the
+  viewer to magnify it, then move the mouse to look around, brushwork, texture, fine line.
+  Find it under Design, near the Lightbox option. Off by default.
+
 ## 0.18.0
 
 - **Testimonials on your About page.** Add short quotes about you or your work under Pages,
