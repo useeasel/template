@@ -7,6 +7,14 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.23.0
+
+- **A stronger link-in-bio page.** Your /links page can now feature one link as a
+  bigger, bolder button, show a thumbnail image on any link, and offer a QR code that
+  points right back to the page. Hand someone your phone or print the code for a show
+  wall, then set this page as the link in your Instagram or TikTok bio. Your existing
+  links look the same until you feature one or add a picture.
+
 ## 0.22.0
 
 - **Let visitors follow your work from anywhere.** Your newsletter signup can now

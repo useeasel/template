@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { GitHub } from '../lib/github';
   import type { Settings } from '../lib/content';
-  import { loadSettings, saveSettings } from '../lib/store';
+  import { loadSettings, saveSettings, uploadAsset } from '../lib/store';
   import { useShell } from '../lib/shell.svelte';
 
   let {
@@ -52,6 +52,21 @@
       notify('Could not make a QR code from that link.', 'error');
     }
     qrBusy = false;
+  }
+
+  // Upload a thumbnail for a /links row and store its served path on that link.
+  let thumbBusy = $state(-1);
+  async function uploadLinkThumb(i: number, e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    thumbBusy = i;
+    try {
+      const path = await uploadAsset(gh, file, 'link');
+      s.links[i].thumbnail = path;
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Could not upload the image.', 'error');
+    }
+    thumbBusy = -1;
   }
 
   const isDirty = () => !loading && JSON.stringify($state.snapshot(s)) !== savedJson;
@@ -158,8 +173,20 @@
           <button class="ez-btn ez-btn--sm" onclick={() => { if (i < s.links.length - 1) { const n = [...s.links]; [n[i+1], n[i]] = [n[i], n[i+1]]; s.links = n; } }} disabled={i === (s.links?.length ?? 0) - 1} aria-label="Move down">↓</button>
           <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => (s.links = s.links.filter((_, j) => j !== i))} aria-label="Remove">×</button>
         </div>
+        <div class="ez-row" style="margin:-0.25rem 0 0.5rem; align-items:center; gap:0.75rem; flex-wrap:wrap">
+          <label class="ez-field--check" style="margin:0"><input type="checkbox" bind:checked={link.featured} /><span>Feature this one</span></label>
+          {#if link.thumbnail}
+            <img src={link.thumbnail} alt="" style="width:1.75rem;height:1.75rem;object-fit:cover;border-radius:4px" />
+            <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => (s.links[i].thumbnail = undefined)}>Remove image</button>
+          {:else}
+            <label class="ez-btn ez-btn--sm" style="cursor:pointer">
+              {thumbBusy === i ? 'Uploading…' : 'Add thumbnail'}
+              <input type="file" accept="image/*" hidden disabled={thumbBusy === i} onchange={(e) => uploadLinkThumb(i, e)} />
+            </label>
+          {/if}
+        </div>
       {/each}
-      <p class="ez-help">Your social links (above) show automatically at the bottom of the page.</p>
+      <p class="ez-help">Your social links (above) show automatically at the bottom of the page. Feature a link to make it bigger and bolder; add a thumbnail to show a picture on the button.</p>
     {/if}
   </div>
 

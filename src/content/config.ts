@@ -158,6 +158,12 @@ const bioLink = z.object({
   url: z.string().url(),
   // Optional leading emoji/icon (e.g. "🛒", "📷").
   icon: z.string().optional(),
+  // Optional thumbnail image (a served path, e.g. /assets/links-shop.png). Shows
+  // a small picture on the button instead of (or beside) the emoji.
+  thumbnail: z.string().optional(),
+  // Featured links get a larger, accented button so one link can stand out.
+  // Off by default, so existing /links pages look the same until the artist opts in.
+  featured: z.boolean().default(false),
 });
 
 // Global settings singleton, stored at src/content/site.json and validated as a

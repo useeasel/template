@@ -3,6 +3,7 @@ import { getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import { withBase } from '../lib/href';
+import QRCode from 'qrcode';
 
 // A "link in bio" hub (Linktree-style) at /links. Unlisted: it's never in the
 // site menu, only reachable at this URL, so the artist can drop it in a social
@@ -20,6 +21,17 @@ const name = settings.linksDisplayName || settings.logoText || settings.siteTitl
 const bio = settings.linksBio || settings.tagline;
 const links = settings.links ?? [];
 const socials = settings.socialLinks ?? [];
+
+// A QR code pointing at this page, generated at build time. Lets the artist print
+// the hub on a card or show wall, or hand a phone over to scan. Best-effort: if
+// generation fails the page just renders without it.
+const hubUrl = new URL(withBase('/links'), Astro.site ?? 'https://example.com').href;
+let qrDataUri = '';
+try {
+  qrDataUri = await QRCode.toDataURL(hubUrl, { width: 480, margin: 1 });
+} catch {
+  /* no QR — page still works */
+}
 ---
 
 <Base pageTitle={name} pageDescription={bio || `Links from ${name}`} pageImage={withBase('/og/links.png')}>
@@ -34,13 +46,30 @@ const socials = settings.socialLinks ?? [];
       <ul class="ez-links__list" role="list">
         {links.map((link) => (
           <li>
-            <a class="ez-links__btn" href={link.url} rel="noopener" target="_blank">
-              {link.icon && <span class="ez-links__icon" aria-hidden="true">{link.icon}</span>}
+            <a
+              class:list={['ez-links__btn', link.featured && 'ez-links__btn--featured']}
+              href={link.url}
+              rel="noopener"
+              target="_blank"
+            >
+              {link.thumbnail ? (
+                <img class="ez-links__thumb" src={link.thumbnail} alt="" loading="lazy" />
+              ) : (
+                link.icon && <span class="ez-links__icon" aria-hidden="true">{link.icon}</span>
+              )}
               <span class="ez-links__label">{link.label}</span>
             </a>
           </li>
         ))}
       </ul>
+    )}
+
+    {qrDataUri && (
+      <details class="ez-links__qr">
+        <summary>Show QR code</summary>
+        <img class="ez-links__qrimg" src={qrDataUri} alt={`QR code linking to ${name}'s page`} width="200" height="200" />
+        <p class="ez-links__qrhint">Point a phone camera at this, or save it for a card or show wall. Set this page as the link in your Instagram or TikTok bio.</p>
+      </details>
     )}
 
     {socials.length > 0 && (
@@ -100,6 +129,39 @@ const socials = settings.socialLinks ?? [];
   }
   .ez-links__btn:hover { transform: translateY(-2px); color: var(--ez-link); }
   .ez-links__icon { font-size: 1.25em; line-height: 1; }
+  .ez-links__thumb {
+    width: 2rem;
+    height: 2rem;
+    object-fit: cover;
+    border-radius: calc(var(--ez-radius) * 0.6);
+    flex: 0 0 auto;
+  }
+  /* Featured: bigger tap target, accent fill, so one link leads. */
+  .ez-links__btn--featured {
+    background: var(--ez-blue);
+    color: var(--ez-pill-available-text, #fff);
+    padding-block: var(--ez-space-5);
+    font-size: var(--ez-text-md, 1.1rem);
+  }
+  .ez-links__btn--featured:hover { color: var(--ez-pill-available-text, #fff); }
+  .ez-links__btn--featured .ez-links__thumb { width: 2.4rem; height: 2.4rem; }
+  .ez-links__qr {
+    margin-top: var(--ez-space-5);
+    font-size: var(--ez-text-sm);
+    color: var(--ez-stone);
+  }
+  .ez-links__qr summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--ez-link);
+  }
+  .ez-links__qrimg {
+    margin-top: var(--ez-space-3);
+    border: var(--ez-border-width) solid var(--ez-border);
+    background: #fff;
+    padding: var(--ez-space-2);
+  }
+  .ez-links__qrhint { max-width: 22rem; margin: var(--ez-space-2) auto 0; }
   .ez-links__socials {
     list-style: none;
     display: flex;

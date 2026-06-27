@@ -131,7 +131,7 @@ export interface Settings {
   linksEnabled?: boolean;
   linksDisplayName?: string;
   linksBio?: string;
-  links?: { label: string; url: string; icon?: string }[];
+  links?: { label: string; url: string; icon?: string; thumbnail?: string; featured?: boolean }[];
   searchEnabled?: boolean;
   cfAnalyticsToken?: string;
   analyticsSnippet?: string;
