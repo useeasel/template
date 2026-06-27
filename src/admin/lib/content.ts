@@ -140,6 +140,8 @@ export interface Settings {
   metaDescription?: string;
   ogImage?: string;
   socialLinks: { label: string; url: string }[];
+  /** "Support me" links (Ko-fi, Patreon, PayPal.me…) — shown as a footer block. */
+  supportLinks?: { label: string; url: string }[];
   /** Optional /links "link in bio" page. Unlisted; off until linksEnabled. */
   linksEnabled?: boolean;
   linksDisplayName?: string;

@@ -7,6 +7,12 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.38.0
+
+- **Let people support you.** Add Ko-fi, Buy Me a Coffee, Patreon, or PayPal.me links under
+  Settings and a "Support my work" row appears in your footer. Each link goes to your own
+  page; Easel never handles the money. Nothing shows until you add a link.
+
 ## 0.37.0
 
 - **Sell on your own site.** Turn on a Shop page and paste in a store embed from Gumroad,

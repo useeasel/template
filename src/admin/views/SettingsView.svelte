@@ -153,6 +153,19 @@
   </div>
 
   <div class="ez-block">
+    <div class="ez-block__head"><strong>Support links</strong>
+      <button class="ez-btn ez-btn--sm" onclick={() => (s.supportLinks = [...(s.supportLinks ?? []), { label: '', url: '' }])}>Add link</button></div>
+    <p class="ez-help">Add Ko-fi, Buy Me a Coffee, Patreon, or PayPal.me links and a "Support my work" row shows in your footer. People go straight to your page; Easel never handles the money.</p>
+    {#each s.supportLinks ?? [] as link, i (i)}
+      <div class="ez-row">
+        <input class="ez-input" style="max-width:10rem" bind:value={link.label} placeholder="Ko-fi" />
+        <input class="ez-input" bind:value={link.url} placeholder="https://ko-fi.com/you" />
+        <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => (s.supportLinks = s.supportLinks.filter((_, j) => j !== i))}>×</button>
+      </div>
+    {/each}
+  </div>
+
+  <div class="ez-block">
     <strong>Link in bio (/links)</strong>
     <p class="ez-help">A single shareable page at <strong>yoursite/links</strong> with big tappable buttons — the one link you put in your Instagram or TikTok bio. It uses your site's colours and fonts. It stays out of your main menu; people reach it only through the link you share.</p>
     <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={s.linksEnabled} />

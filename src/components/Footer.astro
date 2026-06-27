@@ -14,12 +14,24 @@ interface Props {
     provider?: 'netlify' | 'buttondown' | 'mailchimp' | 'convertkit';
     actionUrl?: string;
   } | null;
+  /** "Support me" links (Ko-fi, Patreon, PayPal.me…). Empty = nothing shows. */
+  supportLinks?: { label: string; url: string }[];
 }
-const { logoText, socialLinks = [], footerText, rssHref, newsletter = null } = Astro.props;
+const { logoText, socialLinks = [], footerText, rssHref, newsletter = null, supportLinks = [] } = Astro.props;
 const year = new Date().getFullYear();
 ---
 
 <footer class="ez-footer">
+  {supportLinks.length > 0 && (
+    <div class="ez-container ez-footer__support">
+      <span class="ez-footer__supportlabel">Support my work</span>
+      <ul class="ez-footer__supportlinks">
+        {supportLinks.map((link) => (
+          <li><a class="ez-footer__supportbtn" href={link.url} rel="noopener" target="_blank">{link.label}</a></li>
+        ))}
+      </ul>
+    </div>
+  )}
   {newsletter && (
     <div class="ez-container ez-footer__newsletter">
       <NewsletterSignup
@@ -101,4 +113,25 @@ const year = new Date().getFullYear();
     padding-block: var(--ez-space-6);
     border-bottom: var(--ez-border-width) solid var(--ez-border);
   }
+  .ez-footer__support {
+    padding-block: var(--ez-space-5);
+    border-bottom: var(--ez-border-width) solid var(--ez-border);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ez-space-3) var(--ez-space-4);
+  }
+  .ez-footer__supportlabel { font-family: var(--ez-font-display); font-weight: 800; }
+  .ez-footer__supportlinks { display: flex; flex-wrap: wrap; gap: var(--ez-space-3); list-style: none; margin: 0; padding: 0; }
+  .ez-footer__supportbtn {
+    display: inline-block;
+    padding: var(--ez-space-2) var(--ez-space-4);
+    background: var(--ez-blue);
+    color: var(--ez-pill-available-text, #fff);
+    border-radius: var(--ez-radius);
+    font-family: var(--ez-font-display);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .ez-footer__supportbtn:hover { transform: translateY(-1px); }
 </style>

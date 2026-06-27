@@ -448,6 +448,7 @@ export async function loadSettings(gh: GitHub): Promise<Settings> {
     metaDescription: data.metaDescription,
     ogImage: data.ogImage,
     socialLinks: Array.isArray(data.socialLinks) ? data.socialLinks : [],
+    supportLinks: Array.isArray(data.supportLinks) ? data.supportLinks : [],
     linksEnabled: !!data.linksEnabled,
     linksDisplayName: data.linksDisplayName,
     linksBio: data.linksBio,

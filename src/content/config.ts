@@ -235,6 +235,10 @@ const site = defineCollection({
     ogImage: z.string().optional(),
     metaDescription: z.string().optional(),
     socialLinks: z.array(socialLink).default([]),
+    // Optional "support me" links (Ko-fi, Buy Me a Coffee, Patreon, PayPal.me, …).
+    // When any are set, a small support block shows in the footer. Easel never
+    // handles the money — these just point to the artist's own page. Off when empty.
+    supportLinks: z.array(socialLink).default([]),
     // Optional /links "link in bio" page (a Linktree-style hub to drop in social
     // bios). Unlisted: it never appears in the site menu, only at the /links URL.
     // Off by default, so existing sites are unchanged until the artist turns it on.
