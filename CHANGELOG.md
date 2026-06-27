@@ -12,20 +12,20 @@ always preserved, and new features stay off until you turn them on.
 - **Updates no longer stall publishing on GitHub Pages.** On Pages-hosted sites, running
   an update used to quietly remove the behind-the-scenes file that rebuilds your site, so
   the update committed but your live site never refreshed. Updates now leave that file
-  alone — and if an earlier update already removed it, this update puts it back and
-  republishes your site automatically. (Netlify sites were never affected.)
+  alone. If an earlier update already removed it, this update puts it back and republishes
+  your site for you. (Netlify sites were never affected.)
 
 ## 0.13.0
 
-- **Your changes show up right away.** After you publish an edit, visitors (and you)
-  could sometimes still see the old version until a hard refresh — browsers and hosts
-  cache pages aggressively. Your site now notices when a new version has gone live and
-  refreshes itself automatically.
+- **Your changes show up right away.** After you publish an edit, visitors (and you) could
+  sometimes still see the old version until a hard refresh, because browsers and hosts hold
+  onto cached pages. Your site now notices when a new version has gone live and refreshes
+  itself for you.
 
 ## 0.12.0
 
-- **Simpler custom domains.** Settings no longer asks you to type your domain into Easel —
-  your links are relative, so they keep working on whatever address you use. Instead, a
+- **Simpler custom domains.** Settings no longer asks you to type your domain into Easel.
+  Your links are relative, so they keep working on whatever address you use. Instead, a
   single button takes you straight to the right place on your host (your repo’s Pages
   settings, or your Netlify domain management) to set it up.
 - **Roomier Design.** The Design workspace now uses the full width of your screen, so the
@@ -35,7 +35,7 @@ always preserved, and new features stay off until you turn them on.
 ## 0.11.0
 
 - **Edit from your phone.** The editor now welcomes you on mobile instead of turning you
-  away — add photos, update your pages, and publish right from your phone. Your choice to
+  away: add photos, update your pages, and publish right from your phone. Your choice to
   keep editing is remembered, and the full-screen style wizard no longer gets in the way on
   a small screen (designing your site’s look is still easiest on a computer).
 
@@ -48,17 +48,17 @@ always preserved, and new features stay off until you turn them on.
 
 ## 0.9.0
 
-- **Show your exhibitions.** A new Exhibitions page lists your upcoming and past shows —
-  with venue, location, dates, and an optional link — grouped automatically so the next
-  show is always up top. Add and edit them under **Pages → Exhibitions**, then turn the
-  page on under **Design → Pages**. Off by default, so nothing changes until you add some.
+- **Show your exhibitions.** A new Exhibitions page lists your upcoming and past shows
+  (venue, location, dates, and an optional link), grouped so the next show is always up
+  top. Add and edit them under **Pages → Exhibitions**, then turn the page on under
+  **Design → Pages**. Off by default, so nothing changes until you add some.
 
 ## 0.8.0
 
 - **A friendlier first run.** Your editor’s Home now shows a short “Getting started”
-  checklist — style your site, add your first piece, write your About — that ticks each
-  item off on its own as you go and disappears once you’re set up (or whenever you dismiss
-  it). It replaces the old one-off prompts with a clearer, all-in-one starting point.
+  checklist (style your site, add your first piece, write your About) that ticks each item
+  off as you go and disappears once you’re set up (or whenever you dismiss it). It replaces
+  the old one-off prompts with a clearer, all-in-one starting point.
 
 ## 0.7.0
 
@@ -71,23 +71,23 @@ always preserved, and new features stay off until you turn them on.
 
 - **Polished link previews when you share your site.** When you (or anyone) shares your
   home page, a series, a news post, or your about page, it now shows a clean branded
-  preview card — your title and name on your site’s own colours — instead of a bare link.
+  preview card (your title and name on your site’s own colours) instead of a bare link.
   Individual artwork pages still preview with the actual artwork. It’s automatic; nothing
   to set up.
 
 ## 0.5.0
 
 - **Download your CV as a PDF.** Your CV page now has a “Download PDF” button that opens
-  your browser’s Save-as-PDF — using your site’s own fonts and accent colour, so the
+  your browser’s Save-as-PDF, using your site’s own fonts and accent colour, so the
   document looks like the rest of your site. It adds a clean letterhead (your name, and how
   to reach you) and drops the site’s menu and footer from the page. Nothing to set up.
 
 ## 0.4.0
 
 - **Followers can subscribe to your News.** Your site now publishes an RSS feed, so
-  visitors can follow your updates in a reader and get new posts automatically. A subtle
-  “RSS” link appears in your footer whenever the News page is turned on — nothing changes
-  if you don’t use News.
+  visitors can follow your updates in a reader and get new posts as you publish them. A
+  subtle “RSS” link appears in your footer whenever the News page is turned on. Nothing
+  changes if you don’t use News.
 
 ## 0.3.1
 
@@ -111,7 +111,7 @@ always preserved, and new features stay off until you turn them on.
 ## 0.2.0
 
 - **Redesigned editor.** The `/admin` editor has a new sidebar layout that groups
-  everything into clear sections — Home, Work, Design, Pages, News, and Settings — so
+  everything into clear sections (Home, Work, Design, Pages, News, and Settings) so
   it's easier to find what you're looking for.
 - **Home dashboard.** A new landing view in the editor gives you an at-a-glance starting
   point when you log in.
@@ -119,7 +119,7 @@ always preserved, and new features stay off until you turn them on.
   changes and confirms when your work is saved and publishing, with a prompt before you
   navigate away from unsaved edits.
 - **Updates panel.** A new **Updates** section lets you pull the latest template
-  improvements whenever you choose — always opt-in, and your content is never touched.
+  improvements whenever you choose. It’s always opt-in, and your content is never touched.
 - **Refreshed typography.** Updated to the Jost + Hanken Grotesk type pairing for a
   cleaner, bolder look.
 
