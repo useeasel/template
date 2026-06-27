@@ -21,8 +21,15 @@ export const TEMPLATE: RepoRef = { owner: 'useeasel', repo: 'template', branch: 
  * Paths the editor itself writes — the user's content + settings. The updater never
  * reads or overwrites these. THIS IS THE SAFETY CONTRACT: keep it in sync with
  * `PATHS` in content.ts if the editor ever writes a new content location.
+ *
+ * `.github/` is host-provisioning infrastructure, not template code: the provision
+ * worker commits a per-repo `.github/workflows/easel-pages.yml` to GitHub Pages sites,
+ * and the template itself ships no `.github/`. Without preserving it, the "remove
+ * stale template-code files" pass below would delete the Pages deploy workflow on
+ * every update — and because a push evaluates workflows as they exist in that commit,
+ * the deletion commit triggers no run, so the site silently stops rebuilding.
  */
-const PRESERVE_PREFIXES = ['src/content/', 'src/assets/', 'public/assets/'];
+const PRESERVE_PREFIXES = ['src/content/', 'src/assets/', 'public/assets/', '.github/'];
 const PRESERVE_EXACT = new Set(['public/admin/config.json']);
 
 function isUserContent(path: string): boolean {
