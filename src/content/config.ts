@@ -109,6 +109,23 @@ const posts = defineCollection({
     }),
 });
 
+// Exhibitions / shows — a structured list of upcoming and past shows. Lightweight
+// frontmatter only (no markdown body); the public page groups them by date.
+const exhibitions = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    venue: z.string().optional(),
+    location: z.string().optional(),
+    // ISO date strings (YYYY-MM-DD). startDate drives sort + upcoming/past grouping.
+    startDate: z.string(),
+    endDate: z.string().optional(),
+    url: z.string().url().optional(),
+    description: z.string().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
 const socialLink = z.object({
   label: z.string(),
   url: z.string().url(),
@@ -165,5 +182,6 @@ export const collections = {
   collections: seriesCollection,
   pages,
   posts,
+  exhibitions,
   site,
 };

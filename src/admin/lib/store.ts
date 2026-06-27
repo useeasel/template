@@ -12,6 +12,7 @@ import {
   type Artwork,
   type Series,
   type Post,
+  type Exhibition,
   type AboutPage,
   type ContactPage,
   type CvPage,
@@ -243,6 +244,54 @@ export async function savePost(gh: GitHub, p: Post, isNew: boolean): Promise<str
 
 export async function deletePost(gh: GitHub, p: Post): Promise<void> {
   await gh.commit([{ path: `${PATHS.posts}/${p.id}.md`, remove: true }], `Remove post: ${p.title}`);
+}
+
+// ---------- Exhibitions (shows) ----------
+
+export async function loadExhibitions(gh: GitHub): Promise<Exhibition[]> {
+  const entries = (await gh.listDir(PATHS.exhibitions)).filter((e) => e.name.endsWith('.md'));
+  const items = await Promise.all(
+    entries.map(async (e) => {
+      const file = await gh.getFile(e.path);
+      const { data } = parseFrontmatter(file?.text ?? '');
+      return {
+        id: e.name.replace(/\.md$/, ''),
+        title: data.title ?? 'Untitled',
+        venue: data.venue,
+        location: data.location,
+        startDate: data.startDate ?? '',
+        endDate: data.endDate,
+        url: data.url,
+        description: data.description,
+        draft: !!data.draft,
+      } as Exhibition;
+    }),
+  );
+  // Most recent / soonest first by start date.
+  return items.sort((a, b) => (a.startDate < b.startDate ? 1 : -1));
+}
+
+export async function saveExhibition(gh: GitHub, x: Exhibition, isNew: boolean): Promise<string> {
+  const id = isNew ? await uniqueId(gh, PATHS.exhibitions, slugify(x.title)) : x.id;
+  const md = toMarkdown(
+    {
+      title: x.title,
+      venue: x.venue,
+      location: x.location,
+      startDate: x.startDate,
+      endDate: x.endDate,
+      url: x.url,
+      description: x.description,
+      draft: x.draft,
+    },
+    '',
+  );
+  await gh.commit([{ path: `${PATHS.exhibitions}/${id}.md`, content: md }], `${isNew ? 'Add' : 'Update'} exhibition: ${x.title}`);
+  return id;
+}
+
+export async function deleteExhibition(gh: GitHub, x: Exhibition): Promise<void> {
+  await gh.commit([{ path: `${PATHS.exhibitions}/${x.id}.md`, remove: true }], `Remove exhibition: ${x.title}`);
 }
 
 // ---------- Pages ----------

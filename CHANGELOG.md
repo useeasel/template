@@ -7,6 +7,13 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.9.0
+
+- **Show your exhibitions.** A new Exhibitions page lists your upcoming and past shows —
+  with venue, location, dates, and an optional link — grouped automatically so the next
+  show is always up top. Add and edit them under **Pages → Exhibitions**, then turn the
+  page on under **Design → Pages**. Off by default, so nothing changes until you add some.
+
 ## 0.8.0
 
 - **A friendlier first run.** Your editor’s Home now shows a short “Getting started”

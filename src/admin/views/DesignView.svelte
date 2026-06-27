@@ -291,6 +291,7 @@
           <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.contact} /><span>Contact</span></label>
           <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.cv} /><span>CV</span></label>
           <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.press} /><span>Press</span></label>
+          <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.exhibitions} /><span>Exhibitions</span></label>
           <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.news} /><span>News</span></label>
         </div>
       </section>

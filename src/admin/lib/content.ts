@@ -10,6 +10,7 @@ export const PATHS = {
   series: 'src/content/collections',
   pages: 'src/content/pages',
   posts: 'src/content/posts',
+  exhibitions: 'src/content/exhibitions',
   settings: 'src/content/site/settings.json',
   assets: 'src/assets',
 };
@@ -40,6 +41,18 @@ export interface Post {
   cover?: string;
   draft: boolean;
   body: string;
+}
+
+export interface Exhibition {
+  id: string;
+  title: string;
+  venue?: string;
+  location?: string;
+  startDate: string; // YYYY-MM-DD
+  endDate?: string;
+  url?: string;
+  description?: string;
+  draft: boolean;
 }
 
 export interface Series {

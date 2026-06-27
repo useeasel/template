@@ -1,0 +1,77 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { withBase } from '../../lib/href';
+
+const settings = (await getEntry('site', 'settings'))!.data;
+const artist = settings.logoText || settings.siteTitle;
+
+// Build-time "today" (YYYY-MM-DD) for the upcoming/past split. Recomputed on each
+// rebuild, so a show moves to "Past" the next time the site builds after it ends.
+const now = new Date();
+const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+const all = (await getCollection('exhibitions')).filter((e) => !e.data.draft);
+const endOf = (e: (typeof all)[number]) => e.data.endDate || e.data.startDate;
+const upcoming = all.filter((e) => endOf(e) >= today).sort((a, b) => (a.data.startDate < b.data.startDate ? -1 : 1));
+const past = all.filter((e) => endOf(e) < today).sort((a, b) => (a.data.startDate < b.data.startDate ? 1 : -1));
+const groups = [
+  { heading: 'Upcoming', items: upcoming },
+  { heading: 'Past', items: past },
+].filter((g) => g.items.length > 0);
+
+const fmt = (iso: string) => {
+  // Parse as LOCAL midnight ('T00:00:00'); `new Date('YYYY-MM-DD')` would parse as
+  // UTC and render a day early in negative-offset timezones.
+  const d = new Date(`${iso}T00:00:00`);
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+const range = (e: (typeof all)[number]) =>
+  e.data.endDate && e.data.endDate !== e.data.startDate ? `${fmt(e.data.startDate)} – ${fmt(e.data.endDate)}` : fmt(e.data.startDate);
+---
+
+<Base pageTitle="Exhibitions" pageDescription={`Exhibitions and shows by ${artist}`} pageImage={withBase('/og/exhibitions.png')}>
+  <div class="ez-container ez-shows">
+    <h1>Exhibitions</h1>
+    {all.length === 0 && <p class="ez-shows__empty">No exhibitions listed yet — check back soon.</p>}
+    {groups.map((group) => (
+      <section class="ez-shows__group">
+        <h2 class="ez-shows__heading">{group.heading}</h2>
+        <ul class="ez-shows__list" role="list">
+          {group.items.map((e) => (
+            <li class="ez-shows__item">
+              <p class="ez-shows__when"><time datetime={e.data.startDate}>{range(e)}</time></p>
+              <h3 class="ez-shows__title">
+                {e.data.url ? <a href={e.data.url} rel="noopener" target="_blank">{e.data.title}</a> : e.data.title}
+              </h3>
+              {(e.data.venue || e.data.location) && (
+                <p class="ez-shows__where">{[e.data.venue, e.data.location].filter(Boolean).join(' · ')}</p>
+              )}
+              {e.data.description && <p class="ez-shows__desc">{e.data.description}</p>}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</Base>
+
+<style>
+  .ez-shows { max-width: 760px; }
+  .ez-shows__empty { color: var(--ez-stone); }
+  .ez-shows__group { margin-top: var(--ez-space-7); }
+  .ez-shows__heading {
+    font-size: var(--ez-text-xl);
+    border-bottom: var(--ez-border-width) solid var(--ez-border);
+    padding-bottom: var(--ez-space-2);
+    margin-bottom: var(--ez-space-4);
+  }
+  .ez-shows__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ez-space-5); }
+  .ez-shows__item { display: grid; gap: var(--ez-space-1); }
+  .ez-shows__when { color: var(--ez-stone); font-size: var(--ez-text-sm); margin: 0; }
+  .ez-shows__title { margin: 0; font-size: var(--ez-text-lg); }
+  .ez-shows__title a { text-decoration: none; color: var(--ez-ink); }
+  .ez-shows__title a:hover { color: var(--ez-blue); }
+  .ez-shows__where { margin: 0; font-weight: 700; }
+  .ez-shows__desc { margin: 0; color: var(--ez-stone); }
+</style>

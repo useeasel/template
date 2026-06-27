@@ -7,6 +7,7 @@
   } from '../lib/store';
   import { useShell } from '../lib/shell.svelte';
   import NewsView from './NewsView.svelte';
+  import ExhibitionsView from './ExhibitionsView.svelte';
 
   let {
     gh,
@@ -20,9 +21,9 @@
 
   const shell = useShell();
 
-  type Tab = 'about' | 'contact' | 'cv' | 'press' | 'news';
+  type Tab = 'about' | 'contact' | 'cv' | 'press' | 'exhibitions' | 'news';
   const isTab = (t: string | null): t is Tab =>
-    t === 'about' || t === 'contact' || t === 'cv' || t === 'press' || t === 'news';
+    t === 'about' || t === 'contact' || t === 'cv' || t === 'press' || t === 'exhibitions' || t === 'news';
   let tab = $state<Tab>(isTab(initialTab) ? initialTab : 'about');
   let loading = $state(true);
 
@@ -56,7 +57,7 @@
     return tab === 'about' ? about : tab === 'contact' ? contact : tab === 'cv' ? cv : press;
   }
 
-  const isDirty = () => !loading && tab !== 'news' && snap(current()) !== baseline[tab];
+  const isDirty = () => !loading && tab !== 'news' && tab !== 'exhibitions' && snap(current()) !== baseline[tab];
 
   async function save(): Promise<boolean> {
     try {
@@ -75,7 +76,7 @@
   }
 
   function discard() {
-    if (tab === 'news' || !baseline[tab]) return;
+    if (tab === 'news' || tab === 'exhibitions' || !baseline[tab]) return;
     const b = JSON.parse(baseline[tab]);
     if (tab === 'about') about = b;
     else if (tab === 'contact') contact = b;
@@ -86,7 +87,7 @@
   // Register the active form tab with the shell. News drives its own saves, so we
   // skip registration there (NewsView registers itself when an editor is open).
   $effect(() => {
-    if (tab === 'news') return;
+    if (tab === 'news' || tab === 'exhibitions') return;
     return shell.register({ isDirty, save, discard });
   });
 
@@ -100,6 +101,7 @@
     { id: 'contact', label: 'Contact' },
     { id: 'cv', label: 'CV' },
     { id: 'press', label: 'Press' },
+    { id: 'exhibitions', label: 'Exhibitions' },
     { id: 'news', label: 'News' },
   ];
 </script>
@@ -159,6 +161,8 @@
     </div>
   {/each}
   <button class="ez-btn" onclick={() => (press.press = [...press.press, { outlet: '', title: '' }])}>Add mention</button>
-{:else}
+{:else if tab === 'news'}
   <NewsView {gh} {notify} />
+{:else}
+  <ExhibitionsView {gh} {notify} />
 {/if}
