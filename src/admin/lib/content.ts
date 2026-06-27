@@ -61,6 +61,8 @@ export interface Exhibition {
   endDate?: string;
   url?: string;
   description?: string;
+  /** Solo vs group — splits the auto CV exhibitions section. Unset = combined. */
+  kind?: 'solo' | 'group';
   draft: boolean;
 }
 
@@ -140,6 +142,8 @@ export interface Settings {
   linksBio?: string;
   links?: { label: string; url: string; icon?: string; thumbnail?: string; featured?: boolean }[];
   searchEnabled?: boolean;
+  /** Generate the CV's exhibitions sections from the Exhibitions content. Off by default. */
+  cvAutoExhibitions?: boolean;
   /** Commissions page (toggled via design.pages.commissions). */
   commissionsMode?: 'form' | 'vgen';
   commissionsIntro?: string;

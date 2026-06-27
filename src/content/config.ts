@@ -140,6 +140,9 @@ const exhibitions = defineCollection({
     endDate: z.string().optional(),
     url: z.string().url().optional(),
     description: z.string().optional(),
+    // Solo vs group, used to split the auto-generated CV exhibitions section.
+    // Unset entries fall under a single "Exhibitions" heading.
+    kind: z.enum(['solo', 'group']).optional(),
     draft: z.boolean().default(false),
   }),
 });
@@ -225,6 +228,10 @@ const site = defineCollection({
     commissionsIntro: z.string().optional(),
     commissionsTerms: z.string().optional(),
     commissionsVgenUrl: z.string().url().optional(),
+    // When on, the CV page's exhibitions sections are generated from the
+    // Exhibitions you've entered (split into solo/group), so the CV stays current
+    // without retyping. Off by default, so existing hand-typed CVs are unchanged.
+    cvAutoExhibitions: z.boolean().default(false),
     // Client-side search (Pagefind). When on, a search box shows in the header and
     // visitors can search across your work, series, and news. Off by default.
     searchEnabled: z.boolean().default(false),

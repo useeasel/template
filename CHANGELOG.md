@@ -7,6 +7,14 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.30.0
+
+- **A CV that keeps itself current.** Turn on "Fill my CV's exhibitions from my Exhibitions
+  list" and your CV builds its solo and group show sections from the exhibitions you already
+  track, so adding a show updates your CV too. Mark each show as solo or group when you add
+  it. The styled Download PDF still works the same. Off by default, so a hand-typed CV stays
+  exactly as you wrote it.
+
 ## 0.29.0
 
 - **Take commissions properly.** Turn on a Commissions page that asks for what you need up

@@ -109,8 +109,16 @@
       <label class="ez-field"><span class="ez-label">End date (optional)</span>
         <input class="ez-input" type="date" bind:value={editing.endDate} /></label>
     </div>
-    <label class="ez-field"><span class="ez-label">Link (optional)</span>
-      <input class="ez-input" bind:value={editing.url} placeholder="https://gallery.com/show" /></label>
+    <div class="ez-row">
+      <label class="ez-field"><span class="ez-label">Type (for your CV)</span>
+        <select class="ez-input" bind:value={editing.kind}>
+          <option value={undefined}>Not specified</option>
+          <option value="solo">Solo show</option>
+          <option value="group">Group show</option>
+        </select></label>
+      <label class="ez-field"><span class="ez-label">Link (optional)</span>
+        <input class="ez-input" bind:value={editing.url} placeholder="https://gallery.com/show" /></label>
+    </div>
     <label class="ez-field"><span class="ez-label">Description (optional)</span>
       <textarea class="ez-input" rows="3" bind:value={editing.description}></textarea>
       <span class="ez-help">A short line about the show.</span></label>

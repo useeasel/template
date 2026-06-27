@@ -228,6 +228,13 @@
   </div>
 
   <div class="ez-block">
+    <strong>CV</strong>
+    <p class="ez-help">Keep your CV current on its own. When this is on, your CV's exhibitions sections are built from the Exhibitions you add, split into solo and group shows.</p>
+    <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={s.cvAutoExhibitions} />
+      <span>Fill my CV's exhibitions from my Exhibitions list</span></label>
+  </div>
+
+  <div class="ez-block">
     <strong>Commissions</strong>
     <p class="ez-help">Turn the Commissions page on under <strong>Design</strong>. It can show a request form that asks for the details you need, or point straight to your vGen page.</p>
     <label class="ez-field"><span class="ez-label">How people request a commission</span>

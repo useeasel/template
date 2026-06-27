@@ -1,16 +1,43 @@
 ---
-import { getEntry } from 'astro:content';
+import { getEntry, getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 
 const cvPage = await getEntry('pages', 'cv');
 const data = cvPage!.data;
-const groups = data.cv ?? [];
+const manualGroups = data.cv ?? [];
 
 // Identity for the printable letterhead. The CV is the one page artists hand out
 // as a document, so it carries a proper header (name + how to reach them) that the
 // other pages don't need. Everything below inherits the artist's --ez-* design
 // tokens, so the PDF matches their site's fonts and accent colour automatically.
 const settings = (await getEntry('site', 'settings'))!.data;
+
+// Living CV: when turned on, build the exhibitions sections from the artist's
+// Exhibitions content (split solo/group) so the CV stays current without retyping.
+// Off by default — existing hand-typed CVs are untouched.
+type CvGroup = { heading: string; items: { year?: string; text: string }[] };
+let autoGroups: CvGroup[] = [];
+if (settings.cvAutoExhibitions) {
+  const shows = (await getCollection('exhibitions'))
+    .filter((x) => !x.data.draft)
+    .sort((a, b) => (a.data.startDate < b.data.startDate ? 1 : -1));
+  const toItem = (x: (typeof shows)[number]) => ({
+    year: (x.data.startDate || '').slice(0, 4) || undefined,
+    text: [x.data.title, x.data.venue, x.data.location].filter(Boolean).join(', '),
+  });
+  const sections: [string, 'solo' | 'group' | 'other'][] = [
+    ['Solo Exhibitions', 'solo'],
+    ['Group Exhibitions', 'group'],
+    ['Exhibitions', 'other'],
+  ];
+  autoGroups = sections
+    .map(([heading, kind]) => ({
+      heading,
+      items: shows.filter((x) => (x.data.kind ?? 'other') === kind).map(toItem),
+    }))
+    .filter((g) => g.items.length > 0);
+}
+const groups = [...manualGroups, ...autoGroups];
 const contact = await getEntry('pages', 'contact');
 const artistName = settings.logoText || settings.siteTitle;
 const tagline = settings.tagline;

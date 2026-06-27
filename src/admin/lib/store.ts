@@ -313,6 +313,7 @@ export async function loadExhibitions(gh: GitHub): Promise<Exhibition[]> {
         endDate: data.endDate,
         url: data.url,
         description: data.description,
+        kind: data.kind === 'solo' || data.kind === 'group' ? data.kind : undefined,
         draft: !!data.draft,
       } as Exhibition;
     }),
@@ -332,6 +333,7 @@ export async function saveExhibition(gh: GitHub, x: Exhibition, isNew: boolean):
       endDate: x.endDate,
       url: x.url,
       description: x.description,
+      kind: x.kind,
       draft: x.draft,
     },
     '',
@@ -447,6 +449,7 @@ export async function loadSettings(gh: GitHub): Promise<Settings> {
     linksBio: data.linksBio,
     links: Array.isArray(data.links) ? data.links : [],
     searchEnabled: !!data.searchEnabled,
+    cvAutoExhibitions: !!data.cvAutoExhibitions,
     commissionsMode: data.commissionsMode === 'vgen' ? 'vgen' : 'form',
     commissionsIntro: data.commissionsIntro,
     commissionsTerms: data.commissionsTerms,
