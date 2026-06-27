@@ -7,6 +7,14 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.27.0
+
+- **Start with the work you already have.** Instead of a blank page, use Import from
+  Instagram to bring in posts from the archive Instagram lets you download. Your captions
+  become titles and descriptions, and the post date fills in the year, all in the same
+  review list where you can tidy them up before publishing. Nothing connects to Instagram
+  and nothing is posted on your behalf; you only ever import a file you downloaded yourself.
+
 ## 0.26.0
 
 - **Add a whole folder at once.** Drop in many photos and they line up in a review list

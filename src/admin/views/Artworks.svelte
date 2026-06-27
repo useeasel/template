@@ -2,6 +2,7 @@
   import type { GitHub } from '../lib/github';
   import { resolveAssetPath, type Artwork, type Series } from '../lib/content';
   import { loadArtworks, deleteArtwork, reorderArtworks, bulkAddArtworksDetailed, type BulkDraft } from '../lib/store';
+  import { parseInstagramExport } from '../lib/instagram';
   import { useShell } from '../lib/shell.svelte';
   import ArtworkForm from './ArtworkForm.svelte';
 
@@ -30,6 +31,7 @@
   // Bulk staging queue (multi-file add with per-item edit + reorder before publish).
   let queue = $state<QueueItem[]>([]);
   let reading = $state(false);
+  let igInput = $state<HTMLInputElement | null>(null);
 
   // --- pointer-based drag reordering ---
   let dragId = $state<string | null>(null);
@@ -202,6 +204,35 @@
     reading = false;
   }
 
+  async function onInstagramPick(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    reading = true;
+    try {
+      const items = await parseInstagramExport(file);
+      if (!items.length) {
+        notify('No photos found in that file. Pick the .zip Instagram emailed you.', 'error');
+      } else {
+        queue = [
+          ...queue,
+          ...items.map((it) => ({
+            file: it.file,
+            url: URL.createObjectURL(it.file),
+            title: it.title,
+            year: it.year,
+            medium: undefined,
+            alt: it.alt,
+          })),
+        ];
+      }
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Could not read that export file.', 'error');
+    }
+    reading = false;
+  }
+
   function moveQueue(i: number, dir: number) {
     const j = i + dir;
     if (j < 0 || j >= queue.length) return;
@@ -291,8 +322,18 @@
         bind:this={bulkInput}
         onchange={onBulkPick}
       />
+      <input
+        type="file"
+        accept=".zip,application/zip"
+        class="ez-visually-hidden"
+        bind:this={igInput}
+        onchange={onInstagramPick}
+      />
+      <button class="ez-btn ez-btn--ghost" onclick={() => igInput?.click()} disabled={reading}>
+        {reading ? 'Reading…' : 'Import from Instagram'}
+      </button>
       <button class="ez-btn ez-btn--ghost" onclick={() => bulkInput?.click()} disabled={reading}>
-        {reading ? 'Reading…' : 'Add many photos'}
+        Add many photos
       </button>
       <button class="ez-btn ez-btn--primary" onclick={() => (adding = true)}>Add artwork</button>
     </div>
@@ -304,6 +345,7 @@
     <div class="ez-empty">
       <p>No artwork yet.</p>
       <button class="ez-btn ez-btn--primary" onclick={() => (adding = true)}>Add your first piece</button>
+      <p class="ez-help">Already posting elsewhere? Use <strong>Import from Instagram</strong> above to bring in the work you've downloaded from Instagram, or <strong>Add many photos</strong> to drop in a folder. You can start empty too.</p>
     </div>
   {:else}
     <div class="ez-grid">
