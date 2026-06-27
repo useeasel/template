@@ -205,7 +205,8 @@
         <div class="ez-row">
           <label class="ez-field"><span class="ez-label">Gallery layout</span>
             <select class="ez-input" bind:value={d.gallery.layout}>
-              <option value="grid">Even grid</option><option value="masonry">Masonry</option></select></label>
+              <option value="grid">Even grid</option><option value="masonry">Masonry</option>
+              <option value="cinematic">Cinematic (one per row)</option><option value="fullbleed">Full-bleed</option></select></label>
           <label class="ez-field"><span class="ez-label">Piece size</span>
             <select class="ez-input" bind:value={d.gallery.size}>
               <option value="small">Small (more per row)</option><option value="medium">Medium</option><option value="large">Large (fewer per row)</option></select></label>

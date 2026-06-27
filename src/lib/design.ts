@@ -41,7 +41,7 @@ export interface DesignTokens {
   background: { type: 'solid' | 'texture' | 'none' };
   thumb: { fit: 'cover' | 'contain'; hover: 'none' | 'zoom' | 'lift' };
   gallery: {
-    layout: 'grid' | 'masonry';
+    layout: 'grid' | 'masonry' | 'cinematic' | 'fullbleed';
     /** Target size of each piece; columns auto-fit to the window. */
     size: 'small' | 'medium' | 'large';
     gutter: 'tight' | 'normal' | 'loose';

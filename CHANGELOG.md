@@ -7,6 +7,13 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.39.0
+
+- **Two new gallery looks.** Under Design, Gallery layout now offers Cinematic, one piece
+  per row, large and centered for a slow scroll, and Full-bleed, where each image runs
+  edge to edge across the screen. Your current grid or masonry layout stays put until you
+  switch.
+
 ## 0.38.0
 
 - **Let people support you.** Add Ko-fi, Buy Me a Coffee, Patreon, or PayPal.me links under

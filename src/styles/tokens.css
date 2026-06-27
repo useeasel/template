@@ -349,6 +349,38 @@ img {
   grid-column: span 2;
 }
 
+/* Cinematic: one large piece per row, centered in a comfortable reading width,
+   with generous breathing room — a slow, scroll-through presentation. */
+:root.ez-layout-cinematic .ez-portfolio {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--ez-gallery-gap, var(--ez-gap)) * 2.5);
+  max-width: 60rem;
+  margin-inline: auto;
+}
+:root.ez-layout-cinematic .ez-artcard__img { width: 100%; }
+
+/* Full-bleed: edge-to-edge, one piece per row, breaking out of the container so
+   each image spans the whole viewport. No gaps — images stack like a slideshow. */
+:root.ez-layout-fullbleed .ez-portfolio {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+:root.ez-layout-fullbleed .ez-artcard {
+  border: 0;
+  border-radius: 0;
+}
+:root.ez-layout-fullbleed .ez-artcard__trigger { border-radius: 0; border-bottom: 0; }
+:root.ez-layout-fullbleed .ez-artcard__img { width: 100%; }
+:root.ez-layout-fullbleed .ez-artcard__body {
+  max-width: 60rem;
+  margin-inline: auto;
+  width: 100%;
+}
+
 /* Caption display: under the image (default), reveal on hover, or hidden. */
 :root.ez-cap-hidden .ez-artcard__body { display: none; }
 :root.ez-cap-hover .ez-artcard { position: relative; }
