@@ -30,6 +30,23 @@ const artworks = defineCollection({
       // shows a Buy button; otherwise an Inquire button. Only acts when the
       // site's `sellEnabled` setting is on. Easel never handles money itself.
       buyLink: z.string().url().optional(),
+      // Optional purchase options — sizes, print editions, or tiers. Each carries its
+      // own price and (optional) external checkout link, so a piece can offer e.g.
+      // "A3 print — $40" and "Original — $1,800" side by side. When set (and selling is
+      // on), the work page lists these instead of the single price/buyLink above. An
+      // option with no link falls back to the inquiry flow. Easel never handles money.
+      options: z
+        .array(
+          z.object({
+            label: z.string(),
+            price: z.string().optional(),
+            buyLink: z.string().url().optional(),
+            // e.g. "Edition of 25" or "3 of 25".
+            edition: z.string().optional(),
+            soldOut: z.boolean().default(false),
+          }),
+        )
+        .default([]),
       // Required for SEO + accessibility; prompted in the CMS.
       alt: z.string(),
       // Optional time-based media: a YouTube or Vimeo URL. The still image above is

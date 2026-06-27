@@ -187,6 +187,24 @@
       <input class="ez-input" bind:value={form.buyLink} placeholder="https://… (Stripe, Gumroad, Etsy, Big Cartel)" />
       <span class="ez-help">Paste a checkout link and this piece gets a Buy button. Leave it blank for an Inquire button instead. Turn buttons on under Settings → Selling.</span>
     </label>
+
+    <div class="ez-block">
+      <div class="ez-block__head" style="margin-top:.25rem"><strong>Sizes / editions (optional)</strong>
+        <button class="ez-btn ez-btn--sm" type="button" onclick={() => (form.options = [...(form.options ?? []), { label: '', price: '', buyLink: '', edition: '', soldOut: false }])}>Add option</button></div>
+      <p class="ez-help">List print sizes or editions, each with its own price and checkout link, like "A3 print, $40" and "Original, $1,800". Shown on the piece's page when selling is on.</p>
+      {#each form.options ?? [] as opt, i (i)}
+        <div class="ez-row">
+          <input class="ez-input" style="max-width:11rem" bind:value={opt.label} placeholder="A3 print" />
+          <input class="ez-input" style="max-width:7rem" bind:value={opt.price} placeholder="$40" />
+          <input class="ez-input" bind:value={opt.buyLink} placeholder="https://… checkout" />
+          <button class="ez-btn ez-btn--sm ez-btn--ghost" type="button" onclick={() => (form.options = form.options.filter((_, j) => j !== i))} aria-label="Remove">×</button>
+        </div>
+        <div class="ez-row" style="margin:-0.25rem 0 0.5rem; gap:0.75rem; align-items:center">
+          <input class="ez-input" style="max-width:14rem" bind:value={opt.edition} placeholder='Edition note (e.g. "3 of 25")' />
+          <label class="ez-field--check" style="margin:0"><input type="checkbox" bind:checked={opt.soldOut} /><span>Sold out</span></label>
+        </div>
+      {/each}
+    </div>
   {/if}
 
   <label class="ez-field">

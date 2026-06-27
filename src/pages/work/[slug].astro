@@ -146,7 +146,26 @@ const jsonLd = [
         {a.status === 'available' && a.price && <p class="ez-work__price">{a.price}</p>}
 
         {settings.sellEnabled && (a.status === 'available' || a.status === 'inquire') && (
-          a.status === 'available' && a.buyLink ? (
+          a.options && a.options.length > 0 ? (
+            <ul class="ez-work__options" role="list">
+              {a.options.map((opt) => (
+                <li class="ez-work__option">
+                  <div class="ez-work__optinfo">
+                    <span class="ez-work__optlabel">{opt.label}</span>
+                    {opt.edition && <span class="ez-work__optedition">{opt.edition}</span>}
+                  </div>
+                  {opt.price && <span class="ez-work__optprice">{opt.price}</span>}
+                  {opt.soldOut ? (
+                    <span class="ez-work__optsold">Sold</span>
+                  ) : opt.buyLink ? (
+                    <a class="ez-btn ez-btn--sm ez-btn--primary" href={opt.buyLink} rel="noopener" target="_blank">Buy</a>
+                  ) : (
+                    <a class="ez-btn ez-btn--sm" href={`${withBase('/contact/')}?piece=${encodeURIComponent(`${a.title} — ${opt.label}`)}`}>Inquire</a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : a.status === 'available' && a.buyLink ? (
             <a class="ez-btn ez-btn--primary ez-work__buy" href={a.buyLink} rel="noopener" target="_blank">Buy this piece</a>
           ) : (
             <a class="ez-btn ez-btn--primary ez-work__buy" href={`${withBase('/contact/')}?piece=${encodeURIComponent(a.title)}`}>Inquire about this piece</a>
@@ -297,6 +316,28 @@ const jsonLd = [
     font-size: var(--ez-text-lg);
   }
   .ez-work__buy { display: inline-block; margin-top: var(--ez-space-4); text-decoration: none; }
+  .ez-work__options {
+    list-style: none;
+    margin: var(--ez-space-4) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ez-space-2);
+  }
+  .ez-work__option {
+    display: flex;
+    align-items: center;
+    gap: var(--ez-space-3);
+    padding: var(--ez-space-3);
+    border: var(--ez-border-width) solid var(--ez-border);
+    border-radius: var(--ez-radius);
+    background: var(--ez-white);
+  }
+  .ez-work__optinfo { display: flex; flex-direction: column; margin-right: auto; }
+  .ez-work__optlabel { font-weight: 700; }
+  .ez-work__optedition { font-size: var(--ez-text-sm); color: var(--ez-stone); }
+  .ez-work__optprice { font-family: var(--ez-font-display); font-weight: 700; color: var(--ez-blue); }
+  .ez-work__optsold { font-size: var(--ez-text-sm); font-weight: 700; color: var(--ez-stone); text-transform: uppercase; }
   .ez-work__body { margin-top: var(--ez-space-5); line-height: 1.7; }
   .ez-work__body :global(p) { margin: 0 0 var(--ez-space-3); }
   .ez-work__nav {

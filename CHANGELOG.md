@@ -7,6 +7,14 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.36.0
+
+- **Show sizes, editions, and prices clearly.** A piece can now list several options, like
+  "A3 print, $40" and "Original, $1,800", each with its own price, checkout link, and an
+  edition note such as "3 of 25". Mark an option sold out and it shows as sold instead of a
+  buy button. Each Buy link goes to your own checkout; Easel never handles the money. Works
+  once selling is turned on under Settings.
+
 ## 0.35.0
 
 - **Help search engines understand your shows and news.** Your exhibitions now carry the

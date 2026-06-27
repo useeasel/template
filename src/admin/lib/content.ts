@@ -30,6 +30,8 @@ export interface Artwork {
   /** Optional external buy link (Stripe/Gumroad/Etsy/…). Shown as a Buy button
    *  on available pieces when the site's `sellEnabled` setting is on. */
   buyLink?: string;
+  /** Purchase options (sizes/editions/tiers), each with its own price + checkout link. */
+  options?: { label: string; price?: string; buyLink?: string; edition?: string; soldOut?: boolean }[];
   alt: string;
   collection?: string; // series id
   /** Optional YouTube/Vimeo URL — plays on the artwork's own page. */
