@@ -11,48 +11,80 @@ import { hostConfig } from '../lib/host';
 interface Props {
   heading?: string;
   blurb?: string;
+  /** 'netlify' (built-in backend) or an external provider's hosted form. */
+  provider?: 'netlify' | 'buttondown' | 'mailchimp' | 'convertkit';
+  /** The provider's form action URL (required when provider isn't 'netlify'). */
+  actionUrl?: string;
 }
-const { heading, blurb } = Astro.props;
+const { heading, blurb, provider = 'netlify', actionUrl } = Astro.props;
 const { useNetlifyForms, formEndpoint } = hostConfig();
+
+// Use an external provider only when one is chosen AND an action URL is present;
+// otherwise fall back to the built-in form backend (Netlify Forms / FormSubmit).
+const external = provider !== 'netlify' && !!actionUrl;
+// Each provider names its email field differently.
+const emailField =
+  provider === 'mailchimp' ? 'EMAIL' : provider === 'convertkit' ? 'email_address' : 'email';
 ---
 
 <section class="ez-newsletter" aria-label="Newsletter signup">
   <div class="ez-newsletter__inner">
     <h2 class="ez-newsletter__title">{heading || 'Stay in the loop'}</h2>
     {blurb && <p class="ez-newsletter__blurb">{blurb}</p>}
-    <form
-      name="newsletter"
-      method="POST"
-      action={useNetlifyForms ? '/?subscribed=1' : formEndpoint}
-      class="ez-newsletter__form"
-      {...(useNetlifyForms ? { 'data-netlify': 'true', 'netlify-honeypot': 'bot-field' } : {})}
-    >
-      {useNetlifyForms ? (
-        <>
-          <input type="hidden" name="form-name" value="newsletter" />
-          <p class="ez-visually-hidden" aria-hidden="true">
-            <label>Do not fill this out: <input name="bot-field" /></label>
-          </p>
-        </>
-      ) : (
-        <>
-          <input type="hidden" name="_subject" value="New newsletter signup" />
-          <input type="hidden" name="_captcha" value="false" />
-          <input type="text" name="_honey" class="ez-visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
-        </>
-      )}
-      <label class="ez-visually-hidden" for="newsletter-email">Email address</label>
-      <input
-        class="ez-input ez-newsletter__email"
-        id="newsletter-email"
-        type="email"
-        name="email"
-        placeholder="you@example.com"
-        autocomplete="email"
-        required
-      />
-      <button type="submit" class="ez-btn ez-btn--primary">Subscribe</button>
-    </form>
+    {external ? (
+      <form
+        method="POST"
+        action={actionUrl}
+        target="_blank"
+        class="ez-newsletter__form"
+      >
+        <label class="ez-visually-hidden" for="newsletter-email">Email address</label>
+        <input
+          class="ez-input ez-newsletter__email"
+          id="newsletter-email"
+          type="email"
+          name={emailField}
+          placeholder="you@example.com"
+          autocomplete="email"
+          required
+        />
+        <button type="submit" class="ez-btn ez-btn--primary">Subscribe</button>
+      </form>
+    ) : (
+      <form
+        name="newsletter"
+        method="POST"
+        action={useNetlifyForms ? '/?subscribed=1' : formEndpoint}
+        class="ez-newsletter__form"
+        {...(useNetlifyForms ? { 'data-netlify': 'true', 'netlify-honeypot': 'bot-field' } : {})}
+      >
+        {useNetlifyForms ? (
+          <>
+            <input type="hidden" name="form-name" value="newsletter" />
+            <p class="ez-visually-hidden" aria-hidden="true">
+              <label>Do not fill this out: <input name="bot-field" /></label>
+            </p>
+          </>
+        ) : (
+          <>
+            <input type="hidden" name="_subject" value="New newsletter signup" />
+            <input type="hidden" name="_captcha" value="false" />
+            <input type="text" name="_honey" class="ez-visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          </>
+        )}
+        <label class="ez-visually-hidden" for="newsletter-email">Email address</label>
+        <input
+          class="ez-input ez-newsletter__email"
+          id="newsletter-email"
+          type="email"
+          name="email"
+          placeholder="you@example.com"
+          autocomplete="email"
+          required
+        />
+        <button type="submit" class="ez-btn ez-btn--primary">Subscribe</button>
+      </form>
+    )}
   </div>
 </section>
 

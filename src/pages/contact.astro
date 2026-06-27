@@ -87,7 +87,12 @@ const { useNetlifyForms, formEndpoint } = hostConfig();
     )}
 
     {settings.newsletterEnabled && (
-      <NewsletterSignup heading={settings.newsletterHeading} blurb={settings.newsletterBlurb} />
+      <NewsletterSignup
+        heading={settings.newsletterHeading}
+        blurb={settings.newsletterBlurb}
+        provider={settings.newsletterProvider}
+        actionUrl={settings.newsletterActionUrl}
+      />
     )}
   </div>
 

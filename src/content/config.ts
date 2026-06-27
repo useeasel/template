@@ -134,6 +134,19 @@ const exhibitions = defineCollection({
   }),
 });
 
+// Testimonials / praise — short quotes about the artist or their work. Frontmatter
+// only (no body); shown as a section on the About page when any exist.
+const testimonials = defineCollection({
+  type: 'content',
+  schema: z.object({
+    quote: z.string(),
+    author: z.string(),
+    // Who they are / where it ran (e.g. "Collector", "Frieze").
+    role: z.string().optional(),
+    order: z.number().default(0),
+  }),
+});
+
 const socialLink = z.object({
   label: z.string(),
   url: z.string().url(),
@@ -193,10 +206,15 @@ const site = defineCollection({
     // (Buy when the piece carries a buyLink, otherwise a prefilled contact link).
     // Off by default, so existing sites are unchanged until the artist opts in.
     sellEnabled: z.boolean().default(false),
-    // Newsletter signup (Netlify Forms). When enabled, a signup block renders.
+    // Newsletter signup. When enabled, a signup block renders on the contact page.
     newsletterEnabled: z.boolean().default(false),
     newsletterHeading: z.string().optional(),
     newsletterBlurb: z.string().optional(),
+    // Where signups go. 'netlify' = the built-in form backend (Netlify Forms or
+    // FormSubmit). The others post straight to that provider's hosted form using
+    // the paste-in action URL, so signups land directly in the artist's list.
+    newsletterProvider: z.enum(['netlify', 'buttondown', 'mailchimp', 'convertkit']).default('netlify'),
+    newsletterActionUrl: z.string().url().optional(),
     // Power-user escape hatches (the artist's own site).
     customCss: z.string().optional(),
     customCode: z.string().optional(),
@@ -209,5 +227,6 @@ export const collections = {
   pages,
   posts,
   exhibitions,
+  testimonials,
   site,
 };

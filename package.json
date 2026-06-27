@@ -1,7 +1,7 @@
 {
   "name": "easel-template",
   "type": "module",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "private": true,
   "description": "Easel portfolio template — a Bauhaus-styled Astro static site for artists, editable via the custom Easel editor at /admin.",
   "scripts": {
@@ -20,6 +20,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "astro": "^5.1.0",
     "js-yaml": "^4.1.0",
+    "qrcode": "^1.5.4",
     "satori": "^0.26.0",
     "sharp": "^0.33.5",
     "svelte": "^5.0.0"

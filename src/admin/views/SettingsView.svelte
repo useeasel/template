@@ -37,6 +37,23 @@
   let loading = $state(true);
   let savedJson = $state('');
 
+  // Editor-only QR generator: make a downloadable code for a gallery placard or
+  // business card that points at the site (or any specific piece's URL). Runs
+  // entirely client-side; nothing is saved to the site.
+  let qrTarget = $state(typeof location !== 'undefined' ? location.origin : '');
+  let qrImg = $state('');
+  let qrBusy = $state(false);
+  async function generateQr() {
+    qrBusy = true;
+    try {
+      const QRCode = (await import('qrcode')).default as any;
+      qrImg = await QRCode.toDataURL(qrTarget || location.origin, { width: 600, margin: 2 });
+    } catch (e) {
+      notify('Could not make a QR code from that link.', 'error');
+    }
+    qrBusy = false;
+  }
+
   const isDirty = () => !loading && JSON.stringify($state.snapshot(s)) !== savedJson;
 
   async function load() {
@@ -157,6 +174,19 @@
         <input class="ez-input" bind:value={s.newsletterHeading} placeholder="Stay in the loop" /></label>
       <label class="ez-field"><span class="ez-label">Short blurb</span>
         <input class="ez-input" bind:value={s.newsletterBlurb} placeholder="The occasional note about new work and shows." /></label>
+      <label class="ez-field"><span class="ez-label">Where signups go</span>
+        <select class="ez-input" bind:value={s.newsletterProvider}>
+          <option value="netlify">My inbox / Netlify (built in)</option>
+          <option value="buttondown">Buttondown</option>
+          <option value="mailchimp">Mailchimp</option>
+          <option value="convertkit">Kit (ConvertKit)</option>
+        </select>
+        <span class="ez-help">Built in needs no setup. Pick a provider to send signups straight into that mailing list instead.</span></label>
+      {#if s.newsletterProvider && s.newsletterProvider !== 'netlify'}
+        <label class="ez-field"><span class="ez-label">Form address from {s.newsletterProvider}</span>
+          <input class="ez-input ez-mono" bind:value={s.newsletterActionUrl} placeholder="https://…" />
+          <span class="ez-help">In your provider, create an embedded/hosted signup form and copy its form action URL here.</span></label>
+      {/if}
     {/if}
   </div>
 
@@ -165,6 +195,22 @@
     <p class="ez-help">See how many people visit, privately — no cookie banner needed. Turn on Web Analytics in your Cloudflare dashboard, then paste the token here.</p>
     <label class="ez-field"><span class="ez-label">Cloudflare Web Analytics token</span>
       <input class="ez-input ez-mono" bind:value={s.cfAnalyticsToken} placeholder="abc123…" /></label>
+  </div>
+
+  <div class="ez-block">
+    <strong>QR code</strong>
+    <p class="ez-help">Make a QR code for a show wall, business card, or print. It points wherever you like, your site by default, or paste a single piece's web address. This is just a tool; nothing here changes your site.</p>
+    <label class="ez-field"><span class="ez-label">Link the code opens</span>
+      <input class="ez-input ez-mono" bind:value={qrTarget} placeholder="https://your-site.com" /></label>
+    <div class="ez-row">
+      <button class="ez-btn ez-btn--sm" onclick={generateQr} disabled={qrBusy}>{qrBusy ? 'Making…' : 'Make QR code'}</button>
+      {#if qrImg}
+        <a class="ez-btn ez-btn--sm ez-btn--primary" href={qrImg} download="qr-code.png">Download PNG</a>
+      {/if}
+    </div>
+    {#if qrImg}
+      <img src={qrImg} alt="QR code preview" style="width:160px;height:160px;margin-top:.75rem;border:var(--ez-border-width) solid var(--ez-border)" />
+    {/if}
   </div>
 
   <div class="ez-block">

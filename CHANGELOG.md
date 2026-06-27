@@ -7,6 +7,18 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.18.0
+
+- **Testimonials on your About page.** Add short quotes about you or your work under Pages,
+  Testimonials, and they appear in a Praise section on your About page. Nothing shows until
+  you add one.
+- **Send newsletter signups to your mailing list.** The signup form can now post straight to
+  Buttondown, Mailchimp, or Kit (ConvertKit) instead of your inbox. Pick your provider under
+  Settings and paste in your form address. The built-in option still works with no setup.
+- **QR codes.** Make a QR code for a gallery wall, business card, or print, pointing at your
+  site or any single piece, and download it as an image. It's a tool in Settings; it doesn't
+  change your site.
+
 ## 0.17.0
 
 - **A downloadable press kit.** Turn on a Press kit page that gathers your name, bio,

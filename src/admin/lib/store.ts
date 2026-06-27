@@ -13,6 +13,7 @@ import {
   type Series,
   type Post,
   type Exhibition,
+  type Testimonial,
   type AboutPage,
   type ContactPage,
   type CvPage,
@@ -313,6 +314,40 @@ export async function deleteExhibition(gh: GitHub, x: Exhibition): Promise<void>
   await gh.commit([{ path: `${PATHS.exhibitions}/${x.id}.md`, remove: true }], `Remove exhibition: ${x.title}`);
 }
 
+// ---------- Testimonials (praise) ----------
+
+export async function loadTestimonials(gh: GitHub): Promise<Testimonial[]> {
+  const entries = (await gh.listDir(PATHS.testimonials)).filter((e) => e.name.endsWith('.md'));
+  const items = await Promise.all(
+    entries.map(async (e) => {
+      const file = await gh.getFile(e.path);
+      const { data } = parseFrontmatter(file?.text ?? '');
+      return {
+        id: e.name.replace(/\.md$/, ''),
+        quote: data.quote ?? '',
+        author: data.author ?? '',
+        role: data.role,
+        order: typeof data.order === 'number' ? data.order : 0,
+      } as Testimonial;
+    }),
+  );
+  return items.sort((a, b) => a.order - b.order);
+}
+
+export async function saveTestimonial(gh: GitHub, t: Testimonial, isNew: boolean): Promise<string> {
+  const id = isNew ? await uniqueId(gh, PATHS.testimonials, slugify(t.author || t.quote.slice(0, 24))) : t.id;
+  const md = toMarkdown(
+    { quote: t.quote, author: t.author, role: t.role, order: t.order },
+    '',
+  );
+  await gh.commit([{ path: `${PATHS.testimonials}/${id}.md`, content: md }], `${isNew ? 'Add' : 'Update'} testimonial: ${t.author}`);
+  return id;
+}
+
+export async function deleteTestimonial(gh: GitHub, t: Testimonial): Promise<void> {
+  await gh.commit([{ path: `${PATHS.testimonials}/${t.id}.md`, remove: true }], `Remove testimonial: ${t.author}`);
+}
+
 // ---------- Pages ----------
 
 async function loadPage(gh: GitHub, name: string): Promise<{ data: Record<string, any>; body: string }> {
@@ -386,6 +421,8 @@ export async function loadSettings(gh: GitHub): Promise<Settings> {
     newsletterEnabled: !!data.newsletterEnabled,
     newsletterHeading: data.newsletterHeading,
     newsletterBlurb: data.newsletterBlurb,
+    newsletterProvider: data.newsletterProvider ?? 'netlify',
+    newsletterActionUrl: data.newsletterActionUrl,
     customCss: data.customCss,
     customCode: data.customCode,
     design: data.design,

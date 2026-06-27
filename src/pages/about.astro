@@ -1,5 +1,5 @@
 ---
-import { getEntry } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import { withBase } from '../lib/href';
@@ -7,6 +7,10 @@ import { withBase } from '../lib/href';
 const page = await getEntry('pages', 'about');
 const { Content } = await page!.render();
 const data = page!.data;
+
+// Praise / testimonials — shown only when the artist has added at least one, so
+// it's opt-in by nature (an empty collection renders nothing on existing sites).
+const testimonials = (await getCollection('testimonials')).sort((a, b) => a.data.order - b.data.order);
 ---
 
 <Base pageTitle={data.title} pageDescription={data.statement} pageImage={withBase('/og/about.png')}>
@@ -24,6 +28,20 @@ const data = page!.data;
       <h1>{data.title}</h1>
       {data.statement && <p class="ez-about__statement">{data.statement}</p>}
       <Content />
+
+      {testimonials.length > 0 && (
+        <section class="ez-praise" aria-label="Praise">
+          <h2 class="ez-praise__heading">Praise</h2>
+          <ul class="ez-praise__list" role="list">
+            {testimonials.map((t) => (
+              <li class="ez-praise__item">
+                <blockquote class="ez-praise__quote">“{t.data.quote}”</blockquote>
+                <p class="ez-praise__by">{[t.data.author, t.data.role].filter(Boolean).join(', ')}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   </div>
 </Base>
@@ -46,6 +64,23 @@ const data = page!.data;
     font-weight: 700;
     line-height: var(--ez-leading-tight);
   }
+  .ez-praise {
+    margin-top: var(--ez-space-7);
+    padding-top: var(--ez-space-5);
+    border-top: var(--ez-border-width) solid var(--ez-border);
+  }
+  .ez-praise__heading { font-size: var(--ez-text-xl); margin: 0 0 var(--ez-space-4); }
+  .ez-praise__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ez-space-5); }
+  .ez-praise__item { margin: 0; }
+  .ez-praise__quote {
+    margin: 0;
+    font-family: var(--ez-font-display);
+    font-size: var(--ez-text-lg);
+    line-height: 1.5;
+    border-left: var(--ez-border-width) solid var(--ez-blue);
+    padding-left: var(--ez-space-4);
+  }
+  .ez-praise__by { margin: var(--ez-space-2) 0 0 var(--ez-space-4); color: var(--ez-stone); font-size: var(--ez-text-sm); }
   @media (max-width: 768px) {
     .ez-about { grid-template-columns: 1fr; }
   }

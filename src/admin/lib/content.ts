@@ -11,6 +11,7 @@ export const PATHS = {
   pages: 'src/content/pages',
   posts: 'src/content/posts',
   exhibitions: 'src/content/exhibitions',
+  testimonials: 'src/content/testimonials',
   settings: 'src/content/site/settings.json',
   assets: 'src/assets',
 };
@@ -58,6 +59,14 @@ export interface Exhibition {
   url?: string;
   description?: string;
   draft: boolean;
+}
+
+export interface Testimonial {
+  id: string;
+  quote: string;
+  author: string;
+  role?: string;
+  order: number;
 }
 
 export interface Series {
@@ -127,6 +136,8 @@ export interface Settings {
   newsletterEnabled?: boolean;
   newsletterHeading?: string;
   newsletterBlurb?: string;
+  newsletterProvider?: 'netlify' | 'buttondown' | 'mailchimp' | 'convertkit';
+  newsletterActionUrl?: string;
   customCss?: string;
   customCode?: string;
   /** Design tokens (theme). Opaque to the editor's basic settings; carried through
