@@ -18,7 +18,7 @@ const fmtDate = (iso: string) => {
 };
 ---
 
-<Base pageTitle="News" pageDescription={`Updates from ${settings.siteTitle}`}>
+<Base pageTitle="News" pageDescription={`Updates from ${settings.siteTitle}`} pageImage={withBase('/og/news.png')}>
   <div class="ez-container ez-news">
     <h1>News</h1>
     {posts.length === 0 && <p class="ez-news__empty">No updates yet — check back soon.</p>}

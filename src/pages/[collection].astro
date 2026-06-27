@@ -38,7 +38,7 @@ const lightboxItems = await Promise.all(
 );
 ---
 
-<Base pageTitle={series.data.title} pageDescription={series.data.description}>
+<Base pageTitle={series.data.title} pageDescription={series.data.description} pageImage={withBase(`/og/series-${seriesSlug}.png`)}>
   <div class="ez-container">
     <p class="ez-back"><a href={withBase('/')}>← All work</a></p>
     <h1>{series.data.title}</h1>

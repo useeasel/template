@@ -2,13 +2,14 @@
 import { getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import { withBase } from '../lib/href';
 
 const page = await getEntry('pages', 'about');
 const { Content } = await page!.render();
 const data = page!.data;
 ---
 
-<Base pageTitle={data.title} pageDescription={data.statement}>
+<Base pageTitle={data.title} pageDescription={data.statement} pageImage={withBase('/og/about.png')}>
   <div class="ez-container ez-about">
     {data.portrait && (
       <Image

@@ -7,6 +7,14 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.6.0
+
+- **Polished link previews when you share your site.** When you (or anyone) shares your
+  home page, a series, a news post, or your about page, it now shows a clean branded
+  preview card — your title and name on your site’s own colours — instead of a bare link.
+  Individual artwork pages still preview with the actual artwork. It’s automatic; nothing
+  to set up.
+
 ## 0.5.0
 
 - **Download your CV as a PDF.** Your CV page now has a “Download PDF” button that opens
