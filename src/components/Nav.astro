@@ -20,6 +20,7 @@ const links = [
   { href: '/press', label: 'Press', key: 'press' },
   { href: '/exhibitions', label: 'Exhibitions', key: 'exhibitions' },
   { href: '/news', label: 'News', key: 'news' },
+  { href: '/press-kit', label: 'Press kit', key: 'presskit' },
   { href: '/contact', label: 'Contact', key: 'contact' },
 ];
 const isActive = (href: string) => {
@@ -75,7 +76,8 @@ const isActive = (href: string) => {
   :global(html.ez-page-press-off) .ez-pagelink-press,
   :global(html.ez-page-exhibitions-off) .ez-pagelink-exhibitions,
   :global(html.ez-page-news-off) .ez-pagelink-news,
-  :global(html.ez-page-available-off) .ez-pagelink-available { display: none; }
+  :global(html.ez-page-available-off) .ez-pagelink-available,
+  :global(html.ez-page-presskit-off) .ez-pagelink-presskit { display: none; }
 
   /* Top layout: name on its own centered row, links centered below. */
   :global(html.ez-nav-top) .ez-nav { position: relative; }

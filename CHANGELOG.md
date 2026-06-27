@@ -7,6 +7,15 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.17.0
+
+- **A downloadable press kit.** Turn on a Press kit page that gathers your name, bio,
+  contact details, and your featured pieces onto one tidy page, with a Download PDF button.
+  Hand it to galleries, grant panels, or press. It uses your site's fonts and colours, so
+  the PDF looks like your site. The pieces shown are the ones you've featured, so you
+  choose what's in it from the same star you use to pin work to your homepage. Off by
+  default; turn it on under Design.
+
 ## 0.16.0
 
 - **A "link in bio" page.** Turn on a single page at yoursite/links with big tappable
