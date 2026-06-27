@@ -22,7 +22,7 @@
   let editBaseline = $state('');
   let saving = $state(false);
 
-  const blank = (): Series => ({ id: '', title: '', description: '', order: 0, body: '' });
+  const blank = (): Series => ({ id: '', title: '', description: '', lede: '', storyLayout: false, order: 0, body: '' });
 
   function open(s: Series) {
     editing = s;
@@ -96,7 +96,22 @@
     </label>
     <label class="ez-field">
       <span class="ez-label">Description</span>
-      <textarea class="ez-input" rows="3" bind:value={editing.description}></textarea>
+      <textarea class="ez-input" rows="2" bind:value={editing.description}></textarea>
+      <span class="ez-help">A sentence for search results and link previews.</span>
+    </label>
+    <label class="ez-field">
+      <span class="ez-label">Tagline (optional)</span>
+      <input class="ez-input" bind:value={editing.lede} placeholder="Oil on linen, 2023" />
+      <span class="ez-help">A short line shown under the title on the series page.</span>
+    </label>
+    <label class="ez-field">
+      <span class="ez-label">Intro (optional)</span>
+      <textarea class="ez-input" rows="5" bind:value={editing.body} placeholder="Tell the story behind this body of work…"></textarea>
+      <span class="ez-help">Shown above the gallery. Plain text or Markdown.</span>
+    </label>
+    <label class="ez-field ez-field--check">
+      <input type="checkbox" bind:checked={editing.storyLayout} />
+      <span>Full-width intro header</span>
     </label>
     <label class="ez-field">
       <span class="ez-label">Order</span>

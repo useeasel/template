@@ -208,7 +208,9 @@ export async function loadSeries(gh: GitHub): Promise<Series[]> {
         id: e.name.replace(/\.md$/, ''),
         title: data.title ?? 'Untitled',
         description: data.description,
+        lede: data.lede,
         cover: data.cover,
+        storyLayout: !!data.storyLayout,
         order: typeof data.order === 'number' ? data.order : 0,
         body,
       } as Series;
@@ -220,7 +222,14 @@ export async function loadSeries(gh: GitHub): Promise<Series[]> {
 export async function saveSeries(gh: GitHub, s: Series, isNew: boolean): Promise<string> {
   const id = isNew ? await uniqueId(gh, PATHS.series, slugify(s.title)) : s.id;
   const md = toMarkdown(
-    { title: s.title, description: s.description, cover: s.cover, order: s.order },
+    {
+      title: s.title,
+      description: s.description,
+      lede: s.lede,
+      cover: s.cover,
+      storyLayout: s.storyLayout ? true : undefined,
+      order: s.order,
+    },
     s.body,
   );
   await gh.commit([{ path: `${PATHS.series}/${id}.md`, content: md }], `${isNew ? 'Add' : 'Update'} series: ${s.title}`);

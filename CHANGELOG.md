@@ -7,6 +7,13 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.25.0
+
+- **Tell the story behind a series.** A series page can now open with an intro: a tagline
+  under the title, a few paragraphs about the work, and an optional full-width cover image
+  with the title across it. Add them under Pages, Series. Your existing series look the
+  same until you write an intro or turn on the full-width header.
+
 ## 0.24.0
 
 - **Audio and video on your work.** A piece can now carry a video (YouTube, Vimeo) or

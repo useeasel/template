@@ -76,7 +76,11 @@ export interface Series {
   id: string;
   title: string;
   description?: string;
+  /** Short tagline under the title on the series page. */
+  lede?: string;
   cover?: string;
+  /** Full-bleed intro header instead of a centered heading. Off by default. */
+  storyLayout?: boolean;
   order: number;
   body: string;
 }

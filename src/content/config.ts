@@ -57,7 +57,12 @@ const seriesCollection = defineCollection({
       // The entry id (filename) is the slug; `slug` is reserved by Astro for
       // content collections, so we don't declare it here.
       description: z.string().optional(),
+      // A short tagline shown under the title on the series page (e.g. "Oil, 2023").
+      lede: z.string().optional(),
       cover: image().optional(),
+      // Full-bleed intro header (cover/title/lede span the page) instead of the
+      // standard centered heading. Off by default, so existing series are unchanged.
+      storyLayout: z.boolean().default(false),
       order: z.number().default(0),
     }),
 });
