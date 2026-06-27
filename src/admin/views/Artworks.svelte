@@ -32,6 +32,12 @@
   let queue = $state<QueueItem[]>([]);
   let reading = $state(false);
   let igInput = $state<HTMLInputElement | null>(null);
+  // Quick post: snap/pick one photo + a caption → publish in a few taps (mobile-first).
+  let quickPost = $state(false);
+  let qpFile = $state<File | null>(null);
+  let qpPreview = $state('');
+  let qpCaption = $state('');
+  let qpBusy = $state(false);
 
   // --- pointer-based drag reordering ---
   let dragId = $state<string | null>(null);
@@ -270,10 +276,73 @@
     }
     bulkBusy = false;
   }
+
+  function openQuickPost() {
+    qpFile = null;
+    qpPreview = '';
+    qpCaption = '';
+    quickPost = true;
+  }
+  function onQpPick(e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0] ?? null;
+    qpFile = file;
+    if (file) {
+      if (qpPreview) URL.revokeObjectURL(qpPreview);
+      qpPreview = URL.createObjectURL(file);
+    }
+  }
+  function cancelQuickPost() {
+    if (qpPreview) URL.revokeObjectURL(qpPreview);
+    quickPost = false;
+  }
+  async function publishQuickPost() {
+    if (!qpFile) {
+      notify('Add a photo first.', 'error');
+      return;
+    }
+    qpBusy = true;
+    try {
+      const caption = qpCaption.trim();
+      await bulkAddArtworksDetailed(gh, [{ file: qpFile, title: caption, alt: caption }]);
+      shell.markCommitted();
+      notify('Posted. Your site will update shortly.');
+      cancelQuickPost();
+      await refresh();
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Could not post that.', 'error');
+    }
+    qpBusy = false;
+  }
 </script>
 
 {#if adding || editing}
   <ArtworkForm {gh} art={editing} {seriesList} onDone={onFormDone} {notify} />
+{:else if quickPost}
+  <div class="ez-view__head">
+    <div>
+      <h2>Quick post</h2>
+      <p class="ez-help">Snap or pick a photo, add a caption, publish. Fill in the rest later.</p>
+    </div>
+    <button class="ez-btn ez-btn--ghost" onclick={cancelQuickPost} disabled={qpBusy}>Cancel</button>
+  </div>
+  <div class="ez-quickpost">
+    <label class="ez-quickpost__photo">
+      {#if qpPreview}
+        <img src={qpPreview} alt="" class="ez-quickpost__preview" />
+        <span class="ez-quickpost__retake">Choose another</span>
+      {:else}
+        <span class="ez-quickpost__prompt">Tap to take or choose a photo</span>
+      {/if}
+      <input type="file" accept="image/*" capture="environment" hidden onchange={onQpPick} />
+    </label>
+    <label class="ez-field">
+      <span class="ez-label">Caption (optional)</span>
+      <textarea class="ez-input" rows="2" bind:value={qpCaption} placeholder="A line about this piece"></textarea>
+    </label>
+    <button class="ez-btn ez-btn--primary ez-btn--lg" onclick={publishQuickPost} disabled={qpBusy || !qpFile}>
+      {qpBusy ? 'Posting…' : 'Publish'}
+    </button>
+  </div>
 {:else if queue.length}
   <div class="ez-view__head">
     <div>
@@ -335,6 +404,7 @@
       <button class="ez-btn ez-btn--ghost" onclick={() => bulkInput?.click()} disabled={reading}>
         Add many photos
       </button>
+      <button class="ez-btn ez-btn--ghost" onclick={openQuickPost}>Quick post</button>
       <button class="ez-btn ez-btn--primary" onclick={() => (adding = true)}>Add artwork</button>
     </div>
   </div>
@@ -409,4 +479,29 @@
   .ez-queue__meta { display: flex; gap: 0.5rem; }
   .ez-queue__meta :global(input:first-child) { max-width: 7rem; }
   .ez-queue__ctrls { display: flex; flex-direction: column; gap: 0.35rem; flex: 0 0 auto; }
+
+  .ez-quickpost { max-width: 30rem; display: flex; flex-direction: column; gap: 1rem; }
+  .ez-quickpost__photo {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 14rem;
+    border: 2px dashed var(--ez-border);
+    border-radius: var(--ez-radius);
+    background: var(--ez-paper);
+    cursor: pointer;
+    overflow: hidden;
+    text-align: center;
+  }
+  .ez-quickpost__prompt { color: var(--ez-stone); padding: 1rem; font-weight: 700; }
+  .ez-quickpost__preview { width: 100%; height: 100%; max-height: 22rem; object-fit: contain; display: block; }
+  .ez-quickpost__retake {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 0.4rem;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: var(--ez-text-sm);
+    font-weight: 700;
+  }
 </style>

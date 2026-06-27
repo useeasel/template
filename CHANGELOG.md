@@ -7,6 +7,13 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.28.0
+
+- **Post from your phone in a few taps.** A new Quick post option lets you take or pick a
+  photo, add a caption, and publish, all in one short screen. On a phone it opens the
+  camera so you can shoot and post on the spot, then fill in the details later from your
+  computer.
+
 ## 0.27.0
 
 - **Start with the work you already have.** Instead of a blank page, use Import from
