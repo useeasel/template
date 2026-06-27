@@ -7,6 +7,13 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.5.0
+
+- **Download your CV as a PDF.** Your CV page now has a “Download PDF” button that opens
+  your browser’s Save-as-PDF — using your site’s own fonts and accent colour, so the
+  document looks like the rest of your site. It adds a clean letterhead (your name, and how
+  to reach you) and drops the site’s menu and footer from the page. Nothing to set up.
+
 ## 0.4.0
 
 - **Followers can subscribe to your News.** Your site now publishes an RSS feed, so

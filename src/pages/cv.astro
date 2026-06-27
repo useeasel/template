@@ -2,14 +2,47 @@
 import { getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
 
-const page = await getEntry('pages', 'cv');
-const data = page!.data;
+const cvPage = await getEntry('pages', 'cv');
+const data = cvPage!.data;
 const groups = data.cv ?? [];
+
+// Identity for the printable letterhead. The CV is the one page artists hand out
+// as a document, so it carries a proper header (name + how to reach them) that the
+// other pages don't need. Everything below inherits the artist's --ez-* design
+// tokens, so the PDF matches their site's fonts and accent colour automatically.
+const settings = (await getEntry('site', 'settings'))!.data;
+const contact = await getEntry('pages', 'contact');
+const artistName = settings.logoText || settings.siteTitle;
+const tagline = settings.tagline;
+const email = contact?.data.email;
+const socialLinks = settings.socialLinks ?? [];
+const siteUrl = Astro.site ?? new URL(Astro.url.origin);
+const siteHost = siteUrl.host;
 ---
 
-<Base pageTitle={data.title}>
+<Base pageTitle={data.title} pageDescription={`Curriculum vitae for ${artistName}`}>
   <div class="ez-container ez-cv">
-    <h1>{data.title}</h1>
+    <header class="ez-cv__head">
+      <div class="ez-cv__id">
+        <h1 class="ez-cv__name">{artistName}</h1>
+        {data.title && <p class="ez-cv__eyebrow">{data.title}</p>}
+        {tagline && <p class="ez-cv__tagline">{tagline}</p>}
+      </div>
+      <button id="ez-cv-print" class="ez-cv__download" type="button" aria-label="Download this CV as a PDF">
+        Download PDF
+      </button>
+    </header>
+
+    <ul class="ez-cv__contact" role="list">
+      {email && (
+        <li><a href={`mailto:${email}`}>{email}</a></li>
+      )}
+      <li><a href={siteUrl.href} rel="noopener">{siteHost}</a></li>
+      {socialLinks.map((s) => (
+        <li><a href={s.url} rel="me noopener" target="_blank">{s.label}</a></li>
+      ))}
+    </ul>
+
     {groups.map((group) => (
       <section class="ez-cv__group">
         <h2 class="ez-cv__heading">{group.heading}</h2>
@@ -24,10 +57,66 @@ const groups = data.cv ?? [];
       </section>
     ))}
   </div>
+
+  {/* Print-to-PDF: the browser's "Save as PDF" renders this page with the artist's
+      own fonts and colours. is:inline keeps it a zero-network one-liner; the button
+      precedes it in the DOM so it's already present when this runs. */}
+  <script is:inline>
+    document.getElementById('ez-cv-print')?.addEventListener('click', function () {
+      window.print();
+    });
+  </script>
 </Base>
 
 <style>
   .ez-cv { max-width: 760px; }
+
+  .ez-cv__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ez-space-5);
+    flex-wrap: wrap;
+  }
+  .ez-cv__name { margin: 0; }
+  .ez-cv__eyebrow {
+    margin: var(--ez-space-2) 0 0;
+    font-family: var(--ez-font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: var(--ez-text-sm);
+    color: var(--ez-blue);
+  }
+  .ez-cv__tagline { margin: var(--ez-space-2) 0 0; color: var(--ez-stone); }
+
+  .ez-cv__download {
+    flex-shrink: 0;
+    font-family: var(--ez-font-display);
+    font-weight: 700;
+    font-size: var(--ez-text-sm);
+    color: var(--ez-ink);
+    background: var(--ez-white);
+    border: var(--ez-border-width) solid var(--ez-border);
+    border-radius: var(--ez-radius);
+    padding: var(--ez-space-2) var(--ez-space-4);
+    cursor: pointer;
+  }
+  .ez-cv__download:hover { color: var(--ez-blue); border-color: var(--ez-blue); }
+
+  .ez-cv__contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ez-space-2) var(--ez-space-4);
+    list-style: none;
+    margin: var(--ez-space-4) 0 var(--ez-space-7);
+    padding: 0 0 var(--ez-space-4);
+    border-bottom: var(--ez-border-width) solid var(--ez-border);
+    font-size: var(--ez-text-sm);
+  }
+  .ez-cv__contact a { color: var(--ez-ink); }
+  .ez-cv__contact a:hover { color: var(--ez-blue); }
+
   .ez-cv__group { margin-bottom: var(--ez-space-7); }
   .ez-cv__heading {
     font-size: var(--ez-text-xl);
@@ -50,5 +139,24 @@ const groups = data.cv ?? [];
   .ez-cv__text { margin: 0; }
   @media (max-width: 480px) {
     .ez-cv__row { grid-template-columns: 1fr; gap: 0; }
+  }
+
+  /* Print / Save as PDF: drop the site chrome, keep the artist's styled CV, and
+     force brand colours + borders to render (browsers strip them by default). */
+  @media print {
+    :global(.ez-nav),
+    :global(.ez-footer),
+    :global(.ez-skip-link) { display: none !important; }
+    :global(.ez-main) { padding: 0 !important; }
+    .ez-cv__download { display: none !important; }
+
+    @page { margin: 1.6cm; }
+    .ez-cv { max-width: none; }
+    .ez-cv,
+    .ez-cv * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    /* Keep a heading with its first entries and never split a single entry. */
+    .ez-cv__heading { break-after: avoid; }
+    .ez-cv__row { break-inside: avoid; }
   }
 </style>
