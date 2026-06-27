@@ -4,9 +4,31 @@
   import { loadSettings, saveSettings } from '../lib/store';
   import { useShell } from '../lib/shell.svelte';
 
-  let { gh, notify }: { gh: GitHub; notify: (m: string, k?: 'info' | 'error') => void } = $props();
+  let {
+    gh,
+    notify,
+    host,
+    repo,
+  }: {
+    gh: GitHub;
+    notify: (m: string, k?: 'info' | 'error') => void;
+    host?: string;
+    repo?: string;
+  } = $props();
 
   const shell = useShell();
+
+  // A direct link to where the artist manages their domain — at their host, not in
+  // Easel. GitHub Pages: the repo's Settings → Pages. Netlify: derive the project
+  // slug from the live hostname (slug.netlify.app); falls back to the dashboard.
+  function domainSettingsUrl(): string {
+    if (host === 'github-pages') {
+      return repo ? `https://github.com/${repo}/settings/pages` : 'https://github.com/';
+    }
+    const m = typeof location !== 'undefined' ? location.hostname.match(/^([^.]+)\.netlify\.app$/) : null;
+    return m ? `https://app.netlify.com/projects/${m[1]}/domain-management/setup` : 'https://app.netlify.com/';
+  }
+  const hostLabel = host === 'github-pages' ? 'GitHub Pages' : 'Netlify';
 
   let s = $state<Settings>({
     siteTitle: '', logoText: '', theme: 'default', portfolioLayout: 'grid',
@@ -109,16 +131,9 @@
 
   <div class="ez-block">
     <strong>Custom domain</strong>
-    <p class="ez-help">Use your own web address (like your-name.com) instead of the default one. Optional, and free on both Netlify and GitHub Pages.</p>
-    <label class="ez-field"><span class="ez-label">Your domain</span>
-      <input class="ez-input" bind:value={s.customDomain} placeholder="your-name.com" /></label>
-    <ol class="ez-steps">
-      <li>Buy a domain if you don't have one — Porkbun, Namecheap, or similar, usually about $10–20 a year.</li>
-      <li>Add it on your host: in <strong>Netlify → Domain management → Add a domain</strong>, or in your repo's <strong>GitHub → Settings → Pages → Custom domain</strong>.</li>
-      <li>Point your domain at your host with the DNS records it shows you. HTTPS is set up automatically.</li>
-      <li>Pop your domain in the box above and save, so links and search results use it.</li>
-    </ol>
-    <p class="ez-help">Full walkthrough: <a href="https://easel.rosematcha.com/custom-domain/" target="_blank" rel="noopener">easel.rosematcha.com/custom-domain</a>.</p>
+    <p class="ez-help">Use your own web address (like your-name.com) instead of the default one. You set this up at your host ({hostLabel}) — Easel keeps your links relative, so they keep working on whatever domain you choose. Nothing to enter here.</p>
+    <a class="ez-btn ez-btn--outline" href={domainSettingsUrl()} target="_blank" rel="noopener">Manage your domain on {hostLabel} ↗</a>
+    <p class="ez-help">New to this? <a href="https://easel.rosematcha.com/custom-domain/" target="_blank" rel="noopener">Step-by-step walkthrough →</a></p>
   </div>
 
   <details class="ez-advanced">

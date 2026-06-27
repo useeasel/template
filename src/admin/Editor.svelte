@@ -54,6 +54,7 @@
     branch: string;
     authBaseUrl: string;
     easelVersion?: string;
+    host?: string;
   } | null = null;
 
   onMount(async () => {
@@ -109,7 +110,6 @@
     try {
       const st = await loadSettings(client);
       designEmpty = !st.design || Object.keys(st.design).length === 0;
-      if (st.customDomain) siteUrl = `https://${st.customDomain}`;
       // First-time setup: open the style wizard if no design has been chosen — but
       // not on a phone, where the full-screen wizard is cramped. Mobile users land on
       // the editor and can add work; design is best done later on a computer.
@@ -257,7 +257,7 @@
           </div>
         </div>
 
-        <main class="ez-main" id="ez-main">
+        <main class="ez-main" class:ez-main--wide={view === 'design'} id="ez-main">
           {#if view === 'home'}
             <HomeView {gh} {go} {siteUrl} {designEmpty} onWizard={() => (wizard = true)} />
           {:else if view === 'work'}
@@ -267,7 +267,7 @@
           {:else if view === 'design'}
             <DesignView {gh} {notify} onWizard={() => (wizard = true)} />
           {:else if view === 'settings'}
-            <SettingsView {gh} {notify} />
+            <SettingsView {gh} {notify} host={config?.host} repo={config?.repo} />
           {:else if view === 'updates'}
             <UpdatesView {gh} {notify} currentVersion={config?.easelVersion ?? null} />
           {/if}

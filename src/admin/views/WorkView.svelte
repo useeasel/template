@@ -34,11 +34,11 @@
   ];
 </script>
 
-<div class="ez-seg" role="tablist" aria-label="Work">
+<div class="ez-tabs" role="tablist" aria-label="Work">
   {#each TABS as t (t.id)}
     <button
-      class="ez-seg__btn"
-      class:ez-seg__btn--on={tab === t.id}
+      class="ez-tab"
+      class:ez-tab--on={tab === t.id}
       role="tab"
       aria-selected={tab === t.id}
       onclick={() => switchTab(t.id)}

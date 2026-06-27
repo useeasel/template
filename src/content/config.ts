@@ -164,7 +164,6 @@ const site = defineCollection({
     ogImage: z.string().optional(),
     metaDescription: z.string().optional(),
     socialLinks: z.array(socialLink).default([]),
-    customDomain: z.string().optional(),
     // Privacy-friendly analytics: paste a Cloudflare Web Analytics token and we
     // inject the beacon (no cookie banner needed). The raw snippet below stays for
     // power users who want GA/Plausible/etc.

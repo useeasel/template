@@ -113,7 +113,6 @@ export interface Settings {
   metaDescription?: string;
   ogImage?: string;
   socialLinks: { label: string; url: string }[];
-  customDomain?: string;
   cfAnalyticsToken?: string;
   analyticsSnippet?: string;
   newsletterEnabled?: boolean;

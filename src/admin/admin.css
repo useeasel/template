@@ -77,6 +77,8 @@
   padding: var(--ez-space-6) var(--ez-space-5);
   flex: 1;
 }
+/* The Design workspace (controls + live preview) wants the whole main area. */
+.ez-main--wide { max-width: none; }
 
 /* Sign-in / empty states */
 .ez-signin { max-width: 32rem; margin: var(--ez-space-8) auto; text-align: center; }
@@ -164,8 +166,6 @@
   grid-template-columns: 360px 1fr;
   gap: var(--ez-space-5);
   align-items: start;
-  width: min(1360px, 94vw);
-  margin-left: calc((min(1360px, 94vw) - 100%) / -2);
 }
 .ez-design__controls { display: grid; gap: var(--ez-space-4); min-width: 0; }
 .ez-design__preview { position: sticky; top: var(--ez-space-4); }
@@ -179,7 +179,7 @@
 .ez-color { display: flex; align-items: center; gap: var(--ez-space-2); font-size: var(--ez-text-sm); }
 .ez-color input[type='color'] { width: 36px; height: 36px; padding: 0; border: var(--ez-border-width) solid var(--ez-border); background: none; cursor: pointer; flex: none; }
 @media (max-width: 900px) {
-  .ez-design { grid-template-columns: 1fr; width: auto; margin-left: 0; }
+  .ez-design { grid-template-columns: 1fr; }
   .ez-design__preview { position: static; }
 }
 
@@ -333,10 +333,7 @@
 .ez-modal__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--ez-space-3); margin-top: var(--ez-space-5); }
 
 /* Segmented control (Work: Artwork / Series) */
-.ez-seg { display: inline-flex; border: var(--ez-border-bold) solid var(--ez-border); box-shadow: var(--ez-shadow-hard-sm); margin-bottom: var(--ez-space-5); }
-.ez-seg__btn { font-family: var(--ez-font-display); font-weight: 700; background: var(--ez-white); color: var(--ez-ink); border: 0; border-right: var(--ez-border-width) solid var(--ez-border); padding: var(--ez-space-2) var(--ez-space-5); cursor: pointer; }
-.ez-seg__btn:last-child { border-right: 0; }
-.ez-seg__btn--on { background: var(--ez-ink); color: var(--ez-white); }
+/* (Removed .ez-seg segmented control — sub-navs use .ez-tabs everywhere now.) */
 
 /* Home dashboard */
 .ez-home { display: grid; gap: var(--ez-space-6); max-width: 820px; }

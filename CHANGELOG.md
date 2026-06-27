@@ -7,6 +7,16 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.12.0
+
+- **Simpler custom domains.** Settings no longer asks you to type your domain into Easel —
+  your links are relative, so they keep working on whatever address you use. Instead, a
+  single button takes you straight to the right place on your host (your repo’s Pages
+  settings, or your Netlify domain management) to set it up.
+- **Roomier Design.** The Design workspace now uses the full width of your screen, so the
+  controls and live preview aren’t cramped or cut off.
+- **More consistent editor.** The Work and Pages section tabs now share one style.
+
 ## 0.11.0
 
 - **Edit from your phone.** The editor now welcomes you on mobile instead of turning you

@@ -106,9 +106,9 @@
   ];
 </script>
 
-<div class="ez-tabs">
+<div class="ez-tabs" role="tablist" aria-label="Pages">
   {#each TABS as t (t.id)}
-    <button class="ez-tab" class:ez-tab--on={tab === t.id} onclick={() => switchTab(t.id)}>{t.label}</button>
+    <button class="ez-tab" class:ez-tab--on={tab === t.id} role="tab" aria-selected={tab === t.id} onclick={() => switchTab(t.id)}>{t.label}</button>
   {/each}
 </div>
 
