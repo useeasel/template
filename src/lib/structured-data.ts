@@ -85,6 +85,62 @@ export function visualArtworkLd(
   });
 }
 
+export interface LdExhibition {
+  title: string;
+  startDate: string; // YYYY-MM-DD
+  endDate?: string;
+  venue?: string;
+  location?: string;
+  url?: string;
+  description?: string;
+}
+
+/** An exhibition as a schema.org ExhibitionEvent, for show rich results. */
+export function eventLd(x: LdExhibition, artist: { name: string }): Record<string, unknown> {
+  const place = x.venue || x.location
+    ? prune({
+        '@type': 'Place',
+        name: x.venue || x.location,
+        address: x.venue && x.location ? x.location : undefined,
+      })
+    : undefined;
+  return prune({
+    '@context': 'https://schema.org',
+    '@type': 'ExhibitionEvent',
+    name: x.title,
+    startDate: x.startDate || undefined,
+    endDate: x.endDate || undefined,
+    url: x.url,
+    description: x.description,
+    location: place,
+    performer: { '@type': 'Person', name: artist.name },
+    organizer: x.venue ? { '@type': 'Organization', name: x.venue } : undefined,
+  });
+}
+
+export interface LdArticle {
+  title: string;
+  url: string; // absolute
+  datePublished: string; // YYYY-MM-DD
+  description?: string;
+  imageUrl?: string; // absolute
+}
+
+/** A news post as a BlogPosting, so updates can surface as fresh content. */
+export function articleLd(a: LdArticle, author: { name: string; url: string }): Record<string, unknown> {
+  return prune({
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: a.title,
+    url: a.url,
+    mainEntityOfPage: a.url,
+    datePublished: a.datePublished || undefined,
+    description: a.description,
+    image: a.imageUrl,
+    author: { '@type': 'Person', name: author.name, url: author.url },
+  });
+}
+
 /** A breadcrumb trail. `items` are [name, absoluteUrl] in order. */
 export function breadcrumbLd(items: Array<[string, string]>): Record<string, unknown> {
   return {

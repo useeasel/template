@@ -7,6 +7,14 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.35.0
+
+- **Help search engines understand your shows and news.** Your exhibitions now carry the
+  behind-the-scenes details search engines read to list events (name, dates, venue), and
+  each news post is marked up as a dated article. This can help your shows and updates show
+  up better in search. Nothing to set up, it works from the exhibitions and news you
+  already add.
+
 ## 0.34.0
 
 - **Use the analytics tool you like.** Pick from Google Analytics, Plausible, Fathom,

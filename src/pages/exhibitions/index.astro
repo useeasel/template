@@ -2,6 +2,7 @@
 import { getCollection, getEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { withBase } from '../../lib/href';
+import { eventLd } from '../../lib/structured-data';
 
 const settings = (await getEntry('site', 'settings'))!.data;
 const artist = settings.logoText || settings.siteTitle;
@@ -28,9 +29,25 @@ const fmt = (iso: string) => {
 };
 const range = (e: (typeof all)[number]) =>
   e.data.endDate && e.data.endDate !== e.data.startDate ? `${fmt(e.data.startDate)} – ${fmt(e.data.endDate)}` : fmt(e.data.startDate);
+
+// One ExhibitionEvent node per show, so search engines can surface them as events.
+const jsonLd = all.map((e) =>
+  eventLd(
+    {
+      title: e.data.title,
+      startDate: e.data.startDate,
+      endDate: e.data.endDate,
+      venue: e.data.venue,
+      location: e.data.location,
+      url: e.data.url,
+      description: e.data.description,
+    },
+    { name: artist },
+  ),
+);
 ---
 
-<Base pageTitle="Exhibitions" pageDescription={`Exhibitions and shows by ${artist}`} pageImage={withBase('/og/exhibitions.png')}>
+<Base pageTitle="Exhibitions" pageDescription={`Exhibitions and shows by ${artist}`} pageImage={withBase('/og/exhibitions.png')} {jsonLd}>
   <div class="ez-container ez-shows">
     <h1>Exhibitions</h1>
     {all.length === 0 && <p class="ez-shows__empty">No exhibitions listed yet — check back soon.</p>}
