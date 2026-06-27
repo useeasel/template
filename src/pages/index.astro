@@ -16,6 +16,18 @@ const artworks = (await getCollection('artworks')).sort(
   (a, b) => a.data.order - b.data.order
 );
 
+// Opt-in filter chips (design.gallery.filters): by series actually present, plus an
+// "Available" shortcut. Filtering is client-side over data-* on each card.
+const seriesEntries = (await getCollection('collections')).sort((a, b) => a.data.order - b.data.order);
+const presentSeries = new Set(
+  artworks.map((a) => (a.data.collection ? slugify(a.data.collection.id) : null)).filter(Boolean) as string[]
+);
+const seriesChips = seriesEntries
+  .filter((s) => presentSeries.has(slugify(s.id)))
+  .map((s) => ({ slug: slugify(s.id), title: s.data.title }));
+const hasAvailable = artworks.some((a) => a.data.status === 'available');
+const showFilters = design.gallery.filters && artworks.length > 1 && (seriesChips.length > 0 || hasAvailable);
+
 // Build lightbox payload (resolved, full-size URLs + gallery labels).
 const lightboxItems = await Promise.all(
   artworks.map(async (a) => {
@@ -45,26 +57,61 @@ const lightboxItems = await Promise.all(
         <a class="ez-btn ez-btn--primary ez-btn--lg" href={withBase('/admin')}>Open your editor</a>
       </div>
     ) : (
-      <div class="ez-portfolio">
-        {artworks.map((a, i) => (
-          <ArtworkCard
-            image={a.data.image}
-            title={a.data.title}
-            alt={a.data.alt}
-            year={a.data.year}
-            medium={a.data.medium}
-            dimensions={a.data.dimensions}
-            price={a.data.price}
-            status={a.data.status}
-            index={i}
-            href={linkToPage ? withBase(`/work/${slugify(a.id)}/`) : undefined}
-          />
-        ))}
-      </div>
+      <>
+        {showFilters && (
+          <div class="ez-filters" data-ez-filters hidden>
+            <button class="ez-filter is-active" type="button" data-filter="all">All</button>
+            {hasAvailable && <button class="ez-filter" type="button" data-filter="status:available">Available</button>}
+            {seriesChips.map((s) => (
+              <button class="ez-filter" type="button" data-filter={`series:${s.slug}`}>{s.title}</button>
+            ))}
+          </div>
+        )}
+        <div class="ez-portfolio">
+          {artworks.map((a, i) => (
+            <ArtworkCard
+              image={a.data.image}
+              title={a.data.title}
+              alt={a.data.alt}
+              year={a.data.year}
+              medium={a.data.medium}
+              dimensions={a.data.dimensions}
+              price={a.data.price}
+              status={a.data.status}
+              series={a.data.collection ? slugify(a.data.collection.id) : undefined}
+              index={i}
+              href={linkToPage ? withBase(`/work/${slugify(a.id)}/`) : undefined}
+            />
+          ))}
+        </div>
+      </>
     )}
   </div>
 
   {!linkToPage && artworks.length > 0 && <Lightbox items={lightboxItems} />}
+
+  {showFilters && (
+    <script>
+      const bar = document.querySelector('[data-ez-filters]');
+      if (bar) {
+        bar.hidden = false;
+        const cards = Array.from(document.querySelectorAll('.ez-portfolio .ez-artcard'));
+        const matches = (f, card) => {
+          if (f === 'all') return true;
+          if (f.startsWith('status:')) return card.dataset.status === f.slice(7);
+          if (f.startsWith('series:')) return card.dataset.series === f.slice(7);
+          return true;
+        };
+        bar.addEventListener('click', (e) => {
+          const btn = e.target.closest('.ez-filter');
+          if (!btn || !bar.contains(btn)) return;
+          bar.querySelectorAll('.ez-filter').forEach((b) => b.classList.toggle('is-active', b === btn));
+          const f = btn.dataset.filter;
+          cards.forEach((card) => { card.hidden = !matches(f, card); });
+        });
+      }
+    </script>
+  )}
 </Base>
 
 <style>
@@ -81,6 +128,30 @@ const lightboxItems = await Promise.all(
     font-size: var(--ez-text-lg);
     margin: 0;
   }
+  .ez-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ez-space-3);
+    margin-bottom: var(--ez-space-6);
+  }
+  .ez-filter {
+    font-family: var(--ez-font-display);
+    font-weight: 700;
+    font-size: var(--ez-text-sm);
+    color: var(--ez-ink);
+    background: var(--ez-white);
+    border: var(--ez-border-width) solid var(--ez-border);
+    border-radius: var(--ez-radius);
+    padding: var(--ez-space-2) var(--ez-space-4);
+    cursor: pointer;
+  }
+  .ez-filter:hover { border-color: var(--ez-blue); color: var(--ez-blue); }
+  .ez-filter.is-active {
+    background: var(--ez-blue);
+    color: var(--ez-pill-available-text, #fff);
+    border-color: var(--ez-blue);
+  }
+
   .ez-firstrun {
     border: var(--ez-border-width) solid var(--ez-border);
     box-shadow: var(--ez-shadow);

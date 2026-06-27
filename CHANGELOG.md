@@ -7,6 +7,13 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.7.0
+
+- **Let visitors filter your gallery.** You can now turn on filter chips for your home
+  page so visitors can jump to a series or to just the pieces that are available. Find it
+  under **Design → Gallery → “Show filter chips.”** It’s off by default, and the gallery
+  works exactly as before until you turn it on.
+
 ## 0.6.0
 
 - **Polished link previews when you share your site.** When you (or anyone) shares your

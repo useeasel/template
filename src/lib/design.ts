@@ -49,6 +49,8 @@ export interface DesignTokens {
     featureFirst: boolean;
     /** What a thumbnail click does: open the lightbox, or go to its own page. */
     click: 'lightbox' | 'page';
+    /** Show filter chips on the home gallery (by series + availability). */
+    filters: boolean;
   };
   lightbox: { transition: 'fade' | 'slide' };
   hero: { enabled: boolean; align: 'left' | 'center'; size: 'small' | 'large' };
@@ -85,7 +87,7 @@ export const DEFAULT_DESIGN: DesignTokens = {
   logo: { mode: 'none' },
   background: { type: 'solid' },
   thumb: { fit: 'contain', hover: 'zoom' },
-  gallery: { layout: 'masonry', size: 'medium', gutter: 'normal', caption: 'below', featureFirst: false, click: 'lightbox' },
+  gallery: { layout: 'masonry', size: 'medium', gutter: 'normal', caption: 'below', featureFirst: false, click: 'lightbox', filters: false },
   lightbox: { transition: 'fade' },
   hero: { enabled: false, align: 'left', size: 'small' },
   footer: { socials: true, credit: true },

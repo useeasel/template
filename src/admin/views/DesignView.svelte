@@ -241,6 +241,7 @@
             <span class="ez-help">Its own page is better for long descriptions, video, and sharing a single piece.</span></label>
         </div>
         <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.gallery.featureFirst} /><span>Feature the first piece (span two columns)</span></label>
+        <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.gallery.filters} /><span>Show filter chips on the home page (by series &amp; availability)</span></label>
       </section>
 
       <section class="ez-block">

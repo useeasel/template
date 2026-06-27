@@ -18,6 +18,8 @@ interface Props {
   index?: number;
   /** When set, the card links to this URL (its own page) instead of the lightbox. */
   href?: string;
+  /** Series slug this piece belongs to — drives the home gallery filter chips. */
+  series?: string;
 }
 const {
   image,
@@ -31,6 +33,7 @@ const {
   columns = 3,
   index,
   href,
+  series,
 } = Astro.props;
 
 const metaParts = [year, medium, dimensions].filter(Boolean);
@@ -49,7 +52,7 @@ const triggerProps = href
     };
 ---
 
-<article class="ez-card ez-artcard">
+<article class="ez-card ez-artcard" data-status={status} data-series={series}>
   <Trigger {...triggerProps}>
     <Image
       src={image}
