@@ -10,6 +10,7 @@ import SEO from '../components/SEO.astro';
 import { resolveDesign, designVars, designClasses, motionAttr, googleFontsHref, faviconDataUri, readableOn } from '../lib/design';
 import { websiteLd, personLd } from '../lib/structured-data';
 import { withBase } from '../lib/href';
+import { BUILD_ID } from '../lib/version';
 
 interface Props {
   pageTitle?: string;
@@ -107,6 +108,35 @@ const rssHref = design.pages.news ? withBase('/rss.xml') : undefined;
     )}
     {settings.analyticsSnippet && <Fragment set:html={settings.analyticsSnippet} />}
     {settings.customCss && <style set:html={settings.customCss}></style>}
+
+    {/* Auto-refresh when a newer build has deployed, so an edit shows up without the
+        visitor doing a hard refresh (browsers/CDNs cache HTML — GitHub Pages for ~10
+        min). We compare this page's build id against /version.json (fetched bypassing
+        the cache); on a mismatch, prime the HTTP cache with fresh HTML then reload. A
+        per-version sessionStorage guard prevents any reload loop. */}
+    <script is:inline define:vars={{ buildId: BUILD_ID, versionUrl: withBase('/version.json') }}>
+      (function () {
+        if (!buildId) return;
+        var busy = false;
+        function check() {
+          if (busy || document.hidden) return;
+          busy = true;
+          fetch(versionUrl, { cache: 'no-store' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+              if (!d || !d.v || d.v === buildId) return;
+              var key = 'ez-reloaded-' + d.v;
+              if (sessionStorage.getItem(key)) return;
+              sessionStorage.setItem(key, '1');
+              fetch(location.href, { cache: 'reload' }).catch(function () {}).then(function () { location.reload(); });
+            })
+            .catch(function () {})
+            .then(function () { busy = false; });
+        }
+        check();
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
+      })();
+    </script>
   </head>
   <body>
     <a href="#main" class="ez-skip-link">Skip to content</a>

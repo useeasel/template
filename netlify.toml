@@ -34,3 +34,11 @@
   from = "/admin"
   to = "/admin/index.html"
   status = 200
+
+# The build stamp must never be cached, so the auto-refresh check (see Base.astro)
+# always sees the freshly deployed value. (The client also fetches it with
+# `cache: 'no-store'`, which is what protects GitHub Pages, where headers can't be set.)
+[[headers]]
+  for = "/version.json"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"

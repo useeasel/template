@@ -7,6 +7,13 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.13.0
+
+- **Your changes show up right away.** After you publish an edit, visitors (and you)
+  could sometimes still see the old version until a hard refresh — browsers and hosts
+  cache pages aggressively. Your site now notices when a new version has gone live and
+  refreshes itself automatically.
+
 ## 0.12.0
 
 - **Simpler custom domains.** Settings no longer asks you to type your domain into Easel —
