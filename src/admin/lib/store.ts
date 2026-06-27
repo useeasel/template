@@ -34,6 +34,7 @@ export async function loadArtworks(gh: GitHub): Promise<Artwork[]> {
       const art: Artwork = {
         id: e.name.replace(/\.md$/, ''),
         image: data.image ?? '',
+        images: Array.isArray(data.images) ? data.images : [],
         title: data.title ?? 'Untitled',
         year: data.year,
         medium: data.medium,
@@ -57,6 +58,7 @@ function artworkToMd(a: Artwork): string {
   return toMarkdown(
     {
       image: a.image,
+      images: a.images?.length ? a.images : undefined,
       title: a.title,
       year: a.year,
       medium: a.medium,
@@ -73,26 +75,41 @@ function artworkToMd(a: Artwork): string {
   );
 }
 
-/** Save one artwork (optionally with a freshly chosen image file). One commit. */
+/** An ordered gallery entry: either an already-saved path or a freshly chosen file. */
+export type GalleryItem = { path?: string; file?: File };
+
+/**
+ * Save one artwork. `imageFile` (if set) replaces the cover; `gallery` is the
+ * ordered list of extra shots — existing ones keep their path, newly chosen files
+ * are uploaded. Cover + every new gallery image + the .md go in ONE commit, so the
+ * site rebuilds once.
+ */
 export async function saveArtwork(
   gh: GitHub,
   art: Artwork,
   imageFile: File | null,
+  gallery: GalleryItem[],
   isNew: boolean,
 ): Promise<string> {
   const id = isNew ? await uniqueId(gh, PATHS.artworks, slugify(art.title)) : art.id;
   const changes: FileChange[] = [];
 
-  if (imageFile) {
-    const ext = (imageFile.name.split('.').pop() ?? 'jpg').toLowerCase();
-    const fname = `${id}-${shortStamp()}.${ext}`;
-    art.image = `${ARTWORK_IMG_REL}/${fname}`;
-    changes.push({
-      path: `${ARTWORK_IMG_DIR}/${fname}`,
-      content: await fileToBase64(imageFile),
-      encoding: 'base64',
-    });
+  const upload = async (file: File): Promise<string> => {
+    const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase();
+    const fname = `${id}-${shortStamp()}.${ext}`; // shortStamp() is random, so it's unique per call
+    changes.push({ path: `${ARTWORK_IMG_DIR}/${fname}`, content: await fileToBase64(file), encoding: 'base64' });
+    return `${ARTWORK_IMG_REL}/${fname}`;
+  };
+
+  if (imageFile) art.image = await upload(imageFile);
+
+  // Resolve the gallery in order: keep existing paths, upload new files.
+  const images: string[] = [];
+  for (const item of gallery) {
+    if (item.file) images.push(await upload(item.file));
+    else if (item.path) images.push(item.path);
   }
+  art.images = images;
 
   changes.push({ path: `${PATHS.artworks}/${id}.md`, content: artworkToMd({ ...art, id }) });
   await gh.commit(changes, `${isNew ? 'Add' : 'Update'} artwork: ${art.title}`);

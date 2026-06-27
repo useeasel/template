@@ -18,6 +18,8 @@ export const PATHS = {
 export interface Artwork {
   id: string; // filename stem
   image: string; // frontmatter path, e.g. ../../assets/artworks/foo.jpg
+  /** Optional extra shots (frontmatter paths), shown on the piece's own page. */
+  images?: string[];
   title: string;
   year?: number;
   medium?: string;

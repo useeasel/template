@@ -36,12 +36,20 @@
   let imagePreview = $state<string>('');
   let saving = $state(false);
 
+  // Extra "gallery" images (details / other angles). Each item is either an existing
+  // saved path or a freshly chosen File; new files upload on save.
+  let galleryItems = $state<{ path?: string; file?: File; url: string }[]>(
+    (art?.images ?? []).map((path) => ({ path, url: gh.rawUrl(resolveAssetPath('src/content/artworks', path)) })),
+  );
+  const galleryBaseline = (art?.images ?? []).join('|');
+  const galleryDirty = () => galleryItems.map((g) => g.path ?? '@new').join('|') !== galleryBaseline;
+
   if (art?.image) {
     imagePreview = gh.rawUrl(resolveAssetPath('src/content/artworks', art.image));
   }
 
   const formBaseline = JSON.stringify($state.snapshot(form));
-  const isDirty = () => imageFile !== null || JSON.stringify($state.snapshot(form)) !== formBaseline;
+  const isDirty = () => imageFile !== null || galleryDirty() || JSON.stringify($state.snapshot(form)) !== formBaseline;
 
   // Take part in the unsaved-changes guard. Silent: this form has its own footer.
   $effect(() =>
@@ -55,13 +63,31 @@
     if (file) imagePreview = URL.createObjectURL(file);
   }
 
+  function onPickGallery(e: Event) {
+    const input = e.target as HTMLInputElement;
+    for (const file of Array.from(input.files ?? [])) {
+      galleryItems = [...galleryItems, { file, url: URL.createObjectURL(file) }];
+    }
+    input.value = ''; // let the same file be re-picked later
+  }
+  function moveGallery(i: number, dir: number) {
+    const j = i + dir;
+    if (j < 0 || j >= galleryItems.length) return;
+    const next = [...galleryItems];
+    [next[i], next[j]] = [next[j], next[i]];
+    galleryItems = next;
+  }
+  function removeGallery(i: number) {
+    galleryItems = galleryItems.filter((_, idx) => idx !== i);
+  }
+
   async function save(): Promise<boolean> {
     if (!form.title.trim()) { notify('Please add a title.', 'error'); return false; }
     if (!form.alt.trim()) { notify('Please add a photo description.', 'error'); return false; }
     if (isNew && !imageFile) { notify('Please choose a photo.', 'error'); return false; }
     saving = true;
     try {
-      await saveArtwork(gh, $state.snapshot(form), imageFile, isNew);
+      await saveArtwork(gh, $state.snapshot(form), imageFile, galleryItems.map((g) => ({ path: g.path, file: g.file })), isNew);
       notify('Saved. Your site will update in a minute or two.');
       onDone(true);
       return true;
@@ -87,6 +113,26 @@
     <input type="file" accept="image/*" onchange={onPickImage} />
     <span class="ez-help">Big phone photos are fine — Easel resizes them when it builds your site.</span>
   </label>
+
+  <div class="ez-field">
+    <span class="ez-label">More photos (optional)</span>
+    {#if galleryItems.length}
+      <div class="ez-gallery">
+        {#each galleryItems as item, i (item.url)}
+          <div class="ez-gallery__item">
+            <img class="ez-gallery__thumb" src={item.url} alt="" />
+            <div class="ez-gallery__ctrls">
+              <button type="button" class="ez-btn ez-btn--sm" onclick={() => moveGallery(i, -1)} disabled={i === 0} aria-label="Move earlier">↑</button>
+              <button type="button" class="ez-btn ez-btn--sm" onclick={() => moveGallery(i, 1)} disabled={i === galleryItems.length - 1} aria-label="Move later">↓</button>
+              <button type="button" class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => removeGallery(i)} aria-label="Remove">×</button>
+            </div>
+          </div>
+        {/each}
+      </div>
+    {/if}
+    <input type="file" accept="image/*" multiple onchange={onPickGallery} />
+    <span class="ez-help">Detail shots, other angles, or process photos — shown on this piece's own page.</span>
+  </div>
 
   <label class="ez-field">
     <span class="ez-label">Title</span>
@@ -164,3 +210,30 @@
     </button>
   </div>
 </div>
+
+<style>
+  .ez-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ez-space-3);
+    margin-bottom: var(--ez-space-3);
+  }
+  .ez-gallery__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ez-space-1);
+    width: 96px;
+  }
+  .ez-gallery__thumb {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border: var(--ez-border-width) solid var(--ez-border);
+    background: var(--ez-paper);
+  }
+  .ez-gallery__ctrls {
+    display: flex;
+    gap: var(--ez-space-1);
+    justify-content: center;
+  }
+</style>

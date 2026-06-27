@@ -4,6 +4,7 @@ import { getCollection, getEntry, render } from 'astro:content';
 import { getImage, Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import StatusPill from '../../components/StatusPill.astro';
+import Lightbox from '../../components/Lightbox.astro';
 import { FULL_WIDTHS } from '../../lib/images';
 import { visualArtworkLd, breadcrumbLd } from '../../lib/structured-data';
 import { toEmbedSrc } from '../../lib/embed';
@@ -43,6 +44,19 @@ const ogImg = await getImage({ src: a.image, width: 1600 });
 const imageAbs = new URL(ogImg.src, origin).href;
 const pageAbs = new URL(Astro.url.pathname, origin).href;
 
+// Extra gallery shots. When present, the cover + each shot become a lightbox the
+// visitor can step through; with none, the page keeps its plain single image.
+const gallery = a.images ?? [];
+const hasGallery = gallery.length > 0;
+const lightboxItems = hasGallery
+  ? await Promise.all(
+      [a.image, ...gallery].map(async (img, i) => {
+        const full = await getImage({ src: img, width: 1600 });
+        return { src: full.src, alt: i === 0 ? a.alt : `${a.title} — detail ${i}`, title: a.title, meta: metaParts.join(' · ') };
+      }),
+    )
+  : [];
+
 const jsonLd = [
   visualArtworkLd(
     {
@@ -70,7 +84,22 @@ const jsonLd = [
 
     <div class="ez-work__grid">
       <div class="ez-work__media">
-        <Image src={a.image} alt={a.alt} widths={FULL_WIDTHS} sizes="(max-width: 800px) 100vw, 60vw" class="ez-work__img" />
+        {hasGallery ? (
+          <button type="button" class="ez-work__imgbtn" data-ez-lightbox data-index="0" aria-label={`View ${a.title} larger`}>
+            <Image src={a.image} alt={a.alt} widths={FULL_WIDTHS} sizes="(max-width: 800px) 100vw, 60vw" class="ez-work__img" />
+          </button>
+        ) : (
+          <Image src={a.image} alt={a.alt} widths={FULL_WIDTHS} sizes="(max-width: 800px) 100vw, 60vw" class="ez-work__img" />
+        )}
+        {hasGallery && (
+          <div class="ez-work__thumbs">
+            {gallery.map((img, i) => (
+              <button type="button" class="ez-work__thumb" data-ez-lightbox data-index={i + 1} aria-label={`View detail ${i + 1}`}>
+                <Image src={img} alt={`${a.title} — detail ${i + 1}`} widths={[160, 320]} sizes="80px" />
+              </button>
+            ))}
+          </div>
+        )}
         {embedSrc && (
           <div class="ez-work__video">
             <iframe
@@ -103,6 +132,8 @@ const jsonLd = [
       {next ? <a class="ez-work__navlink ez-work__navlink--next" href={withBase(`/work/${next.slug}/`)} rel="next">{next.title} →</a> : <span />}
     </nav>
   </div>
+
+  {hasGallery && <Lightbox items={lightboxItems} />}
 </Base>
 
 <style>
@@ -119,6 +150,35 @@ const jsonLd = [
     display: block;
     border: var(--ez-border-width) solid var(--ez-border);
     background: var(--ez-paper);
+  }
+  .ez-work__imgbtn {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+  .ez-work__thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ez-space-3);
+    margin-top: var(--ez-space-4);
+  }
+  .ez-work__thumb {
+    width: 80px;
+    height: 80px;
+    padding: 0;
+    border: var(--ez-border-width) solid var(--ez-border);
+    background: var(--ez-paper);
+    cursor: zoom-in;
+    overflow: hidden;
+  }
+  .ez-work__thumb :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
   .ez-work__video {
     position: relative;

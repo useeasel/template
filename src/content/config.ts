@@ -15,6 +15,9 @@ const artworks = defineCollection({
   schema: ({ image }) =>
     z.object({
       image: image(),
+      // Optional extra shots (details, process, other angles) shown on the piece's
+      // own page. The primary `image` above stays the cover/thumbnail/share image.
+      images: z.array(image()).default([]),
       title: z.string(),
       year: z.number().optional(),
       medium: z.string().optional(),

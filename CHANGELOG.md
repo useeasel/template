@@ -7,6 +7,13 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.10.0
+
+- **More than one photo per piece.** Add detail shots, other angles, or process photos to
+  any artwork under **“More photos.”** They appear on the piece’s own page, and visitors
+  can step through them all in a full-screen viewer. Your main photo stays the cover and
+  the one used for sharing.
+
 ## 0.9.0
 
 - **Show your exhibitions.** A new Exhibitions page lists your upcoming and past shows —
