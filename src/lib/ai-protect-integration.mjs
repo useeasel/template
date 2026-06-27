@@ -12,6 +12,14 @@ import { join, extname } from 'node:path';
 // entirely when off, and processes each image in its own try/catch so a single
 // unreadable or unsupported file can never fail the build (the same forgiving
 // posture as the `|| true` on the Pagefind step).
+//
+// Interaction with Glaze/Nightshade-protected pieces (B2b): those images are
+// served as untouched originals on the page (no astro:assets transform). This
+// EXIF stamp re-saves images, which is lossless for PNG (pixels preserved) but
+// re-encodes lossy formats. Glaze/Nightshade tolerate mild re-encoding, but the
+// fuller guarantee — never touching a protected file's bytes even with the AI
+// shield on — is a follow-up (would need a build-time exclude list of protected
+// originals). The page-level promise (originals shown untransformed) holds today.
 
 const RIGHTS_NOTE =
   'Do not use for AI or machine-learning training. No AI. (noai, noimageai)';

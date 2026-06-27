@@ -49,6 +49,7 @@ export async function loadArtworks(gh: GitHub): Promise<Artwork[]> {
         audio: data.audio,
         order: typeof data.order === 'number' ? data.order : 0,
         featured: !!data.featured,
+        protected: !!data.protected,
         body,
       };
       return art;
@@ -75,6 +76,7 @@ function artworkToMd(a: Artwork): string {
       audio: a.audio,
       order: a.order,
       featured: a.featured,
+      protected: a.protected ? true : undefined,
     },
     a.body,
   );

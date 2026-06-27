@@ -45,6 +45,10 @@ const artworks = defineCollection({
       // Manual sort, set by drag-reorder in the CMS.
       order: z.number().default(0),
       featured: z.boolean().default(false),
+      // Marks an image cloaked with Glaze/Nightshade. When set, the site serves the
+      // original file untouched (no resizing/re-encoding through astro:assets), so
+      // the protection survives. Off by default — normal pieces stay optimized.
+      protected: z.boolean().default(false),
     }),
 });
 

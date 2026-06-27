@@ -7,6 +7,14 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.32.0
+
+- **Use Glaze and Nightshade with confidence.** Protected an image with one of these tools?
+  Tick "This image is protected with Glaze or Nightshade" when you add it, and your site
+  shows that exact file, with no resizing or re-saving, so the protection stays intact. The
+  editor links both tools and explains what each one does. Off by default, so your other
+  images stay optimized for fast loading.
+
 ## 0.31.0
 
 - **Roll back to an earlier version.** A new History section lists a snapshot from every

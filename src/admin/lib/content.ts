@@ -39,6 +39,8 @@ export interface Artwork {
   audio?: string;
   order: number;
   featured: boolean;
+  /** Image is Glaze/Nightshade-protected — served untouched (no re-encoding). */
+  protected?: boolean;
   body: string;
 }
 

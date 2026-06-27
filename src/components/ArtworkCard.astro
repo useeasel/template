@@ -24,6 +24,8 @@ interface Props {
   hasVideo?: boolean;
   /** Show a small ♪ badge — the piece has audio on its page. */
   hasAudio?: boolean;
+  /** Glaze/Nightshade-protected — serve the original file untouched (no transform). */
+  protected?: boolean;
 }
 const {
   image,
@@ -40,6 +42,7 @@ const {
   series,
   hasVideo,
   hasAudio,
+  protected: isProtected,
 } = Astro.props;
 const mediaBadge = hasVideo ? '▶' : hasAudio ? '♪' : null;
 const mediaLabel = hasVideo ? 'Has video' : hasAudio ? 'Has audio' : null;
@@ -62,14 +65,19 @@ const triggerProps = href
 
 <article class="ez-card ez-artcard" data-status={status} data-series={series}>
   <Trigger {...triggerProps}>
-    <Image
-      src={image}
-      alt={alt}
-      widths={CARD_WIDTHS}
-      sizes={cardSizes(columns)}
-      loading="lazy"
-      class="ez-artcard__img"
-    />
+    {isProtected ? (
+      // Protected (Glaze/Nightshade): serve the original bytes, never transformed.
+      <img src={image.src} width={image.width} height={image.height} alt={alt} loading="lazy" class="ez-artcard__img" />
+    ) : (
+      <Image
+        src={image}
+        alt={alt}
+        widths={CARD_WIDTHS}
+        sizes={cardSizes(columns)}
+        loading="lazy"
+        class="ez-artcard__img"
+      />
+    )}
     {mediaBadge && (
       <span class="ez-artcard__media" aria-label={mediaLabel}>
         <span aria-hidden="true">{mediaBadge}</span>

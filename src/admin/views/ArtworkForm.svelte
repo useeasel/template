@@ -212,6 +212,14 @@
     <span>Feature this piece at the top of my homepage</span>
   </label>
 
+  <label class="ez-field ez-field--check">
+    <input type="checkbox" bind:checked={form.protected} />
+    <span>This image is protected with Glaze or Nightshade</span>
+  </label>
+  {#if form.protected}
+    <p class="ez-help">Your site will show this image exactly as you uploaded it, with no resizing or re-saving, so the protection stays intact. New to these tools? <a href="https://glaze.cs.uchicago.edu/" target="_blank" rel="noopener">Glaze</a> guards your style; <a href="https://nightshade.cs.uchicago.edu/" target="_blank" rel="noopener">Nightshade</a> disrupts models that train on your work. Protect the file first, then upload it here.</p>
+  {/if}
+
   <label class="ez-field">
     <span class="ez-label">About this piece</span>
     <textarea class="ez-input" rows="4" bind:value={form.body}></textarea>

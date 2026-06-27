@@ -87,6 +87,7 @@ const heroLayout = !!series.data.storyLayout && !!cover;
           href={linkToPage ? withBase(`/work/${slugify(a.id)}/`) : undefined}
           hasVideo={!!a.data.video}
           hasAudio={!!a.data.audio}
+          protected={a.data.protected}
         />
       ))}
     </div>
