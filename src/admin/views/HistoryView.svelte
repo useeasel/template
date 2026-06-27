@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { GitHub } from '../lib/github';
   import { useShell } from '../lib/shell.svelte';
+  import { buildBackup, restoreBackup } from '../lib/backup';
 
   let {
     gh,
@@ -11,6 +12,46 @@
   } = $props();
 
   const shell = useShell();
+
+  let backingUp = $state(false);
+  let restoring = $state(false);
+  let restoreInput = $state<HTMLInputElement | null>(null);
+
+  async function downloadBackup() {
+    backingUp = true;
+    try {
+      const blob = await buildBackup(gh);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'easel-backup.zip';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      notify('Backup downloaded.');
+    } catch (e) {
+      notify(e instanceof Error ? e.message : 'Could not make a backup.', 'error');
+    }
+    backingUp = false;
+  }
+
+  async function onRestorePick(e: Event) {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    (e.target as HTMLInputElement).value = '';
+    if (!file) return;
+    if (!confirm('Restore this backup? It replaces your current pages, artwork, and settings with the ones in the file, and publishes a new version. Your current site stays in history, so you can undo this.')) return;
+    restoring = true;
+    try {
+      const n = await restoreBackup(gh, file);
+      shell.markCommitted();
+      notify(`Restored ${n} file${n === 1 ? '' : 's'}. Your site will update shortly.`);
+      await load();
+    } catch (e) {
+      notify(e instanceof Error ? e.message : 'Could not restore that file.', 'error');
+    }
+    restoring = false;
+  }
 
   type Snapshot = { sha: string; message: string; date: string };
   let items = $state<Snapshot[]>([]);
@@ -74,6 +115,22 @@
   </div>
 </div>
 
+<div class="ez-backup">
+  <div>
+    <strong>Backup &amp; restore</strong>
+    <p class="ez-help">Download a full copy of your site, your pages, artwork, and settings, as a single file. Restore it here any time. It's your work; keep a copy somewhere safe.</p>
+  </div>
+  <div class="ez-backup__actions">
+    <button class="ez-btn ez-btn--sm" onclick={downloadBackup} disabled={backingUp || restoring}>
+      {backingUp ? 'Preparing…' : 'Download backup'}
+    </button>
+    <input type="file" accept=".zip,application/zip" class="ez-visually-hidden" bind:this={restoreInput} onchange={onRestorePick} />
+    <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => restoreInput?.click()} disabled={backingUp || restoring}>
+      {restoring ? 'Restoring…' : 'Restore from backup'}
+    </button>
+  </div>
+</div>
+
 {#if loading}
   <p class="ez-help">Loading your history…</p>
 {:else if items.length === 0}
@@ -97,6 +154,19 @@
 {/if}
 
 <style>
+  .ez-backup {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border: var(--ez-border-width) solid var(--ez-border);
+    border-radius: var(--ez-radius);
+    background: var(--ez-paper);
+  }
+  .ez-backup__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
   .ez-history { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
   .ez-history__row {
     display: flex;

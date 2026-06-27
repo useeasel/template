@@ -7,6 +7,13 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.40.0
+
+- **Download a full backup anytime, and restore it just as easily.** In History, you can
+  save a complete copy of your site, your pages, artwork, and settings, as a single file
+  to keep somewhere safe. Restore it later in one step, with a confirmation first. It's
+  your work; keep a copy.
+
 ## 0.39.0
 
 - **Two new gallery looks.** Under Design, Gallery layout now offers Cinematic, one piece
