@@ -14,6 +14,52 @@ import { allFontsHref } from '../../lib/design';
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    {/* OAuth popup landing. When the auth relay redirects the sign-in popup back here with
+        the token in the URL fragment, hand it to the opener over same-origin channels
+        (localStorage `storage` event + BroadcastChannel) and close — all before the editor
+        island boots, so the popup never flashes the UI. Keys mirror src/admin/lib/auth.ts.
+        A no-op on a normal editor load (no auth fragment). */}
+    <script is:inline>
+      (function () {
+        var hash = location.hash || '';
+        if (hash.indexOf('easel_token=') === -1 && hash.indexOf('easel_auth_error=') === -1)
+          return;
+        var params = new URLSearchParams(hash.slice(1));
+        var token = params.get('easel_token');
+        var error = params.get('easel_auth_error');
+        var result = token
+          ? { kind: 'success', token: token }
+          : { kind: 'error', message: error || 'Sign-in failed.' };
+        try {
+          if (result.kind === 'success') localStorage.setItem('easel_gh_token', result.token);
+          var signal = JSON.stringify({
+            kind: result.kind,
+            token: result.token,
+            message: result.message,
+            at: Date.now() + ':' + Math.random(),
+          });
+          // Fires a `storage` event in the opener (a separate same-origin window).
+          localStorage.setItem('easel_auth_event', signal);
+          if ('BroadcastChannel' in window) {
+            var ch = new BroadcastChannel('easel-auth');
+            ch.postMessage(result);
+            ch.close();
+          }
+        } catch (e) {
+          /* storage disabled — opener's popup-closed fallback still recovers the token */
+        }
+        // Strip the token from the URL/history before anything else can read it.
+        try {
+          history.replaceState(null, '', location.pathname + location.search);
+        } catch (e) {}
+        // We're the sign-in popup; close. window.close() is permitted for script-opened
+        // windows even when window.opener is walled off (the bug we're fixing). If it's
+        // blocked (page opened directly), we fall through and the editor boots signed-in.
+        try {
+          window.close();
+        } catch (e) {}
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

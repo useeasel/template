@@ -7,6 +7,12 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.3.1
+
+- **Sign-in that just works.** Fixed the "Sign in with GitHub" pop-up getting stuck on
+  "Completing sign-in…" and never finishing in some browsers (notably Firefox and Safari).
+  The editor now receives your sign-in reliably and the pop-up closes on its own.
+
 ## 0.3.0
 
 - **A site that starts as yours.** New sites now open empty with a friendly prompt to
