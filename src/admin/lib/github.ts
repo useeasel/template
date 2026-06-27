@@ -99,6 +99,20 @@ export class GitHub {
     return u.login;
   }
 
+  /**
+   * True if GitHub Pages is enabled for this repo. The Pages REST endpoint 404s when
+   * Pages was never turned on (i.e. a Netlify-hosted site), so a thrown error ⇒ false.
+   * Used by the updater to decide whether to restore a missing Pages deploy workflow.
+   */
+  async pagesEnabled(): Promise<boolean> {
+    try {
+      await this.api(`${this.repoPath()}/pages`);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   /** List a directory (no file contents). Returns [] if the dir doesn't exist. */
   async listDir(dir: string): Promise<DirEntry[]> {
     let live: DirEntry[] = [];

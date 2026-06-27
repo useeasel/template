@@ -7,6 +7,14 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.14.0
+
+- **Updates no longer stall publishing on GitHub Pages.** On Pages-hosted sites, running
+  an update used to quietly remove the behind-the-scenes file that rebuilds your site, so
+  the update committed but your live site never refreshed. Updates now leave that file
+  alone — and if an earlier update already removed it, this update puts it back and
+  republishes your site automatically. (Netlify sites were never affected.)
+
 ## 0.13.0
 
 - **Your changes show up right away.** After you publish an edit, visitors (and you)
