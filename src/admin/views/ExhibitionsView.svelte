@@ -3,36 +3,19 @@
   import type { Exhibition } from '../lib/content';
   import { loadExhibitions, saveExhibition, deleteExhibition } from '../lib/store';
   import { useShell } from '../lib/shell.svelte';
+  import { createCrud } from '../lib/crud.svelte';
 
   let { gh, notify }: { gh: GitHub; notify: (m: string, k?: 'info' | 'error') => void } = $props();
 
   const shell = useShell();
 
-  let items = $state<Exhibition[]>([]);
-  let loading = $state(true);
-  let editing = $state<Exhibition | null>(null);
-  let editBaseline = $state('');
-  let saving = $state(false);
-
-  const blank = (): Exhibition => ({
-    id: '', title: '', venue: '', location: '', startDate: today(), endDate: '', url: '', description: '', draft: false,
-  });
-
-  function open(x: Exhibition) {
-    editing = x;
-    editBaseline = JSON.stringify($state.snapshot(x));
-  }
-
-  // While an entry is open, take part in the unsaved-changes guard. Silent: the
-  // editor carries its own Save/Cancel footer, so no section-bar button.
-  $effect(() => {
-    if (!editing) return;
-    return shell.register({
-      isDirty: () => editing != null && JSON.stringify($state.snapshot(editing)) !== editBaseline,
-      save,
-      discard: () => (editing = null),
-      silent: true,
-    });
+  const c = createCrud<Exhibition>(notify, shell, {
+    load: () => loadExhibitions(gh),
+    save: (x, isNew) => saveExhibition(gh, x, isNew),
+    remove: (x) => deleteExhibition(gh, x),
+    validate: (x) => (!x.title.trim() ? 'Please add a title.' : !x.startDate.trim() ? 'Please add a start date.' : null),
+    confirmRemove: (x) => `Delete “${x.title}”?`,
+    messages: { saved: 'Saved. Your site will update shortly.', deleted: 'Exhibition deleted.', loadError: 'Could not load exhibitions.' },
   });
 
   function today(): string {
@@ -45,115 +28,89 @@
     return [x.venue, x.location, range].filter(Boolean).join(' · ') + (x.draft ? ' · Draft' : '');
   }
 
-  async function refresh() {
-    loading = true;
-    try {
-      items = await loadExhibitions(gh);
-    } catch (e) {
-      notify(e instanceof Error ? e.message : 'Could not load exhibitions.', 'error');
-    }
-    loading = false;
-  }
-  refresh();
+  const blank = (): Exhibition => ({
+    id: '', title: '', venue: '', location: '', startDate: today(), endDate: '', url: '', description: '', draft: false,
+  });
 
-  async function save(): Promise<boolean> {
-    if (!editing) return true;
-    if (!editing.title.trim()) { notify('Please add a title.', 'error'); return false; }
-    if (!editing.startDate.trim()) { notify('Please add a start date.', 'error'); return false; }
-    saving = true;
-    try {
-      await saveExhibition(gh, $state.snapshot(editing) as Exhibition, editing.id === '');
-      shell.markCommitted();
-      notify('Saved. Your site will update shortly.');
-      editing = null;
-      await refresh();
-      saving = false;
-      return true;
-    } catch (e) {
-      notify(e instanceof Error ? e.message : 'Could not save.', 'error');
-      saving = false;
-      return false;
-    }
-  }
-
-  async function remove(x: Exhibition) {
-    if (!confirm(`Delete “${x.title}”?`)) return;
-    try {
-      await deleteExhibition(gh, x);
-      shell.markCommitted();
-      notify('Exhibition deleted.');
-      await refresh();
-    } catch (e) {
-      notify(e instanceof Error ? e.message : 'Could not delete.', 'error');
-    }
-  }
+  // While an entry is open, take part in the unsaved-changes guard. Silent: the
+  // editor carries its own Save/Cancel footer, so no section-bar button.
+  $effect(() => {
+    if (!c.editing) return;
+    return shell.register({
+      isDirty: () => c.isDirty(),
+      save: c.save,
+      discard: () => c.cancel(),
+      silent: true,
+    });
+  });
 </script>
 
-{#if editing}
+{#if c.editing}
+  {@const ed = c.editing}
   <div class="ez-form">
     <div class="ez-form__head">
-      <h2>{editing.id === '' ? 'New exhibition' : 'Edit exhibition'}</h2>
-      <button class="ez-btn ez-btn--ghost" onclick={() => shell.guard(() => (editing = null))} disabled={saving}>Cancel</button>
+      <h2>{ed.id === '' ? 'New exhibition' : 'Edit exhibition'}</h2>
+      <button class="ez-btn ez-btn--ghost" onclick={() => shell.guard(() => c.cancel())} disabled={c.saving}>Cancel</button>
     </div>
     <label class="ez-field"><span class="ez-label">Title</span>
-      <input class="ez-input" bind:value={editing.title} placeholder="Tidal — recent paintings" /></label>
+      <input class="ez-input" bind:value={ed.title} placeholder="Tidal — recent paintings" /></label>
     <div class="ez-row">
       <label class="ez-field"><span class="ez-label">Venue</span>
-        <input class="ez-input" bind:value={editing.venue} placeholder="Gallery name" /></label>
+        <input class="ez-input" bind:value={ed.venue} placeholder="Gallery name" /></label>
       <label class="ez-field"><span class="ez-label">Location</span>
-        <input class="ez-input" bind:value={editing.location} placeholder="City, Country" /></label>
+        <input class="ez-input" bind:value={ed.location} placeholder="City, Country" /></label>
     </div>
     <div class="ez-row">
       <label class="ez-field"><span class="ez-label">Start date</span>
-        <input class="ez-input" type="date" bind:value={editing.startDate} /></label>
+        <input class="ez-input" type="date" bind:value={ed.startDate} /></label>
       <label class="ez-field"><span class="ez-label">End date (optional)</span>
-        <input class="ez-input" type="date" bind:value={editing.endDate} /></label>
+        <input class="ez-input" type="date" bind:value={ed.endDate} /></label>
     </div>
     <div class="ez-row">
       <label class="ez-field"><span class="ez-label">Type (for your CV)</span>
-        <select class="ez-input" bind:value={editing.kind}>
+        <select class="ez-input" bind:value={ed.kind}>
           <option value={undefined}>Not specified</option>
           <option value="solo">Solo show</option>
           <option value="group">Group show</option>
         </select></label>
       <label class="ez-field"><span class="ez-label">Link (optional)</span>
-        <input class="ez-input" bind:value={editing.url} placeholder="https://gallery.com/show" /></label>
+        <input class="ez-input" bind:value={ed.url} placeholder="https://gallery.com/show" /></label>
     </div>
     <label class="ez-field"><span class="ez-label">Description (optional)</span>
-      <textarea class="ez-input" rows="3" bind:value={editing.description}></textarea>
+      <textarea class="ez-input" rows="3" bind:value={ed.description}></textarea>
       <span class="ez-help">A short line about the show.</span></label>
-    <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={editing.draft} />
+    <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={ed.draft} />
       <span>Draft (hidden from your site)</span></label>
     <div class="ez-form__actions">
-      <button class="ez-btn ez-btn--primary" onclick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>
+      <button class="ez-btn ez-btn--primary" onclick={c.save} disabled={c.saving}>{c.saving ? 'Saving…' : 'Save'}</button>
     </div>
   </div>
 {:else}
   <div class="ez-view__head">
     <p class="ez-help">Upcoming and past shows. Turn the Exhibitions page on in the <strong>Menu</strong> tab.</p>
     <div class="ez-view__actions">
-      <button class="ez-btn ez-btn--primary" onclick={() => open(blank())}>Add exhibition</button>
+      <button class="ez-btn ez-btn--primary" onclick={() => c.open(blank())}>Add exhibition</button>
     </div>
   </div>
 
-  {#if loading}
+  {#if c.loading}
     <p class="ez-help">Loading…</p>
-  {:else if items.length === 0}
+  {:else if c.items.length === 0}
     <div class="ez-empty">
       <p>No exhibitions yet.</p>
-      <button class="ez-btn ez-btn--primary" onclick={() => open(blank())}>Add your first show</button>
+      <button class="ez-btn ez-btn--primary" onclick={() => c.open(blank())}>Add your first show</button>
     </div>
   {:else}
     <ul class="ez-list" role="list">
-      {#each items as x (x.id)}
+      {#each c.items as x (x.id)}
         <li class="ez-list__row">
           <div class="ez-list__info">
             <strong>{x.title}</strong>
             <span class="ez-help">{summary(x)}</span>
           </div>
           <div class="ez-list__actions">
-            <button class="ez-btn ez-btn--sm" onclick={() => open({ ...x })}>Edit</button>
-            <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => remove(x)}>Delete</button>
+            <button class="ez-btn ez-btn--sm" onclick={() => c.open({ ...x })}>Edit</button>
+            <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => c.remove(x)}>Delete</button>
           </div>
         </li>
       {/each}
