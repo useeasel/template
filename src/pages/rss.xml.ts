@@ -1,7 +1,7 @@
 import rss from '@astrojs/rss';
 import { getCollection, getEntry } from 'astro:content';
 import type { APIContext } from 'astro';
-import { withBase } from '../lib/href';
+import { withBase, stripMd } from '../lib/href';
 
 // RSS feed for the News collection, so visitors can follow along in a reader.
 // Mirrors src/pages/news/index.astro: published (non-draft) posts, newest first.
@@ -10,7 +10,6 @@ import { withBase } from '../lib/href';
 export async function GET(context: APIContext) {
   const settings = (await getEntry('site', 'settings'))!.data;
 
-  const slugify = (id: string) => id.replace(/\.md$/, '');
   const toDate = (iso: string) => {
     const d = new Date(iso);
     return Number.isNaN(d.getTime()) ? undefined : d;
@@ -30,7 +29,7 @@ export async function GET(context: APIContext) {
       title: p.data.title,
       pubDate: toDate(p.data.date),
       description: p.data.excerpt,
-      link: withBase(`/news/${slugify(p.id)}/`),
+      link: withBase(`/news/${stripMd(p.id)}/`),
     })),
   });
 }

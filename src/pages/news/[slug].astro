@@ -4,31 +4,24 @@ import { getCollection, getEntry, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { FULL_WIDTHS } from '../../lib/images';
-import { withBase } from '../../lib/href';
+import { withBase, stripMd } from '../../lib/href';
+import { fmtDate } from '../../lib/date';
 import { articleLd, breadcrumbLd } from '../../lib/structured-data';
 
 export const getStaticPaths = (async () => {
-  const slug = (id: string) => id.replace(/\.md$/, '');
   const posts = (await getCollection('posts')).filter((p) => !p.data.draft);
-  return posts.map((entry) => ({ params: { slug: slug(entry.id) }, props: { entry } }));
+  return posts.map((entry) => ({ params: { slug: stripMd(entry.id) }, props: { entry } }));
 }) satisfies GetStaticPaths;
 
 const { entry } = Astro.props;
 const p = entry.data;
 const { Content } = await render(entry);
-const postSlug = entry.id.replace(/\.md$/, '');
+const postSlug = stripMd(entry.id);
 
 const settings = (await getEntry('site', 'settings'))!.data;
 const artist = settings.logoText || settings.siteTitle;
 const origin = (Astro.site ?? Astro.url).origin;
 const abs = (path: string) => new URL(withBase(path), origin).href;
-
-const fmtDate = (iso: string) => {
-  const d = new Date(iso);
-  return Number.isNaN(d.getTime())
-    ? iso
-    : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-};
 
 const jsonLd = [
   articleLd(

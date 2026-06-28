@@ -3,7 +3,7 @@ import { getCollection, getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import { CARD_WIDTHS, cardSizes } from '../lib/images';
-import { withBase } from '../lib/href';
+import { withBase, stripMd } from '../lib/href';
 
 // A simple "shop" index of every available piece: thumbnail, title/meta, price,
 // and a Buy or Inquire action. The page only appears in the menu when the artist
@@ -14,7 +14,6 @@ import { withBase } from '../lib/href';
 const settings = (await getEntry('site', 'settings'))!.data;
 const artist = settings.logoText || settings.siteTitle;
 
-const slug = (id: string) => id.replace(/\.md$/, '');
 const available = (await getCollection('artworks'))
   .filter((a) => a.data.status === 'available')
   .sort((a, b) => a.data.order - b.data.order);
@@ -39,12 +38,12 @@ const inquireHref = (title: string) => `${withBase('/contact/')}?piece=${encodeU
           const meta = [a.year, a.medium, a.dimensions].filter(Boolean).join(' · ');
           return (
             <li class="ez-avail__item">
-              <a class="ez-avail__media" href={withBase(`/work/${slug(entry.id)}/`)} aria-label={`View ${a.title}`}>
+              <a class="ez-avail__media" href={withBase(`/work/${stripMd(entry.id)}/`)} aria-label={`View ${a.title}`}>
                 <Image src={a.image} alt={a.alt} widths={CARD_WIDTHS} sizes={cardSizes(3)} loading="lazy" class="ez-avail__img" />
               </a>
               <div class="ez-avail__body">
                 <h2 class="ez-avail__title">
-                  <a href={withBase(`/work/${slug(entry.id)}/`)}>{a.title}</a>
+                  <a href={withBase(`/work/${stripMd(entry.id)}/`)}>{a.title}</a>
                 </h2>
                 {meta && <p class="ez-avail__meta">{meta}</p>}
                 {a.price && <p class="ez-avail__price">{a.price}</p>}

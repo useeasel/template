@@ -1,21 +1,14 @@
 ---
 import { getCollection, getEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { withBase } from '../../lib/href';
+import { withBase, stripMd } from '../../lib/href';
+import { fmtDate } from '../../lib/date';
 
 const settings = (await getEntry('site', 'settings'))!.data;
-const slugify = (id: string) => id.replace(/\.md$/, '');
 
 const posts = (await getCollection('posts'))
   .filter((p) => !p.data.draft)
   .sort((a, b) => (a.data.date < b.data.date ? 1 : -1));
-
-const fmtDate = (iso: string) => {
-  const d = new Date(iso);
-  return Number.isNaN(d.getTime())
-    ? iso
-    : d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-};
 ---
 
 <Base pageTitle="News" pageDescription={`Updates from ${settings.siteTitle}`} pageImage={withBase('/og/news.png')}>
@@ -25,7 +18,7 @@ const fmtDate = (iso: string) => {
     <ul class="ez-news__list" role="list">
       {posts.map((p) => (
         <li class="ez-news__item">
-          <a class="ez-news__link" href={withBase(`/news/${slugify(p.id)}/`)}>
+          <a class="ez-news__link" href={withBase(`/news/${stripMd(p.id)}/`)}>
             <time class="ez-news__date" datetime={p.data.date}>{fmtDate(p.data.date)}</time>
             <h2 class="ez-news__title">{p.data.title}</h2>
             {p.data.excerpt && <p class="ez-news__excerpt">{p.data.excerpt}</p>}

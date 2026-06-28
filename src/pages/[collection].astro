@@ -6,36 +6,39 @@ import Base from '../layouts/Base.astro';
 import ArtworkCard from '../components/ArtworkCard.astro';
 import Lightbox from '../components/Lightbox.astro';
 import { resolveDesign } from '../lib/design';
-import { withBase } from '../lib/href';
+import { withBase, stripMd } from '../lib/href';
 
 // Astro 5 content-collection ids include the file extension; strip it for clean
 // URLs and for matching artwork series references.
 export const getStaticPaths = (async () => {
   const series = await getCollection('collections');
   return series.map((s) => ({
-    params: { collection: s.id.replace(/\.md$/, '') },
+    params: { collection: stripMd(s.id) },
     props: { series: s },
   }));
 }) satisfies GetStaticPaths;
 
 const { series } = Astro.props;
-const slugify = (id: string) => id.replace(/\.md$/, '');
-const seriesSlug = slugify(series.id);
+const seriesSlug = stripMd(series.id);
 const settings = (await getEntry('site', 'settings'))!.data;
 const design = resolveDesign(settings.design as any);
 const linkToPage = design.gallery.click === 'page';
 
 const artworks = (await getCollection('artworks'))
-  .filter((a) => a.data.collection && slugify(a.data.collection.id) === seriesSlug)
+  .filter((a) => a.data.collection && stripMd(a.data.collection.id) === seriesSlug)
   .sort((a, b) => a.data.order - b.data.order);
 
-const lightboxItems = await Promise.all(
-  artworks.map(async (a) => {
-    const img = await getImage({ src: a.data.image, width: 1600 });
-    const meta = [a.data.year, a.data.medium, a.data.dimensions].filter(Boolean).join(' · ');
-    return { src: img.src, alt: a.data.alt, title: a.data.title, meta };
-  })
-);
+// Only resolve full-size lightbox URLs when the gallery opens a lightbox; in
+// page-link mode the Lightbox never renders, so the transforms would be wasted.
+const lightboxItems = linkToPage
+  ? []
+  : await Promise.all(
+      artworks.map(async (a) => {
+        const img = await getImage({ src: a.data.image, width: 1600 });
+        const meta = [a.data.year, a.data.medium, a.data.dimensions].filter(Boolean).join(' · ');
+        return { src: img.src, alt: a.data.alt, title: a.data.title, meta };
+      })
+    );
 
 // Optional story header: a markdown intro, a tagline, and a cover. The full-bleed
 // hero only kicks in when the artist turns on storyLayout AND has set a cover.
@@ -84,7 +87,7 @@ const heroLayout = !!series.data.storyLayout && !!cover;
           price={a.data.price}
           status={a.data.status}
           index={i}
-          href={linkToPage ? withBase(`/work/${slugify(a.id)}/`) : undefined}
+          href={linkToPage ? withBase(`/work/${stripMd(a.id)}/`) : undefined}
           hasVideo={!!a.data.video}
           hasAudio={!!a.data.audio}
           protected={a.data.protected}

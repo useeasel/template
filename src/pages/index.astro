@@ -5,12 +5,11 @@ import Base from '../layouts/Base.astro';
 import ArtworkCard from '../components/ArtworkCard.astro';
 import Lightbox from '../components/Lightbox.astro';
 import { resolveDesign } from '../lib/design';
-import { withBase } from '../lib/href';
+import { withBase, stripMd } from '../lib/href';
 
 const settings = (await getEntry('site', 'settings'))!.data;
 const design = resolveDesign(settings.design as any);
 const linkToPage = design.gallery.click === 'page';
-const slugify = (id: string) => id.replace(/\.md$/, '');
 
 const artworks = (await getCollection('artworks')).sort(
   (a, b) => a.data.order - b.data.order
@@ -20,22 +19,25 @@ const artworks = (await getCollection('artworks')).sort(
 // "Available" shortcut. Filtering is client-side over data-* on each card.
 const seriesEntries = (await getCollection('collections')).sort((a, b) => a.data.order - b.data.order);
 const presentSeries = new Set(
-  artworks.map((a) => (a.data.collection ? slugify(a.data.collection.id) : null)).filter(Boolean) as string[]
+  artworks.map((a) => (a.data.collection ? stripMd(a.data.collection.id) : null)).filter(Boolean) as string[]
 );
 const seriesChips = seriesEntries
-  .filter((s) => presentSeries.has(slugify(s.id)))
-  .map((s) => ({ slug: slugify(s.id), title: s.data.title }));
+  .filter((s) => presentSeries.has(stripMd(s.id)))
+  .map((s) => ({ slug: stripMd(s.id), title: s.data.title }));
 const hasAvailable = artworks.some((a) => a.data.status === 'available');
 const showFilters = design.gallery.filters && artworks.length > 1 && (seriesChips.length > 0 || hasAvailable);
 
-// Build lightbox payload (resolved, full-size URLs + gallery labels).
-const lightboxItems = await Promise.all(
-  artworks.map(async (a) => {
-    const img = await getImage({ src: a.data.image, width: 1600 });
-    const meta = [a.data.year, a.data.medium, a.data.dimensions].filter(Boolean).join(' · ');
-    return { src: img.src, alt: a.data.alt, title: a.data.title, meta };
-  })
-);
+// Build lightbox payload (resolved, full-size URLs + gallery labels) — only when
+// the gallery actually opens a lightbox; in page-link mode it never renders.
+const lightboxItems = linkToPage
+  ? []
+  : await Promise.all(
+      artworks.map(async (a) => {
+        const img = await getImage({ src: a.data.image, width: 1600 });
+        const meta = [a.data.year, a.data.medium, a.data.dimensions].filter(Boolean).join(' · ');
+        return { src: img.src, alt: a.data.alt, title: a.data.title, meta };
+      })
+    );
 ---
 
 <Base pageDescription={settings.tagline} pageImage={withBase('/og/home.png')}>
@@ -78,9 +80,9 @@ const lightboxItems = await Promise.all(
               dimensions={a.data.dimensions}
               price={a.data.price}
               status={a.data.status}
-              series={a.data.collection ? slugify(a.data.collection.id) : undefined}
+              series={a.data.collection ? stripMd(a.data.collection.id) : undefined}
               index={i}
-              href={linkToPage ? withBase(`/work/${slugify(a.id)}/`) : undefined}
+              href={linkToPage ? withBase(`/work/${stripMd(a.id)}/`) : undefined}
               hasVideo={!!a.data.video}
               hasAudio={!!a.data.audio}
               protected={a.data.protected}

@@ -9,29 +9,26 @@ import NewsletterSignup from '../../components/NewsletterSignup.astro';
 import { FULL_WIDTHS } from '../../lib/images';
 import { visualArtworkLd, breadcrumbLd } from '../../lib/structured-data';
 import { toEmbedSrc, toAudioEmbed } from '../../lib/embed';
-import { withBase } from '../../lib/href';
+import { withBase, stripMd } from '../../lib/href';
 
 // One indexable, shareable page per artwork. Linked from the gallery when the
 // design's gallery.click is 'page' (otherwise the lightbox handles clicks). Even
 // when the gallery opens lightboxes, these pages still exist for SEO + deep links.
 export const getStaticPaths = (async () => {
-  // getStaticPaths runs in isolation — it can't see component-scope consts, so the
-  // slug helper lives here.
-  const slug = (id: string) => id.replace(/\.md$/, '');
   const artworks = (await getCollection('artworks')).sort((a, b) => a.data.order - b.data.order);
   return artworks.map((entry, i) => ({
-    params: { slug: slug(entry.id) },
+    params: { slug: stripMd(entry.id) },
     props: {
       entry,
-      prev: artworks[i - 1] ? { slug: slug(artworks[i - 1].id), title: artworks[i - 1].data.title } : null,
-      next: artworks[i + 1] ? { slug: slug(artworks[i + 1].id), title: artworks[i + 1].data.title } : null,
+      prev: artworks[i - 1] ? { slug: stripMd(artworks[i - 1].id), title: artworks[i - 1].data.title } : null,
+      next: artworks[i + 1] ? { slug: stripMd(artworks[i + 1].id), title: artworks[i + 1].data.title } : null,
     },
   }));
 }) satisfies GetStaticPaths;
 
 const { entry, prev, next } = Astro.props;
 const a = entry.data;
-const slug = entry.id.replace(/\.md$/, '');
+const slug = stripMd(entry.id);
 const { Content } = await render(entry);
 
 const settings = (await getEntry('site', 'settings'))!.data;
@@ -52,12 +49,17 @@ const pageAbs = new URL(Astro.url.pathname, origin).href;
 const gallery = a.images ?? [];
 const hasGallery = gallery.length > 0;
 const lightboxItems = hasGallery
-  ? await Promise.all(
-      [a.image, ...gallery].map(async (img, i) => {
-        const full = await getImage({ src: img, width: 1600 });
-        return { src: full.src, alt: i === 0 ? a.alt : `${a.title} — detail ${i}`, title: a.title, meta: metaParts.join(' · ') };
-      }),
-    )
+  ? [
+      // The cover is already transformed above as `ogImg` (same width) — reuse it
+      // instead of re-running the transform for index 0.
+      { src: ogImg.src, alt: a.alt, title: a.title, meta: metaParts.join(' · ') },
+      ...(await Promise.all(
+        gallery.map(async (img, i) => {
+          const full = await getImage({ src: img, width: 1600 });
+          return { src: full.src, alt: `${a.title} — detail ${i + 1}`, title: a.title, meta: metaParts.join(' · ') };
+        }),
+      )),
+    ]
   : [];
 
 const jsonLd = [
