@@ -96,7 +96,29 @@ class DemoGitHub {
   // --- Update-check surface (in-memory; the demo is always "up to date"). ---
   async getFileFrom(_over: RepoRef, path: string): Promise<string | null> {
     if (path === 'package.json') return JSON.stringify({ version: '1.0.0' });
-    if (path === 'CHANGELOG.md') return '## 1.0.0\n\n- The first release of your Easel site.\n';
+    if (path === 'CHANGELOG.md')
+      return [
+        '# Changelog',
+        '',
+        'Every update is opt-in and non-destructive: your work is always preserved.',
+        '',
+        '## 1.0.0',
+        '',
+        '- **Your site has a home page builder.** Arrange your work, intro, and links however',
+        '  you like. Off by default, so nothing changes until you try it.',
+        '- **Faster image loading.** Large photos now load in steps so pages feel quicker.',
+        '',
+        '## 0.9.0',
+        '',
+        "- **Add a guestbook.** Visitors can leave a note. Find it under `Settings`.",
+        '- **More fonts.** A handful of new pairings in the style wizard.',
+        '',
+        '## 0.8.0',
+        '',
+        '- **Custom domains made simpler.** Step-by-step help at',
+        '  [the guide](https://easel.rosematcha.com/custom-domain/).',
+        '',
+      ].join('\n');
     return null;
   }
   async treeRecursive(): Promise<TreeEntry[]> {

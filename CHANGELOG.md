@@ -7,6 +7,11 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.40.3
+
+- **A clearer "what's new".** Update notes now read as a tidy list with proper formatting,
+  the newest version open and earlier ones tucked away until you click to expand them.
+
 ## 0.40.2
 
 - **History rolls back your work, not Easel itself.** Rolling back now only offers your own

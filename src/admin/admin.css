@@ -448,6 +448,27 @@
 .ez-pagerow:first-child { border-top: 0; }
 .ez-pagerow__config { display: grid; gap: var(--ez-space-3); }
 
+/* Changelog ("What's new" in Updates). Rendered from CHANGELOG.md markdown via
+   {@html}, so these are global (Svelte's scoped styles don't reach @html). */
+.ez-changelog { display: grid; gap: var(--ez-space-3); }
+.ez-cl { border: var(--ez-border-width) solid var(--ez-border); background: var(--ez-white); padding: var(--ez-space-4); }
+.ez-cl__ver { font-family: var(--ez-font-display); font-weight: 800; font-size: var(--ez-text-base); margin: 0; }
+.ez-cl--latest .ez-cl__ver { margin-bottom: var(--ez-space-3); }
+.ez-cl--latest { box-shadow: var(--ez-shadow-hard-sm); }
+/* Older versions collapse to just their number; click to expand. */
+details.ez-cl--old { color: var(--ez-stone); }
+details.ez-cl--old > summary.ez-cl__ver { cursor: pointer; list-style: none; display: flex; align-items: center; gap: var(--ez-space-2); }
+details.ez-cl--old > summary.ez-cl__ver::-webkit-details-marker { display: none; }
+details.ez-cl--old > summary.ez-cl__ver::before { content: '+'; font-weight: 800; width: 1ch; color: var(--ez-stone); }
+details.ez-cl--old[open] { color: var(--ez-ink); }
+details.ez-cl--old[open] > summary.ez-cl__ver { margin-bottom: var(--ez-space-3); }
+details.ez-cl--old[open] > summary.ez-cl__ver::before { content: '\2013'; }
+.ez-changelog ul { margin: 0; padding-left: 1.1rem; display: grid; gap: var(--ez-space-2); }
+.ez-changelog li { line-height: 1.55; }
+.ez-changelog p { margin: 0; line-height: 1.55; }
+.ez-changelog code { font-family: var(--ez-font-mono, ui-monospace, 'SF Mono', Menlo, monospace); font-size: 0.9em; background: var(--ez-paper); padding: 0 4px; }
+.ez-changelog a { color: var(--ez-blue); }
+
 /* Responsive: collapse the sidebar into a drawer below 880px. */
 @media (max-width: 879px) {
   .ez-side {

@@ -19,6 +19,69 @@
   let progress = $state('');
   let errorMsg = $state('');
 
+  // --- Changelog rendering -------------------------------------------------
+  // The notes are the template's raw CHANGELOG.md. Split it into per-version
+  // sections (dropping the file's preamble), show only the versions newer than
+  // the artist's, and render the small markdown subset we actually author
+  // (bold, code, links, bullets) instead of dumping raw text.
+  type Section = { version: string; body: string };
+
+  function parseChangelog(md: string): Section[] {
+    const out: Section[] = [];
+    let cur: Section | null = null;
+    for (const line of md.split(/\r?\n/)) {
+      const m = line.match(/^##\s+(.+?)\s*$/);
+      if (m) {
+        cur = { version: m[1].trim(), body: '' };
+        out.push(cur);
+      } else if (cur) {
+        cur.body += line + '\n';
+      }
+    }
+    return out.map((s) => ({ ...s, body: s.body.trim() }));
+  }
+
+  const semver = (s: string): string | null => s.match(/\d+\.\d+\.\d+/)?.[0] ?? null;
+  function cmp(a: string, b: string): number {
+    const pa = a.split('.').map(Number);
+    const pb = b.split('.').map(Number);
+    for (let i = 0; i < 3; i++) if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) - (pb[i] || 0);
+    return 0;
+  }
+
+  function esc(t: string): string {
+    return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function inline(t: string): string {
+    return esc(t)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  }
+  // Our changelog bodies are `- ` bullets, often wrapped across indented lines.
+  function renderBody(body: string): string {
+    const items: string[] = [];
+    for (const raw of body.split(/\r?\n/)) {
+      if (/^\s*-\s+/.test(raw)) items.push(raw.replace(/^\s*-\s+/, ''));
+      else if (items.length && raw.trim()) items[items.length - 1] += ' ' + raw.trim();
+    }
+    if (!items.length) return `<p>${inline(body)}</p>`;
+    return `<ul>${items.map((i) => `<li>${inline(i)}</li>`).join('')}</ul>`;
+  }
+
+  // Versions newer than the artist's, newest first. Falls back to everything if
+  // we can't tell their version or nothing parses as newer.
+  let sections = $derived.by<Section[]>(() => {
+    if (!check?.notes) return [];
+    const all = parseChangelog(check.notes);
+    const cur = check.currentVersion ? semver(check.currentVersion) : null;
+    const newer = all.filter((s) => {
+      const v = semver(s.version);
+      return v && (!cur || cmp(v, cur) > 0);
+    });
+    return newer.length ? newer : all;
+  });
+
   async function runCheck() {
     phase = 'checking';
     try {
@@ -101,17 +164,31 @@
           <strong>An update is available</strong>
           <p>
             Refresh your site’s template to the newest version. Your artwork, pages, settings,
-            and style stay exactly as they are — and any new features stay off until you choose
+            and style stay exactly as they are, and any new features stay off until you choose
             to turn them on.
           </p>
         </div>
         <button class="ez-btn ez-btn--primary ez-btn--depth" onclick={doUpdate}>Update my site</button>
       </div>
 
-      {#if check.notes}
+      {#if sections.length}
         <section>
           <h2 class="ez-updates__h">What’s new</h2>
-          <pre class="ez-updates__notes">{check.notes}</pre>
+          <div class="ez-changelog">
+            {#each sections as sec, i (sec.version)}
+              {#if i === 0}
+                <article class="ez-cl ez-cl--latest">
+                  <h3 class="ez-cl__ver">{sec.version}</h3>
+                  {@html renderBody(sec.body)}
+                </article>
+              {:else}
+                <details class="ez-cl ez-cl--old">
+                  <summary class="ez-cl__ver">{sec.version}</summary>
+                  <div class="ez-cl__body">{@html renderBody(sec.body)}</div>
+                </details>
+              {/if}
+            {/each}
+          </div>
         </section>
       {/if}
     {:else}
@@ -134,17 +211,5 @@
   .ez-updates__h {
     font-size: 1rem;
     margin: 0 0 0.5rem;
-  }
-  .ez-updates__notes {
-    white-space: pre-wrap;
-    font-family: var(--ez-mono, ui-monospace, monospace);
-    font-size: 0.85rem;
-    line-height: 1.5;
-    background: var(--ez-surface-2, rgba(0, 0, 0, 0.04));
-    border: 1px solid var(--ez-line, rgba(0, 0, 0, 0.12));
-    border-radius: 8px;
-    padding: 1rem;
-    max-height: 22rem;
-    overflow: auto;
   }
 </style>
