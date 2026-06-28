@@ -137,6 +137,12 @@
 .ez-form__actions { margin-top: var(--ez-space-5); }
 .ez-row { display: flex; gap: var(--ez-space-3); flex-wrap: wrap; }
 .ez-row > .ez-field { flex: 1; min-width: 8rem; }
+/* Bare inputs/selects dropped straight into a row (link pairs, etc.) need the
+   same flex sizing as .ez-field, or their width:100% (from tokens.css) makes
+   each one claim a full line and the row wraps to pieces. An inline max-width
+   still caps the small label/icon fields. */
+.ez-row > .ez-input,
+.ez-row > .ez-select { flex: 1; min-width: 7rem; width: auto; }
 .ez-field--check { flex-direction: row; align-items: center; gap: var(--ez-space-3); }
 .ez-field--check input { width: 1.1rem; height: 1.1rem; }
 
@@ -144,10 +150,12 @@
 .ez-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ez-space-3); }
 .ez-list__row { display: flex; align-items: center; justify-content: space-between; gap: var(--ez-space-4); border: var(--ez-border-width) solid var(--ez-border); background: var(--ez-white); padding: var(--ez-space-3) var(--ez-space-4); }
 
-/* Tabs (pages) */
-.ez-tabs { display: flex; gap: var(--ez-space-1); border-bottom: var(--ez-border-width) solid var(--ez-border); margin-bottom: var(--ez-space-5); }
-.ez-tab { font-family: var(--ez-font-display); font-weight: 700; background: transparent; border: 0; border-bottom: 3px solid transparent; padding: var(--ez-space-3) var(--ez-space-4); cursor: pointer; color: var(--ez-stone); }
+/* Tabs (pages) — scroll horizontally rather than wrap, so a long tab list stays
+   a single clean row on any width. */
+.ez-tabs { display: flex; gap: var(--ez-space-1); border-bottom: var(--ez-border-width) solid var(--ez-border); margin-bottom: var(--ez-space-5); overflow-x: auto; scrollbar-width: thin; }
+.ez-tab { font-family: var(--ez-font-display); font-weight: 700; background: transparent; border: 0; border-bottom: 3px solid transparent; padding: var(--ez-space-3) var(--ez-space-4); cursor: pointer; color: var(--ez-stone); white-space: nowrap; flex: none; }
 .ez-tab--on { color: var(--ez-ink); border-bottom-color: var(--ez-blue); }
+.ez-tab:hover { color: var(--ez-ink); }
 
 /* Repeatable blocks (cv, press, social) */
 .ez-block { border: var(--ez-border-width) solid var(--ez-border); background: var(--ez-white); padding: var(--ez-space-4); margin-bottom: var(--ez-space-4); display: grid; gap: var(--ez-space-3); }
@@ -378,6 +386,67 @@
   .ez-gs__item { flex-wrap: wrap; }
   .ez-gs__cta { width: 100%; margin-top: var(--ez-space-2); }
 }
+
+/* ============================================================
+   Settings — grouped sections, on/off switches, page list
+   ============================================================ */
+
+/* The Settings screen is one column of titled groups, separated by space and a
+   hairline, instead of a wall of identical cards. */
+.ez-settings { display: grid; gap: var(--ez-space-7); max-width: 680px; }
+.ez-group { display: grid; gap: var(--ez-space-4); }
+.ez-group + .ez-group { border-top: var(--ez-border-width) solid var(--ez-border); padding-top: var(--ez-space-6); }
+.ez-group__head { display: grid; gap: var(--ez-space-1); }
+.ez-group__title {
+  display: flex; align-items: center; gap: var(--ez-space-3);
+  font-family: var(--ez-font-display); font-weight: 800; font-size: var(--ez-text-xl);
+  margin: 0; text-transform: lowercase;
+}
+/* Small geometric tick — a quiet Bauhaus marker that anchors each group. */
+.ez-group__title::before { content: ''; width: 0.8rem; height: 0.8rem; background: var(--ez-blue); flex: none; }
+.ez-group__head .ez-help { margin: 0; }
+/* Inside a group, fields sit closer together than the old card stacking. */
+.ez-group .ez-field { margin-bottom: 0; }
+
+/* On/off switch (geometric, not a pill — matches the square admin language).
+   Built on a native checkbox so it stays keyboard- and form-friendly. */
+.ez-switch {
+  appearance: none; -webkit-appearance: none;
+  position: relative; flex: none;
+  width: 48px; height: 26px;
+  background: var(--ez-white);
+  border: var(--ez-border-width) solid var(--ez-border);
+  cursor: pointer; margin: 0;
+  transition: background-color var(--ez-motion-fast) var(--ez-ease), border-color var(--ez-motion-fast) var(--ez-ease);
+}
+.ez-switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 18px; height: 18px; background: var(--ez-ink);
+  transition: transform var(--ez-motion-fast) var(--ez-ease), background-color var(--ez-motion-fast) var(--ez-ease);
+}
+.ez-switch:checked { background: var(--ez-blue); border-color: var(--ez-blue); }
+.ez-switch:checked::after { transform: translateX(22px); background: var(--ez-white); }
+.ez-switch:focus-visible { outline: 3px solid var(--ez-blue); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .ez-switch, .ez-switch::after { transition: none; }
+}
+
+/* A labelled on/off row: text on the left, switch pinned right. */
+.ez-toggle { display: flex; align-items: center; justify-content: space-between; gap: var(--ez-space-4); cursor: pointer; margin: 0; }
+.ez-toggle__text { display: grid; gap: 2px; min-width: 0; }
+.ez-toggle__label { font-family: var(--ez-font-display); font-weight: 700; }
+.ez-toggle__text .ez-help { margin: 0; }
+
+/* Reveal block: extra fields that appear when a toggle is on. A recessed paper
+   tint groups them under the switch without a decorative side stripe. */
+.ez-reveal { display: grid; gap: var(--ez-space-3); padding: var(--ez-space-4); background: var(--ez-paper); }
+.ez-reveal .ez-field { margin-bottom: 0; }
+
+/* Pages → Menu: the list of pages with a switch each, some expanding to config. */
+.ez-pagelist { display: grid; border: var(--ez-border-width) solid var(--ez-border); background: var(--ez-white); }
+.ez-pagerow { display: grid; gap: var(--ez-space-3); padding: var(--ez-space-4); border-top: var(--ez-border-width) solid var(--ez-border); }
+.ez-pagerow:first-child { border-top: 0; }
+.ez-pagerow__config { display: grid; gap: var(--ez-space-3); }
 
 /* Responsive: collapse the sidebar into a drawer below 880px. */
 @media (max-width: 879px) {

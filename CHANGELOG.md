@@ -7,6 +7,13 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.40.1
+
+- **Your settings are easier to find.** Settings now sit in clear groups. You choose which
+  pages show in your menu from the Pages tab, beside the pages themselves, along with your
+  shop and commissions setup. Nothing about your published site changes; this just tidies
+  the editor.
+
 ## 0.40.0
 
 - **Download a full backup anytime, and restore it just as easily.** In History, you can

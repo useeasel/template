@@ -26,9 +26,9 @@
   const ITEMS: { id: NavId; label: string; hint: string }[] = [
     { id: 'home', label: 'Home', hint: 'Overview' },
     { id: 'work', label: 'Work', hint: 'Artwork & series' },
-    { id: 'pages', label: 'Pages', hint: 'About, contact, news…' },
+    { id: 'pages', label: 'Pages', hint: 'Menu, about, shop…' },
     { id: 'design', label: 'Design', hint: 'How your site looks' },
-    { id: 'settings', label: 'Settings', hint: 'Domain, SEO, advanced' },
+    { id: 'settings', label: 'Settings', hint: 'Links, analytics, domain' },
     { id: 'history', label: 'History', hint: 'Roll back to an earlier version' },
     { id: 'updates', label: 'Updates', hint: 'Refresh your site’s template' },
   ];

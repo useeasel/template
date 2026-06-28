@@ -248,7 +248,7 @@
       </section>
 
       <section class="ez-block">
-        <strong>Header &amp; pages</strong>
+        <strong>Header</strong>
         <div class="ez-row">
           <label class="ez-field"><span class="ez-label">Navigation</span>
             <select class="ez-input" bind:value={d.nav.layout}>
@@ -288,19 +288,7 @@
                 <option value="small">Small</option><option value="large">Large</option></select></label>
           </div>
         {/if}
-        <p class="ez-help" style="margin-top:.5rem">Pages to show in the menu</p>
-        <div class="ez-row">
-          <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.about} /><span>About</span></label>
-          <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.contact} /><span>Contact</span></label>
-          <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.cv} /><span>CV</span></label>
-          <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.press} /><span>Press</span></label>
-          <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.exhibitions} /><span>Exhibitions</span></label>
-          <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.news} /><span>News</span></label>
-          <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.available} /><span>Available work</span></label>
-          <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.presskit} /><span>Press kit</span></label>
-          <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.commissions} /><span>Commissions</span></label>
-          <label class="ez-field--check"><input type="checkbox" bind:checked={d.pages.shop} /><span>Shop</span></label>
-        </div>
+        <p class="ez-help" style="margin-top:.5rem">Which pages show in your menu now lives under <strong>Pages</strong>.</p>
       </section>
 
       <section class="ez-block">
