@@ -13,6 +13,7 @@
  * Netlify rebuild.
  */
 import type { GitHub, RepoRef, FileChange } from './github';
+import { mapPool } from './concurrency';
 
 /** The upstream template every site is generated from. */
 export const TEMPLATE: RepoRef = { owner: 'useeasel', repo: 'template', branch: 'main' };
@@ -183,12 +184,15 @@ export async function applyUpdate(
   const toFetch = tmplTree.filter(
     (e) => !isUserContent(e.path) && mineByPath.get(e.path) !== e.sha,
   );
+  // Fetch the changed template blobs with bounded parallelism instead of one at a
+  // time; they're independent reads, so this overlaps the round-trips.
   let done = 0;
-  for (const e of toFetch) {
-    note(`Updating files… (${++done}/${toFetch.length})`);
+  const fetched = await mapPool(toFetch, 8, async (e) => {
     const content = await gh.getBlobBase64(e.sha, TEMPLATE);
-    changes.push({ path: e.path, content, encoding: 'base64' });
-  }
+    note(`Updating files… (${++done}/${toFetch.length})`);
+    return { path: e.path, content, encoding: 'base64' as const };
+  });
+  changes.push(...fetched);
 
   // Remove template-code files the artist still has that upstream dropped.
   let removed = 0;

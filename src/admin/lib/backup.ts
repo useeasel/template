@@ -7,6 +7,7 @@
  * commit they choose to push.
  */
 import type { GitHub, FileChange } from './github';
+import { mapPool } from './concurrency';
 
 // The artist's own files — same set the editor preserves across template updates.
 const PREFIXES = ['src/content/', 'src/assets/', 'public/assets/'];
@@ -17,10 +18,10 @@ export async function buildBackup(gh: GitHub): Promise<Blob> {
   const JSZip = (await import('jszip')).default;
   const zip = new JSZip();
   const tree = (await gh.treeRecursive()).filter((t) => inScope(t.path));
-  for (const entry of tree) {
-    const base64 = await gh.getBlobBase64(entry.sha);
-    zip.file(entry.path, base64, { base64: true });
-  }
+  // Fetch the blobs with bounded parallelism, then add them to the zip in tree
+  // order (zip.file is CPU-only, so it stays serial).
+  const blobs = await mapPool(tree, 8, (entry) => gh.getBlobBase64(entry.sha));
+  tree.forEach((entry, i) => zip.file(entry.path, blobs[i], { base64: true }));
   return zip.generateAsync({ type: 'blob' });
 }
 
