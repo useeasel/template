@@ -108,11 +108,10 @@
   </div>
 {:else}
   <div class="ez-view__head">
-    <div>
-      <h2>News</h2>
-      <p class="ez-help">Short updates for your visitors. Turn the News page on under <strong>Design → Pages</strong>.</p>
+    <p class="ez-help">Short updates for your visitors. Turn the News page on in the <strong>Menu</strong> tab.</p>
+    <div class="ez-view__actions">
+      <button class="ez-btn ez-btn--primary" onclick={() => open(blank())}>Add post</button>
     </div>
-    <button class="ez-btn ez-btn--primary" onclick={() => open(blank())}>Add post</button>
   </div>
 
   {#if loading}
@@ -125,12 +124,12 @@
   {:else}
     <ul class="ez-list" role="list">
       {#each items as p (p.id)}
-        <li class="ez-listrow">
-          <div>
+        <li class="ez-list__row">
+          <div class="ez-list__info">
             <strong>{p.title}</strong>
             <span class="ez-help">{p.date}{p.draft ? ' · Draft' : ''}</span>
           </div>
-          <div class="ez-listrow__actions">
+          <div class="ez-list__actions">
             <button class="ez-btn ez-btn--sm" onclick={() => open({ ...p })}>Edit</button>
             <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => remove(p)}>Delete</button>
           </div>
@@ -139,13 +138,3 @@
     </ul>
   {/if}
 {/if}
-
-<style>
-  .ez-list { list-style: none; margin: var(--ez-space-4) 0 0; padding: 0; display: grid; gap: var(--ez-space-2); }
-  .ez-listrow {
-    display: flex; align-items: center; justify-content: space-between; gap: var(--ez-space-3);
-    border: var(--ez-border-width, 1px) solid var(--ez-border, #ddd); padding: var(--ez-space-3);
-    background: var(--ez-white, #fff);
-  }
-  .ez-listrow__actions { display: flex; gap: var(--ez-space-2); flex: none; }
-</style>

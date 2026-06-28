@@ -378,10 +378,7 @@
   </ul>
 {:else}
   <div class="ez-view__head">
-    <div>
-      <h2>Your artwork</h2>
-      <p class="ez-help">Drag pieces to reorder how they appear on your homepage.</p>
-    </div>
+    <p class="ez-help">Drag pieces to reorder how they appear on your homepage.</p>
     <div class="ez-view__actions">
       <input
         type="file"
@@ -415,7 +412,7 @@
     <div class="ez-empty">
       <p>No artwork yet.</p>
       <button class="ez-btn ez-btn--primary" onclick={() => (adding = true)}>Add your first piece</button>
-      <p class="ez-help">Already posting elsewhere? Use <strong>Import from Instagram</strong> above to bring in the work you've downloaded from Instagram, or <strong>Add many photos</strong> to drop in a folder. You can start empty too.</p>
+      <p class="ez-help">Already posting elsewhere? <strong>Import from Instagram</strong>, or <strong>Add many photos</strong> at once from a folder.</p>
     </div>
   {:else}
     <div class="ez-grid">

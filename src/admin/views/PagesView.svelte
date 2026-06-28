@@ -176,9 +176,10 @@
 {#if loading}
   <p class="ez-help">Loading…</p>
 {:else if tab === 'menu'}
-  <div class="ez-settings">
+  <div class="ez-view__head">
     <p class="ez-help">Choose which pages appear in your site's menu. Turn one on, then add its content in the tab above. Pages without their own tab are set up right here.</p>
-    <div class="ez-pagelist">
+  </div>
+  <div class="ez-pagelist">
       {#each PAGE_ROWS as row (row.key)}
         <div class="ez-pagerow">
           <label class="ez-toggle"><span class="ez-toggle__text">
@@ -221,14 +222,20 @@
           {/if}
         </div>
       {/each}
-    </div>
   </div>
 {:else if tab === 'about'}
+  <div class="ez-view__head">
+    <p class="ez-help">Your statement and bio, shown on your About page.</p>
+  </div>
   <label class="ez-field"><span class="ez-label">One-line intro</span>
     <input class="ez-input" bind:value={about.statement} placeholder="Painter working between Lisbon and Berlin" /></label>
   <label class="ez-field"><span class="ez-label">Your bio</span>
-    <textarea class="ez-input" rows="8" bind:value={about.body}></textarea></label>
+    <textarea class="ez-input" rows="8" bind:value={about.body}></textarea>
+    <span class="ez-help">Plain text or Markdown.</span></label>
 {:else if tab === 'contact'}
+  <div class="ez-view__head">
+    <p class="ez-help">How visitors reach you, with an optional contact form.</p>
+  </div>
   <label class="ez-field"><span class="ez-label">Intro</span>
     <input class="ez-input" bind:value={contact.intro} placeholder="I'd love to hear from you" /></label>
   <label class="ez-field"><span class="ez-label">Your email</span>
@@ -237,6 +244,18 @@
     <input type="checkbox" bind:checked={contact.formEnabled} />
     <span>Show a contact form so visitors can message me</span></label>
 {:else if tab === 'cv'}
+  <div class="ez-view__head">
+    <p class="ez-help">Your exhibitions, education, and awards, in sections you name.</p>
+    <div class="ez-view__actions">
+      <button class="ez-btn ez-btn--primary" onclick={() => (cv.cv = [...cv.cv, { heading: '', items: [] }])}>Add section</button>
+    </div>
+  </div>
+  {#if cv.cv.length === 0}
+    <div class="ez-empty">
+      <p>No sections yet.</p>
+      <button class="ez-btn ez-btn--primary" onclick={() => (cv.cv = [...cv.cv, { heading: '', items: [] }])}>Add your first section</button>
+    </div>
+  {/if}
   {#each cv.cv as section, si (si)}
     <div class="ez-block">
       <div class="ez-block__head">
@@ -253,8 +272,19 @@
       <button class="ez-btn ez-btn--sm" onclick={() => (section.items = [...section.items, { year: '', text: '' }])}>Add entry</button>
     </div>
   {/each}
-  <button class="ez-btn" onclick={() => (cv.cv = [...cv.cv, { heading: '', items: [] }])}>Add section</button>
 {:else if tab === 'press'}
+  <div class="ez-view__head">
+    <p class="ez-help">Coverage and mentions, with optional quotes and links.</p>
+    <div class="ez-view__actions">
+      <button class="ez-btn ez-btn--primary" onclick={() => (press.press = [...press.press, { outlet: '', title: '' }])}>Add mention</button>
+    </div>
+  </div>
+  {#if press.press.length === 0}
+    <div class="ez-empty">
+      <p>No mentions yet.</p>
+      <button class="ez-btn ez-btn--primary" onclick={() => (press.press = [...press.press, { outlet: '', title: '' }])}>Add your first mention</button>
+    </div>
+  {/if}
   {#each press.press as item, pi (pi)}
     <div class="ez-block">
       <div class="ez-block__head">
@@ -269,7 +299,6 @@
       <textarea class="ez-input" rows="2" bind:value={item.excerpt} placeholder="Quote (optional)"></textarea>
     </div>
   {/each}
-  <button class="ez-btn" onclick={() => (press.press = [...press.press, { outlet: '', title: '' }])}>Add mention</button>
 {:else if tab === 'news'}
   <NewsView {gh} {notify} />
 {:else if tab === 'testimonials'}

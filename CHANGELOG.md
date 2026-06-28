@@ -7,6 +7,12 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.40.4
+
+- **A tidier editor.** The tabs under Pages and Work now share one layout: a short
+  description up top and the add button in the same place every time, with one consistent
+  list style throughout. Nothing about your site changes.
+
 ## 0.40.3
 
 - **A clearer "what's new".** Update notes now read as a tidy list with proper formatting,

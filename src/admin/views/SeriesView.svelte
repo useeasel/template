@@ -124,26 +124,28 @@
   </div>
 {:else}
   <div class="ez-view__head">
-    <div>
-      <h2>Series</h2>
-      <p class="ez-help">Group your work into bodies or collections.</p>
+    <p class="ez-help">Group your work into collections, each with its own page.</p>
+    <div class="ez-view__actions">
+      <button class="ez-btn ez-btn--primary" onclick={() => open(blank())}>Add series</button>
     </div>
-    <button class="ez-btn ez-btn--primary" onclick={() => open(blank())}>Add series</button>
   </div>
 
   {#if loading}
     <p class="ez-help">Loading…</p>
   {:else if items.length === 0}
-    <div class="ez-empty"><p>No series yet.</p></div>
+    <div class="ez-empty">
+      <p>No series yet.</p>
+      <button class="ez-btn ez-btn--primary" onclick={() => open(blank())}>Add your first series</button>
+    </div>
   {:else}
     <ul class="ez-list">
       {#each items as s (s.id)}
         <li class="ez-list__row">
-          <div>
+          <div class="ez-list__info">
             <strong>{s.title}</strong>
             {#if s.description}<span class="ez-help">{s.description}</span>{/if}
           </div>
-          <div class="ez-tile__actions">
+          <div class="ez-list__actions">
             <button class="ez-btn ez-btn--sm" onclick={() => open({ ...s })}>Edit</button>
             <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => remove(s)}>Delete</button>
           </div>

@@ -146,9 +146,12 @@
 .ez-field--check { flex-direction: row; align-items: center; gap: var(--ez-space-3); }
 .ez-field--check input { width: 1.1rem; height: 1.1rem; }
 
-/* Lists */
-.ez-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ez-space-3); }
+/* Lists — one canonical row used by every sub-view (news, testimonials,
+   exhibitions, series, history). Row = info on the left, actions pinned right. */
+.ez-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ez-space-2); }
 .ez-list__row { display: flex; align-items: center; justify-content: space-between; gap: var(--ez-space-4); border: var(--ez-border-width) solid var(--ez-border); background: var(--ez-white); padding: var(--ez-space-3) var(--ez-space-4); }
+.ez-list__info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ez-list__actions { display: flex; gap: var(--ez-space-2); flex: none; }
 
 /* Tabs (pages) — scroll horizontally rather than wrap, so a long tab list stays
    a single clean row on any width. */

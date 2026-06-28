@@ -130,11 +130,10 @@
   </div>
 {:else}
   <div class="ez-view__head">
-    <div>
-      <h2>Exhibitions</h2>
-      <p class="ez-help">Upcoming and past shows. Turn the Exhibitions page on under <strong>Design → Pages</strong>.</p>
+    <p class="ez-help">Upcoming and past shows. Turn the Exhibitions page on in the <strong>Menu</strong> tab.</p>
+    <div class="ez-view__actions">
+      <button class="ez-btn ez-btn--primary" onclick={() => open(blank())}>Add exhibition</button>
     </div>
-    <button class="ez-btn ez-btn--primary" onclick={() => open(blank())}>Add exhibition</button>
   </div>
 
   {#if loading}
@@ -147,12 +146,12 @@
   {:else}
     <ul class="ez-list" role="list">
       {#each items as x (x.id)}
-        <li class="ez-listrow">
-          <div>
+        <li class="ez-list__row">
+          <div class="ez-list__info">
             <strong>{x.title}</strong>
             <span class="ez-help">{summary(x)}</span>
           </div>
-          <div class="ez-listrow__actions">
+          <div class="ez-list__actions">
             <button class="ez-btn ez-btn--sm" onclick={() => open({ ...x })}>Edit</button>
             <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => remove(x)}>Delete</button>
           </div>
@@ -161,13 +160,3 @@
     </ul>
   {/if}
 {/if}
-
-<style>
-  .ez-list { list-style: none; margin: var(--ez-space-4) 0 0; padding: 0; display: grid; gap: var(--ez-space-2); }
-  .ez-listrow {
-    display: flex; align-items: center; justify-content: space-between; gap: var(--ez-space-3);
-    border: var(--ez-border-width, 1px) solid var(--ez-border, #ddd); padding: var(--ez-space-3);
-    background: var(--ez-white, #fff);
-  }
-  .ez-listrow__actions { display: flex; gap: var(--ez-space-2); flex: none; }
-</style>

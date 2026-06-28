@@ -95,11 +95,10 @@
   </div>
 {:else}
   <div class="ez-view__head">
-    <div>
-      <h2>Testimonials</h2>
-      <p class="ez-help">Short quotes about you or your work. They show in a Praise section on your About page when you add at least one.</p>
+    <p class="ez-help">Short quotes about your work. They appear on your About page once you add one.</p>
+    <div class="ez-view__actions">
+      <button class="ez-btn ez-btn--primary" onclick={() => open(blank())}>Add testimonial</button>
     </div>
-    <button class="ez-btn ez-btn--primary" onclick={() => open(blank())}>Add testimonial</button>
   </div>
 
   {#if loading}
@@ -112,12 +111,12 @@
   {:else}
     <ul class="ez-list" role="list">
       {#each items as t (t.id)}
-        <li class="ez-listrow">
-          <div>
+        <li class="ez-list__row">
+          <div class="ez-list__info">
             <strong>“{t.quote.length > 60 ? t.quote.slice(0, 60) + '…' : t.quote}”</strong>
             <span class="ez-help">{[t.author, t.role].filter(Boolean).join(' · ')}</span>
           </div>
-          <div class="ez-listrow__actions">
+          <div class="ez-list__actions">
             <button class="ez-btn ez-btn--sm" onclick={() => open({ ...t })}>Edit</button>
             <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => remove(t)}>Delete</button>
           </div>
@@ -126,13 +125,3 @@
     </ul>
   {/if}
 {/if}
-
-<style>
-  .ez-list { list-style: none; margin: var(--ez-space-4) 0 0; padding: 0; display: grid; gap: var(--ez-space-2); }
-  .ez-listrow {
-    display: flex; align-items: center; justify-content: space-between; gap: var(--ez-space-3);
-    border: var(--ez-border-width, 1px) solid var(--ez-border, #ddd); padding: var(--ez-space-3);
-    background: var(--ez-white, #fff);
-  }
-  .ez-listrow__actions { display: flex; gap: var(--ez-space-2); flex: none; }
-</style>
