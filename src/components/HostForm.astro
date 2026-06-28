@@ -1,0 +1,51 @@
+---
+/**
+ * A host-aware form shell shared by the contact and commissions pages. On Netlify
+ * it uses native Netlify Forms (with the required hidden form-name + bot-field
+ * honeypot); on hosts without a forms backend (e.g. GitHub Pages) it POSTs to the
+ * artist's FormSubmit endpoint with anti-spam settings and a `_honey` trap. The
+ * page supplies the visible fields via the default slot. This is the anti-spam
+ * scaffolding shipped to every artist site, so keeping it in one place avoids drift.
+ */
+import { hostConfig } from '../lib/host';
+
+interface Props {
+  /** Form name; also the Netlify form-name and the success-redirect query key. */
+  name: string;
+  /** FormSubmit email subject line (ignored on the Netlify path). */
+  subject: string;
+  class?: string;
+}
+const { name, subject, class: className } = Astro.props;
+const { useNetlifyForms, formEndpoint } = hostConfig();
+---
+
+<form
+  name={name}
+  method="POST"
+  action={useNetlifyForms ? `/?${name}=sent` : formEndpoint}
+  class={className}
+  {...(useNetlifyForms ? { 'data-netlify': 'true', 'netlify-honeypot': 'bot-field' } : {})}
+>
+  {useNetlifyForms ? (
+    <>
+      {/* Netlify needs this hidden field to match the form. */}
+      <input type="hidden" name="form-name" value={name} />
+      {/* Honeypot — hidden from people, catches bots. */}
+      <p class="ez-visually-hidden" aria-hidden="true">
+        <label>Do not fill this out: <input name="bot-field" /></label>
+      </p>
+    </>
+  ) : (
+    <>
+      {/* FormSubmit settings: a nicer subject + email, no captcha page, and a
+          honeypot field (`_honey`) that quietly drops bot submissions. */}
+      <input type="hidden" name="_subject" value={subject} />
+      <input type="hidden" name="_template" value="table" />
+      <input type="hidden" name="_captcha" value="false" />
+      <input type="text" name="_honey" class="ez-visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
+    </>
+  )}
+
+  <slot />
+</form>

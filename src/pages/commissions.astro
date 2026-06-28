@@ -2,9 +2,10 @@
 import { getCollection, getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import HostForm from '../components/HostForm.astro';
 import { hostConfig } from '../lib/host';
 import { CARD_WIDTHS, cardSizes } from '../lib/images';
-import { withBase } from '../lib/href';
+import { withBase, stripMd } from '../lib/href';
 
 // Commissions page. Hidden from the menu until the artist turns it on under
 // Design (design.pages.commissions). Two modes, set in Settings: a structured
@@ -13,7 +14,8 @@ import { withBase } from '../lib/href';
 // visitor at the artist's vGen page instead. Easel never processes the request
 // or any money — it only collects the details or hands off.
 const settings = (await getEntry('site', 'settings'))!.data;
-const { useNetlifyForms, formEndpoint } = hostConfig();
+// HostForm renders the request form itself; this is only for the FormSubmit note.
+const { useNetlifyForms } = hostConfig();
 
 const mode = settings.commissionsMode ?? 'form';
 const vgenUrl = settings.commissionsVgenUrl;
@@ -22,7 +24,6 @@ const terms = settings.commissionsTerms;
 
 // Example gallery: the pieces the artist has featured (same star used for the
 // homepage), so they choose what represents their commission work.
-const slug = (id: string) => id.replace(/\.md$/, '');
 const examples = (await getCollection('artworks'))
   .filter((a) => a.data.featured)
   .sort((a, b) => a.data.order - b.data.order)
@@ -48,29 +49,7 @@ const examples = (await getCollection('artworks'))
         </a>
       </p>
     ) : (
-      <form
-        name="commission"
-        method="POST"
-        action={useNetlifyForms ? '/?commission=sent' : formEndpoint}
-        class="ez-commissions__form"
-        {...(useNetlifyForms ? { 'data-netlify': 'true', 'netlify-honeypot': 'bot-field' } : {})}
-      >
-        {useNetlifyForms ? (
-          <>
-            <input type="hidden" name="form-name" value="commission" />
-            <p class="ez-visually-hidden" aria-hidden="true">
-              <label>Do not fill this out: <input name="bot-field" /></label>
-            </p>
-          </>
-        ) : (
-          <>
-            <input type="hidden" name="_subject" value="New commission request" />
-            <input type="hidden" name="_template" value="table" />
-            <input type="hidden" name="_captcha" value="false" />
-            <input type="text" name="_honey" class="ez-visually-hidden" tabindex="-1" autocomplete="off" aria-hidden="true" />
-          </>
-        )}
-
+      <HostForm name="commission" subject="New commission request" class="ez-commissions__form">
         <div class="ez-commissions__row">
           <div class="ez-field">
             <label class="ez-label" for="c-name">Name</label>
@@ -120,7 +99,7 @@ const examples = (await getCollection('artworks'))
         </div>
 
         <button type="submit" class="ez-btn ez-btn--primary">Send request</button>
-      </form>
+      </HostForm>
     )}
 
     {mode !== 'vgen' && !useNetlifyForms && (
@@ -135,7 +114,7 @@ const examples = (await getCollection('artworks'))
         <h2>Recent work</h2>
         <div class="ez-commissions__grid">
           {examples.map((a) => (
-            <a class="ez-commissions__ex" href={withBase(`/work/${slug(a.id)}/`)}>
+            <a class="ez-commissions__ex" href={withBase(`/work/${stripMd(a.id)}/`)}>
               <Image src={a.data.image} alt={a.data.alt} widths={CARD_WIDTHS} sizes={cardSizes(3)} loading="lazy" />
               <span>{a.data.title}</span>
             </a>
