@@ -14,8 +14,11 @@
   const shell = useShell();
 
   let backingUp = $state(false);
-  let restoring = $state(false);
   let restoreInput = $state<HTMLInputElement | null>(null);
+  // Restore + rollback are repo-mutating tasks driven through the shell so they
+  // survive navigation and can't double-fire; these mirror its state for labels.
+  const restoring = $derived(shell.busyOp === 'restore');
+  const busy = $derived(!!shell.busyOp);
 
   async function downloadBackup() {
     backingUp = true;
@@ -41,16 +44,15 @@
     (e.target as HTMLInputElement).value = '';
     if (!file) return;
     if (!confirm('Restore this backup? It replaces your current pages, artwork, and settings with the ones in the file, and publishes a new version. Your current site stays in history, so you can undo this.')) return;
-    restoring = true;
     try {
-      const n = await restoreBackup(gh, file);
+      const n = await shell.runExclusive('restore', 'Restoring backup', () => restoreBackup(gh, file));
+      if (n === undefined) return; // another task was already running
       shell.markCommitted();
       notify(`Restored ${n} file${n === 1 ? '' : 's'}. Your site will update shortly.`);
       await load();
     } catch (e) {
       notify(e instanceof Error ? e.message : 'Could not restore that file.', 'error');
     }
-    restoring = false;
   }
 
   type Snapshot = { sha: string; message: string; date: string };
@@ -111,6 +113,7 @@
   load();
 
   async function restore(s: Snapshot) {
+    if (shell.busyOp) return;
     const ok = confirm(
       `Roll your site back to how it was on ${when(s.date)}?\n\n` +
         `Your work since then is kept in history, so you can undo this too. ` +
@@ -119,7 +122,10 @@
     if (!ok) return;
     restoringSha = s.sha;
     try {
-      const n = await gh.restoreContentTo(s.sha, `Roll back to ${when(s.date)}`);
+      const n = await shell.runExclusive('rollback', 'Rolling back', () =>
+        gh.restoreContentTo(s.sha, `Roll back to ${when(s.date)}`),
+      );
+      if (n === undefined) return; // another task was already running
       shell.markCommitted();
       if (n === 0) {
         notify('That version matches your site already, nothing to change.');
@@ -147,11 +153,11 @@
     <p class="ez-help">Download a full copy of your site, your pages, artwork, and settings, as a single file. Restore it here any time. It's your work; keep a copy somewhere safe.</p>
   </div>
   <div class="ez-backup__actions">
-    <button class="ez-btn ez-btn--sm" onclick={downloadBackup} disabled={backingUp || restoring}>
+    <button class="ez-btn ez-btn--sm" onclick={downloadBackup} disabled={backingUp || busy}>
       {backingUp ? 'Preparing…' : 'Download backup'}
     </button>
     <input type="file" accept=".zip,application/zip" class="ez-visually-hidden" bind:this={restoreInput} onchange={onRestorePick} />
-    <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => restoreInput?.click()} disabled={backingUp || restoring}>
+    <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => restoreInput?.click()} disabled={backingUp || busy}>
       {restoring ? 'Restoring…' : 'Restore from backup'}
     </button>
   </div>
@@ -170,7 +176,7 @@
           <span class="ez-help">{when(s.date)}{i === 0 ? ' · current' : ''}</span>
         </div>
         {#if i !== 0}
-          <button class="ez-btn ez-btn--sm" onclick={() => restore(s)} disabled={restoringSha !== null}>
+          <button class="ez-btn ez-btn--sm" onclick={() => restore(s)} disabled={busy}>
             {restoringSha === s.sha ? 'Rolling back…' : 'Restore'}
           </button>
         {/if}

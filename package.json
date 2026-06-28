@@ -1,7 +1,7 @@
 {
   "name": "easel-template",
   "type": "module",
-  "version": "0.40.5",
+  "version": "0.40.6",
   "private": true,
   "description": "Easel portfolio template — a Bauhaus-styled Astro static site for artists, editable via the custom Easel editor at /admin.",
   "scripts": {

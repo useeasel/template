@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { GitHub } from '../lib/github';
   import { checkForUpdate, applyUpdate, type UpdateCheck } from '../lib/update';
+  import { useShell } from '../lib/shell.svelte';
 
   let {
     gh,
@@ -12,12 +13,28 @@
     notify: (msg: string, kind?: 'info' | 'error') => void;
   } = $props();
 
-  type Phase = 'checking' | 'ready' | 'error' | 'updating' | 'done';
+  const shell = useShell();
+
+  // The check lifecycle is local; the *update itself* lives on the shell
+  // (shell.busyOp === 'update'), so it survives leaving and re-opening this tab
+  // and can't be started twice. `justDone` is the brief celebration on the
+  // instance that ran it.
+  type Phase = 'checking' | 'ready' | 'error';
 
   let phase = $state<Phase>('checking');
   let check = $state<UpdateCheck | null>(null);
-  let progress = $state('');
   let errorMsg = $state('');
+  let justDone = $state(false);
+  const updating = $derived(shell.busyOp === 'update');
+
+  // When the running update finishes (busyOp clears), refresh the check so the
+  // panel reflects the new version, even on an instance that didn't start it.
+  let prevBusy = shell.busyOp;
+  $effect(() => {
+    const b = shell.busyOp;
+    if (prevBusy === 'update' && b === null) runCheck();
+    prevBusy = b;
+  });
 
   // --- Changelog rendering -------------------------------------------------
   // The notes are the template's raw CHANGELOG.md. Split it into per-version
@@ -72,8 +89,13 @@
   // Split the changelog around the artist's current version: what's new (newer,
   // the focus) and earlier notes (what they're already on, kept collapsed and
   // out of the way). When we can't tell their version, treat it all as new.
+  // Effective current version: an in-session update overrides the (stale) prop.
+  let effCur = $derived(shell.updatedTo ?? check?.currentVersion ?? null);
+  let curVer = $derived(effCur ? semver(effCur) : null);
+  let latestVer = $derived(check?.latestVersion ? semver(check.latestVersion) : null);
+  let updateAvailable = $derived(!!(latestVer && (!curVer || cmp(latestVer, curVer) > 0)));
+
   let allSections = $derived.by<Section[]>(() => (check?.notes ? parseChangelog(check.notes) : []));
-  let curVer = $derived(check?.currentVersion ? semver(check.currentVersion) : null);
   let newSections = $derived(
     allSections.filter((s) => {
       const v = semver(s.version);
@@ -102,21 +124,21 @@
   runCheck();
 
   async function doUpdate() {
-    if (!check) return;
+    if (!check || shell.busyOp) return;
     const ok = confirm(
       'Update your site to the latest version?\n\n' +
-        'Everything you’ve added — your artwork, pages, settings, and style — stays exactly as it is. ' +
+        'Everything you’ve added, your artwork, pages, settings, and style, stays exactly as it is. ' +
         'New features stay off until you turn them on. Your site will rebuild a minute or so after.',
     );
     if (!ok) return;
-    phase = 'updating';
-    progress = 'Starting…';
+    const version = check.latestVersion;
     try {
-      const result = await applyUpdate(gh, {
-        version: check.latestVersion,
-        onProgress: (m) => (progress = m),
-      });
-      phase = 'done';
+      const result = await shell.runExclusive('update', 'Updating your site', (onProgress) =>
+        applyUpdate(gh, { version, onProgress }),
+      );
+      if (!result) return; // another task was already running
+      shell.markUpdated(version);
+      justDone = true;
       notify(
         `Update published — ${result.changed} file${result.changed === 1 ? '' : 's'} updated. Your site is rebuilding.`,
       );
@@ -129,7 +151,25 @@
 </script>
 
 <div class="ez-updates">
-  {#if phase === 'checking'}
+  {#if updating}
+    <div class="ez-callout ez-callout--accent">
+      <div>
+        <strong>Updating your site…</strong>
+        <p class="ez-help">{shell.busyProgress || 'Starting…'}</p>
+        <p class="ez-help">This keeps running if you switch tabs. We’ll let you know when it’s done.</p>
+      </div>
+    </div>
+  {:else if justDone}
+    <div class="ez-callout ez-callout--blue">
+      <div>
+        <strong>You’re on the latest version 🎉</strong>
+        <p>
+          Your site is rebuilding now and will be live in a minute or so. Nothing you added
+          changed, only the underlying template was refreshed.
+        </p>
+      </div>
+    </div>
+  {:else if phase === 'checking'}
     <p class="ez-help">Checking for updates…</p>
   {:else if phase === 'error'}
     <div class="ez-callout">
@@ -139,33 +179,15 @@
       </div>
       <button class="ez-btn ez-btn--outline" onclick={runCheck}>Try again</button>
     </div>
-  {:else if phase === 'updating'}
-    <div class="ez-callout ez-callout--accent">
-      <div>
-        <strong>Updating your site…</strong>
-        <p class="ez-help">{progress}</p>
-        <p class="ez-help">Please keep this tab open until it finishes.</p>
-      </div>
-    </div>
-  {:else if phase === 'done'}
-    <div class="ez-callout ez-callout--blue">
-      <div>
-        <strong>You’re on the latest version 🎉</strong>
-        <p>
-          Your site is rebuilding now and will be live in a minute or so. Nothing you added
-          changed — only the underlying template was refreshed.
-        </p>
-      </div>
-    </div>
   {:else if check}
     <section>
       <p class="ez-help">
-        You’re on <strong>{check.currentVersion ?? 'an early version'}</strong>.
+        You’re on <strong>{effCur ?? 'an early version'}</strong>.
         {#if check.latestVersion}The latest is <strong>{check.latestVersion}</strong>.{/if}
       </p>
     </section>
 
-    {#if check.updateAvailable}
+    {#if updateAvailable}
       <div class="ez-callout ez-callout--accent">
         <div>
           <strong>An update is available</strong>
@@ -175,7 +197,7 @@
             to turn them on.
           </p>
         </div>
-        <button class="ez-btn ez-btn--primary ez-btn--depth" onclick={doUpdate}>Update my site</button>
+        <button class="ez-btn ez-btn--primary ez-btn--depth" onclick={doUpdate} disabled={!!shell.busyOp}>Update my site</button>
       </div>
 
       {#if newSections.length}

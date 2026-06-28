@@ -50,6 +50,19 @@ export function createShell(notify: Notify, opts: { demo?: boolean } = {}) {
   let pendingNav = $state<(() => void) | null>(null);
   let publishTimer: ReturnType<typeof setTimeout> | undefined;
 
+  // A long-running, repo-mutating operation (template update, rollback, restore)
+  // that must outlive view navigation. Held on the shell, not in a view, so the
+  // progress survives a tab switch and the same task can't be started twice (the
+  // view that triggers it disables its button while `busyOp` is set). Only one
+  // such task runs at a time.
+  let busyOp = $state<string | null>(null);
+  let busyLabel = $state('');
+  let busyProgress = $state('');
+  // The template version applied this session. The editor's `currentVersion` is
+  // read from config at page load and won't reflect an in-session update, so this
+  // is the source of truth for "what am I on now" until the next reload.
+  let updatedTo = $state<string | null>(null);
+
   // Optional real-deploy probe (set once the GitHub client exists). When present,
   // the publishing chip tracks the actual build instead of a blind timer.
   let probe: (() => Promise<DeployState>) | null = null;
@@ -153,6 +166,55 @@ export function createShell(notify: Notify, opts: { demo?: boolean } = {}) {
     },
     get hasPendingNav() {
       return pendingNav !== null;
+    },
+
+    /** Key of the in-flight exclusive task, or null. */
+    get busyOp() {
+      return busyOp;
+    },
+    /** Human label for the in-flight task (e.g. "Updating your site"). */
+    get busyLabel() {
+      return busyLabel;
+    },
+    /** Latest progress line from the in-flight task. */
+    get busyProgress() {
+      return busyProgress;
+    },
+
+    /** The version applied this session, or null. */
+    get updatedTo() {
+      return updatedTo;
+    },
+    /** Record that the site was updated to `version` this session. */
+    markUpdated(version: string | null) {
+      if (version) updatedTo = version;
+    },
+
+    /**
+     * Run a repo-mutating task that must not run twice or be lost on navigation.
+     * Returns the task's result, or undefined if another task is already running
+     * (the caller should treat undefined as "ignored, already busy"). Progress
+     * pushed through the callback is readable from `busyProgress` everywhere.
+     */
+    async runExclusive<T>(
+      op: string,
+      label: string,
+      run: (onProgress: (msg: string) => void) => Promise<T>,
+    ): Promise<T | undefined> {
+      if (busyOp) {
+        notify('Hold on — another task is still finishing.', 'error');
+        return undefined;
+      }
+      busyOp = op;
+      busyLabel = label;
+      busyProgress = '';
+      try {
+        return await run((m) => (busyProgress = m));
+      } finally {
+        busyOp = null;
+        busyLabel = '';
+        busyProgress = '';
+      }
     },
 
     /** Section-bar Save: persist the active section in place. */

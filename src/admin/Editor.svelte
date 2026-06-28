@@ -190,9 +190,10 @@
     mobileBypass = true;
   }
 
-  // Warn on hard close/refresh while there are unsaved edits.
+  // Warn on hard close/refresh while there are unsaved edits or a repo task
+  // (update, rollback, restore) is still running.
   $effect(() => {
-    if (!shell.dirty) return;
+    if (!shell.dirty && !shell.busyOp) return;
     const handler = (e: BeforeUnloadEvent) => {
       e.preventDefault();
       e.returnValue = '';
@@ -248,6 +249,9 @@
         <div class="ez-sectionbar">
           <h1>{TITLES[view]}</h1>
           <div class="ez-sectionbar__right">
+            {#if shell.busyOp}
+              <span class="ez-chip"><span class="ez-chip__dot ez-chip__dot--busy"></span>{shell.busyLabel}…</span>
+            {/if}
             <span class="ez-sectionbar__chip"><StatusChip /></span>
             {#if shell.canSave}
               <button

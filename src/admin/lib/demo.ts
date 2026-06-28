@@ -127,6 +127,9 @@ class DemoGitHub {
   async getBlobBase64(): Promise<string> {
     return '';
   }
+  async pagesEnabled(): Promise<boolean> {
+    return false;
+  }
   async commit(changes: { path: string; content?: string; encoding?: string; remove?: boolean }[]): Promise<void> {
     await new Promise((r) => setTimeout(r, 400)); // feel like a real save
     for (const c of changes) {

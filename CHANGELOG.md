@@ -7,6 +7,12 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.40.6
+
+- **Updating is steadier.** An update now keeps running if you switch tabs, with a small
+  "Updating your site" marker so you can see it is still going, and it can't be started
+  twice by accident. The same protection covers rolling back and restoring a backup.
+
 ## 0.40.5
 
 - **Look back at earlier updates.** The Updates panel keeps every past version's notes under
