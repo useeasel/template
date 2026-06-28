@@ -1,6 +1,6 @@
 /**
  * Normalize a YouTube/Vimeo share URL into an embeddable iframe src. We don't host
- * video (that's outside Easel's "host nothing" model) — artists paste a link and we
+ * video (that's outside Gesso's "host nothing" model) — artists paste a link and we
  * render the provider's player. Returns null for anything we don't recognize.
  */
 export function toEmbedSrc(url: string): string | null {

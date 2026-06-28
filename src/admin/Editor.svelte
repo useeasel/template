@@ -7,7 +7,7 @@
   import { makeDemoClient } from './lib/demo';
   import { createShell, provideShell } from './lib/shell.svelte';
   import Sidebar, { type NavId } from './Sidebar.svelte';
-  import EaselMark from './EaselMark.svelte';
+  import GessoMark from './GessoMark.svelte';
   import StatusChip from './views/StatusChip.svelte';
   import UnsavedDialog from './views/UnsavedDialog.svelte';
   import HomeView from './views/HomeView.svelte';
@@ -56,7 +56,7 @@
     repo: string;
     branch: string;
     authBaseUrl: string;
-    easelVersion?: string;
+    gessoVersion?: string;
     host?: string;
   } | null = null;
 
@@ -64,7 +64,7 @@
     const mq = window.matchMedia('(max-width: 820px)');
     isNarrow = mq.matches;
     mq.addEventListener('change', (e) => (isNarrow = e.matches));
-    mobileBypass = localStorage.getItem('easel_mobile_ok') === '1';
+    mobileBypass = localStorage.getItem('gesso_mobile_ok') === '1';
 
     try {
       const res = await fetch('/admin/config.json', { cache: 'no-store' });
@@ -188,7 +188,7 @@
   }
 
   function bypassMobile() {
-    localStorage.setItem('easel_mobile_ok', '1');
+    localStorage.setItem('gesso_mobile_ok', '1');
     mobileBypass = true;
   }
 
@@ -240,7 +240,7 @@
           <button class="ez-hamburger" aria-label="Open menu" onclick={() => (navOpen = true)}>
             <span></span><span></span><span></span>
           </button>
-          <div class="ez-mobilebar__brand"><EaselMark size={24} /><strong>easel</strong></div>
+          <div class="ez-mobilebar__brand"><GessoMark size={24} /><strong>gesso</strong></div>
           <StatusChip />
         </header>
 
@@ -279,14 +279,14 @@
           {:else if view === 'history'}
             <HistoryView {gh} {notify} />
           {:else if view === 'updates'}
-            <UpdatesView {gh} {notify} currentVersion={config?.easelVersion ?? (demo ? '0.9.0' : null)} />
+            <UpdatesView {gh} {notify} currentVersion={config?.gessoVersion ?? (demo ? '0.9.0' : null)} />
           {/if}
         </main>
       </div>
     </div>
   {:else}
     <header class="ez-topbar ez-topbar--bare">
-      <div class="ez-brand"><EaselMark size={28} /><strong>easel</strong></div>
+      <div class="ez-brand"><GessoMark size={28} /><strong>gesso</strong></div>
     </header>
     <main class="ez-main">
       {#if status === 'loading'}
@@ -300,7 +300,7 @@
       {:else if status === 'unconfigured'}
         <div class="ez-signin">
           <h1>Editor not set up yet</h1>
-          <p>This editor becomes active once your site is created through Easel. If you just signed up, give it a minute and refresh.</p>
+          <p>This editor becomes active once your site is created through Gesso. If you just signed up, give it a minute and refresh.</p>
         </div>
       {:else if status === 'error'}
         <div class="ez-signin"><h1>Something went wrong</h1><p>{errorMsg}</p></div>

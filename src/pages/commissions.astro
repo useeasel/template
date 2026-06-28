@@ -11,7 +11,7 @@ import { withBase, stripMd } from '../lib/href';
 // Design (design.pages.commissions). Two modes, set in Settings: a structured
 // request form that posts through the same backend as the contact form (Netlify
 // Forms, or FormSubmit on hosts without one), or "vGen mode" that points the
-// visitor at the artist's vGen page instead. Easel never processes the request
+// visitor at the artist's vGen page instead. Gesso never processes the request
 // or any money — it only collects the details or hands off.
 const settings = (await getEntry('site', 'settings'))!.data;
 // HostForm renders the request form itself; this is only for the FormSubmit note.

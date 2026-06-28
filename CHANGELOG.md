@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Easel template. The version here matches `version` in
+All notable changes to the Gesso template. The version here matches `version` in
 `package.json`; the editor's **Updates** panel reads this file to show artists what a
 newer version includes before they choose to update.
 
@@ -12,22 +12,21 @@ always preserved, and new features stay off until you turn them on.
 - **More ways to show your work.** New gallery options let you drop the frames for bare
   images, trim captions down to just the title, let wide pieces span two columns while
   upright ones stay single, butt images edge-to-edge with no gaps, and even make your
-  About page the first thing visitors see. All off by default — turn on what you like in
+  About page the first thing visitors see. All off by default. Turn on what you like in
   the Design tab.
 - **Five new styles to start from.** Gallery wall, Seamless, Salon, Monograph, and
   Spotlight join the style picker, each built around one of the new layouts. Noir, Bold,
   and Brutalist got a matching refresh.
 - **A clearer setup.** In the wizard, "What do you make?" now sets up a fitting layout and
-  the pages your medium tends to need, while "What's the vibe?" sets the whole look — so
+  the pages your medium tends to need, while "What's the vibe?" sets the whole look, so
   the two steps no longer undo each other.
 
 ## 0.40.8
 
-- **Quietly faster, under the hood.** Your pages load a touch quicker — the default fonts now
-  come from one place instead of being fetched twice — and saving a backup or running an
-  update now downloads your files in parallel, so larger sites finish noticeably sooner.
-  Nothing about your site's look or content changes. A small fix also stops your chosen
-  display name from being overwritten while you set things up in the wizard.
+- **Quietly faster, and a wizard fix.** Your pages load a little quicker, and saving a
+  backup or running an update finishes sooner on larger sites. Nothing about your site's
+  look or content changes. A small fix also stops your chosen display name from being
+  overwritten while you set things up in the wizard.
 
 ## 0.40.7
 
@@ -60,8 +59,8 @@ always preserved, and new features stay off until you turn them on.
 
 ## 0.40.2
 
-- **History rolls back your work, not Easel itself.** Rolling back now only offers your own
-  saves, not Easel's own updates, and it never changes which version of Easel you're on. It
+- **History rolls back your work, not Gesso itself.** Rolling back now only offers your own
+  saves, not Gesso's own updates, and it never changes which version of Gesso you're on. It
   still changes your pages, artwork, and settings only.
 
 ## 0.40.1
@@ -89,13 +88,13 @@ always preserved, and new features stay off until you turn them on.
 
 - **Let people support you.** Add Ko-fi, Buy Me a Coffee, Patreon, or PayPal.me links under
   Settings and a "Support my work" row appears in your footer. Each link goes to your own
-  page; Easel never handles the money. Nothing shows until you add a link.
+  page; Gesso never handles the money. Nothing shows until you add a link.
 
 ## 0.37.0
 
 - **Sell on your own site.** Turn on a Shop page and paste in a store embed from Gumroad,
   Big Cartel, or Shopify. Buyers shop and check out right on your site instead of being
-  sent away. The payment runs through your own store, Easel never touches it. Off by
+  sent away. The payment runs through your own store, Gesso never touches it. Off by
   default; turn the page on under Design and add your embed under Settings.
 
 ## 0.36.0
@@ -103,7 +102,7 @@ always preserved, and new features stay off until you turn them on.
 - **Show sizes, editions, and prices clearly.** A piece can now list several options, like
   "A3 print, $40" and "Original, $1,800", each with its own price, checkout link, and an
   edition note such as "3 of 25". Mark an option sold out and it shows as sold instead of a
-  buy button. Each Buy link goes to your own checkout; Easel never handles the money. Works
+  buy button. Each Buy link goes to your own checkout; Gesso never handles the money. Works
   once selling is turned on under Settings.
 
 ## 0.35.0
@@ -118,8 +117,8 @@ always preserved, and new features stay off until you turn them on.
 
 - **Use the analytics tool you like.** Pick from Google Analytics, Plausible, Fathom,
   Umami, GoatCounter, Simple Analytics, Matomo, or Cloudflare, paste your site's id, and
-  Easel adds it for you. Your visitor numbers go straight to that tool, never through
-  Easel. Off until you choose one.
+  Gesso adds it for you. Your visitor numbers go straight to that tool, never through
+  Gesso. Off until you choose one.
 
 ## 0.33.0
 
@@ -191,7 +190,7 @@ always preserved, and new features stay off until you turn them on.
 
 - **Audio and video on your work.** A piece can now carry a video (YouTube, Vimeo) or
   audio (SoundCloud, Bandcamp, or a direct audio file), and a play badge marks it in your
-  gallery so musicians, filmmakers, and sound artists can use Easel too. Your cover photo stays
+  gallery so musicians, filmmakers, and sound artists can use Gesso too. Your cover photo stays
   the thumbnail. Off until you add a link to a piece.
 
 ## 0.23.0
@@ -265,7 +264,7 @@ always preserved, and new features stay off until you turn them on.
   Settings, and every available piece gets a button. Add a shop link to a piece (Stripe,
   Gumroad, Etsy, Big Cartel) and it becomes a **Buy** button that sends buyers to your own
   checkout. Leave the link blank and it becomes an **Inquire** button that opens your
-  contact form with the piece's title already filled in. Easel never handles the money, it
+  contact form with the piece's title already filled in. Gesso never handles the money, it
   just points people to the right place. Off by default, so nothing changes until you turn
   it on.
 - **Optional "Available work" page.** Add a single page that lists everything you have for
@@ -289,7 +288,7 @@ always preserved, and new features stay off until you turn them on.
 
 ## 0.12.0
 
-- **Simpler custom domains.** Settings no longer asks you to type your domain into Easel.
+- **Simpler custom domains.** Settings no longer asks you to type your domain into Gesso.
   Your links are relative, so they keep working on whatever address you use. Instead, a
   single button takes you straight to the right place on your host (your repo’s Pages
   settings, or your Netlify domain management) to set it up.
@@ -390,4 +389,4 @@ always preserved, and new features stay off until you turn them on.
 
 ## 0.1.0
 
-- The first release of your Easel site.
+- The first release of your Gesso site.

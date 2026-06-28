@@ -39,7 +39,7 @@ export async function restoreBackup(gh: GitHub, file: File): Promise<number> {
     changes.push({ path, content: await entry.async('base64'), encoding: 'base64' });
   }
   if (!changes.length) {
-    throw new Error("That file doesn't look like an Easel backup.");
+    throw new Error("That file doesn't look like an Gesso backup.");
   }
   await gh.commit(changes, 'Restore from backup');
   return changes.length;

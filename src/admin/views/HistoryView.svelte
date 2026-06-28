@@ -27,7 +27,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'easel-backup.zip';
+      a.download = 'gesso-backup.zip';
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -62,19 +62,19 @@
 
   // Turn a commit message into something an artist reads. The editor writes
   // friendly messages already ("Update site settings", "Add artwork: Tide"); this
-  // smooths the few that lead with a verb phrase, and names Easel's own system
+  // smooths the few that lead with a verb phrase, and names Gesso's own system
   // commits plainly for the one place they can still appear (the current row).
   function friendly(msg: string): string {
     const m = msg.trim();
     let mm: RegExpMatchArray | null;
     if (/^initial commit/i.test(m)) return 'Your site was created';
-    if ((mm = m.match(/update site to (v?[\d.]+)/i))) return `Updated Easel to ${mm[1]}`;
+    if ((mm = m.match(/update site to (v?[\d.]+)/i))) return `Updated Gesso to ${mm[1]}`;
     if (/point the editor at this repo/i.test(m)) return 'Site set up';
     if (/publish to github pages/i.test(m)) return 'Published your site';
     return m.replace(/^Merge .*/i, 'Combined changes') || 'Saved changes';
   }
 
-  // Easel's own commits (version updates, provisioning, the deploy workflow) are
+  // Gesso's own commits (version updates, provisioning, the deploy workflow) are
   // not artist content saves, so they're never roll-back targets. Rolling back
   // only ever touches content (src/content, src/assets, public/assets); the
   // version, template code, and deploy setup stay exactly where they are. The
@@ -83,7 +83,7 @@
     const m = msg.trim();
     return /^initial commit/i.test(m)
       || /^merge\b/i.test(m)
-      || /^(chore|ci|feat|fix|build|refactor|docs|style|perf|test)\(easel\)/i.test(m);
+      || /^(chore|ci|feat|fix|build|refactor|docs|style|perf|test)\(gesso\)/i.test(m);
   }
 
   // Always keep the current state as a marker (first row, no Restore button);
@@ -143,7 +143,7 @@
 <div class="ez-view__head">
   <div>
     <h2>History</h2>
-    <p class="ez-help">Every time you save, Easel keeps a snapshot. Roll back to any earlier one, your later work stays in history, so you can always undo a rollback. Rolling back changes your pages, artwork, and settings only; you stay on your current version of Easel.</p>
+    <p class="ez-help">Every time you save, Gesso keeps a snapshot. Roll back to any earlier one, your later work stays in history, so you can always undo a rollback. Rolling back changes your pages, artwork, and settings only; you stay on your current version of Gesso.</p>
   </div>
 </div>
 

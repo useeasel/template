@@ -19,7 +19,7 @@
   const shell = useShell();
 
   // A direct link to where the artist manages their domain — at their host, not in
-  // Easel. GitHub Pages: the repo's Settings → Pages. Netlify: derive the project
+  // Gesso. GitHub Pages: the repo's Settings → Pages. Netlify: derive the project
   // slug from the live hostname (slug.netlify.app); falls back to the dashboard.
   function domainSettingsUrl(): string {
     if (host === 'github-pages') {
@@ -147,7 +147,7 @@
       <div class="ez-block">
         <div class="ez-block__head"><strong>Support links</strong>
           <button class="ez-btn ez-btn--sm" onclick={() => (s.supportLinks = [...(s.supportLinks ?? []), { label: '', url: '' }])}>Add link</button></div>
-        <p class="ez-help">Add Ko-fi, Buy Me a Coffee, Patreon, or PayPal.me links and a "Support my work" row shows in your footer. People go straight to your page; Easel never handles the money.</p>
+        <p class="ez-help">Add Ko-fi, Buy Me a Coffee, Patreon, or PayPal.me links and a "Support my work" row shows in your footer. People go straight to your page; Gesso never handles the money.</p>
         {#each s.supportLinks ?? [] as link, i (i)}
           <div class="ez-row">
             <input class="ez-input" style="max-width:10rem" bind:value={link.label} placeholder="Ko-fi" />
@@ -267,7 +267,7 @@
 
     <section class="ez-group">
       <div class="ez-group__head"><h2 class="ez-group__title">Analytics</h2>
-        <p class="ez-help">See how many people visit. Pick the tool you use and paste your site's id; we add it for you. Your visitor data goes straight to that tool, never through Easel.</p></div>
+        <p class="ez-help">See how many people visit. Pick the tool you use and paste your site's id; we add it for you. Your visitor data goes straight to that tool, never through Gesso.</p></div>
       <label class="ez-field"><span class="ez-label">Analytics tool</span>
         <select class="ez-input" bind:value={s.analyticsProvider}>
           <option value="none">None</option>
@@ -328,9 +328,9 @@
 
     <section class="ez-group">
       <div class="ez-group__head"><h2 class="ez-group__title">Custom domain</h2>
-        <p class="ez-help">Use your own web address (like your-name.com) instead of the default one. You set this up at your host ({hostLabel}); Easel keeps your links relative, so they keep working on whatever domain you choose. Nothing to enter here.</p></div>
+        <p class="ez-help">Use your own web address (like your-name.com) instead of the default one. You set this up at your host ({hostLabel}); Gesso keeps your links relative, so they keep working on whatever domain you choose. Nothing to enter here.</p></div>
       <a class="ez-btn ez-btn--outline" href={domainSettingsUrl()} target="_blank" rel="noopener">Manage your domain on {hostLabel} ↗</a>
-      <p class="ez-help">New to this? <a href="https://easel.rosematcha.com/custom-domain/" target="_blank" rel="noopener">Step-by-step walkthrough →</a></p>
+      <p class="ez-help">New to this? <a href="https://usegesso.com/custom-domain/" target="_blank" rel="noopener">Step-by-step walkthrough →</a></p>
     </section>
 
     <details class="ez-advanced">

@@ -111,7 +111,7 @@
       <img class="ez-form__preview" src={imagePreview} alt="" />
     {/if}
     <input type="file" accept="image/*" onchange={onPickImage} />
-    <span class="ez-help">Big phone photos are fine — Easel resizes them when it builds your site.</span>
+    <span class="ez-help">Big phone photos are fine — Gesso resizes them when it builds your site.</span>
   </label>
 
   <div class="ez-field">

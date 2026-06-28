@@ -1,6 +1,6 @@
 /**
  * Host + form configuration, read at build time from the admin config that the
- * Easel provisioner patches (public/admin/config.json).
+ * Gesso provisioner patches (public/admin/config.json).
  *
  * `host` is where the site is published ('netlify' | 'github-pages'); `formEndpoint`
  * is where the contact/newsletter forms POST. Netlify sites leave it empty and use

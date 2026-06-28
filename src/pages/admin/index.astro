@@ -1,5 +1,5 @@
 ---
-// The Easel editor. A standalone Svelte SPA (client-only) — not part of the
+// The Gesso editor. A standalone Svelte SPA (client-only) — not part of the
 // public site layout. It signs the artist in via the shared OAuth relay and
 // edits content straight through the GitHub API. See src/admin/.
 import '../../styles/tokens.css';
@@ -20,16 +20,16 @@ import { allFontsHref } from '../../lib/design';
     <script is:inline>
       (function () {
         var hash = location.hash || '';
-        if (hash.indexOf('easel_token=') === -1 && hash.indexOf('easel_auth_error=') === -1)
+        if (hash.indexOf('gesso_token=') === -1 && hash.indexOf('gesso_auth_error=') === -1)
           return;
         var params = new URLSearchParams(hash.slice(1));
-        var token = params.get('easel_token');
-        var error = params.get('easel_auth_error');
+        var token = params.get('gesso_token');
+        var error = params.get('gesso_auth_error');
         var result = token
           ? { kind: 'success', token: token }
           : { kind: 'error', message: error || 'Sign-in failed.' };
         try {
-          if (result.kind === 'success') localStorage.setItem('easel_gh_token', result.token);
+          if (result.kind === 'success') localStorage.setItem('gesso_gh_token', result.token);
           var signal = JSON.stringify({
             kind: result.kind,
             token: result.token,
@@ -37,9 +37,9 @@ import { allFontsHref } from '../../lib/design';
             at: Date.now() + ':' + Math.random(),
           });
           // Fires a `storage` event in the opener (a separate same-origin window).
-          localStorage.setItem('easel_auth_event', signal);
+          localStorage.setItem('gesso_auth_event', signal);
           if ('BroadcastChannel' in window) {
-            var ch = new BroadcastChannel('easel-auth');
+            var ch = new BroadcastChannel('gesso-auth');
             ch.postMessage(result);
             ch.close();
           }
@@ -63,7 +63,7 @@ import { allFontsHref } from '../../lib/design';
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href={allFontsHref()} />
-    <title>Edit your site · Easel</title>
+    <title>Edit your site · Gesso</title>
   </head>
   <body>
     <Editor client:only="svelte" />

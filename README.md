@@ -1,8 +1,8 @@
-# Easel — portfolio template
+# Gesso — portfolio template
 
-This is the site an artist gets when they sign up for [Easel](https://easel.rosematcha.com).
+This is the site an artist gets when they sign up for [Gesso](https://usegesso.com).
 It's a fast, accessible [Astro](https://astro.build) portfolio with a friendly editor at
-`/admin` — no code, no git, ever. Easel generates a copy of this template into the
+`/admin` — no code, no git, ever. Gesso generates a copy of this template into the
 artist's own GitHub account, and Netlify builds and deploys it.
 
 ## For artists
@@ -66,7 +66,7 @@ GitHub OAuth relay while developing.
 ## Deployment
 
 Configured for Netlify via `netlify.toml` (`astro build` → `dist`, Forms enabled).
-The `/admin` editor authenticates through the shared Easel OAuth relay; the
+The `/admin` editor authenticates through the shared Gesso OAuth relay; the
 provisioning flow rewrites `public/admin/config.yml`'s `repo` and `base_url` per artist.
 
 ## Accessibility

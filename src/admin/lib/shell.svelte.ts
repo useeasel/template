@@ -33,7 +33,7 @@ export interface SectionRegistration {
 
 type Notify = (msg: string, kind?: 'info' | 'error') => void;
 
-const KEY = Symbol('easel-shell');
+const KEY = Symbol('gesso-shell');
 
 export function createShell(notify: Notify) {
   // The publishing window: how long we optimistically say "your site is

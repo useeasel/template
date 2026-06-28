@@ -1,5 +1,5 @@
 /**
- * Content model + (de)serialization for the Easel editor. Mirrors
+ * Content model + (de)serialization for the Gesso editor. Mirrors
  * src/content/config.ts so what the editor writes is exactly what the build reads.
  * Markdown files use YAML frontmatter; settings is plain JSON.
  */

@@ -1,5 +1,5 @@
 /**
- * High-level content operations for the Easel editor: load and save artworks,
+ * High-level content operations for the Gesso editor: load and save artworks,
  * series, pages, and settings through the GitHub client. Each save is one commit.
  */
 import { GitHub, fileToBase64, type FileChange } from './github';

@@ -2,8 +2,8 @@ import { defineCollection, reference, z } from 'astro:content';
 import { ARTWORK_STATUSES } from '../lib/status';
 
 /**
- * Content model for an Easel portfolio. All of these collections are edited by
- * the artist through the custom Easel editor at /admin (src/admin) — never by
+ * Content model for an Gesso portfolio. All of these collections are edited by
+ * the artist through the custom Gesso editor at /admin (src/admin) — never by
  * hand. The editor writes exactly the fields these Zod schemas validate, so what
  * it commits is always what the build can read.
  */
@@ -29,13 +29,13 @@ const artworks = defineCollection({
       // Optional external "buy" link (Stripe Payment Link, Gumroad, Etsy, Big
       // Cartel, …). When the piece is available and this is set, the work page
       // shows a Buy button; otherwise an Inquire button. Only acts when the
-      // site's `sellEnabled` setting is on. Easel never handles money itself.
+      // site's `sellEnabled` setting is on. Gesso never handles money itself.
       buyLink: z.string().url().optional(),
       // Optional purchase options — sizes, print editions, or tiers. Each carries its
       // own price and (optional) external checkout link, so a piece can offer e.g.
       // "A3 print — $40" and "Original — $1,800" side by side. When set (and selling is
       // on), the work page lists these instead of the single price/buyLink above. An
-      // option with no link falls back to the inquiry flow. Easel never handles money.
+      // option with no link falls back to the inquiry flow. Gesso never handles money.
       options: z
         .array(
           z.object({
@@ -237,7 +237,7 @@ const site = defineCollection({
     metaDescription: z.string().optional(),
     socialLinks: z.array(socialLink).default([]),
     // Optional "support me" links (Ko-fi, Buy Me a Coffee, Patreon, PayPal.me, …).
-    // When any are set, a small support block shows in the footer. Easel never
+    // When any are set, a small support block shows in the footer. Gesso never
     // handles the money — these just point to the artist's own page. Off when empty.
     supportLinks: z.array(socialLink).default([]),
     // Optional /links "link in bio" page (a Linktree-style hub to drop in social
@@ -256,7 +256,7 @@ const site = defineCollection({
     commissionsVgenUrl: z.string().url().optional(),
     // Optional /shop page (toggled on via design.pages.shop). Renders a pasted
     // store embed — a Gumroad/Big Cartel/Shopify Buy Button snippet — so the artist
-    // sells through their own store without leaving their site. Easel never touches
+    // sells through their own store without leaving their site. Gesso never touches
     // the transaction. Empty until the artist pastes a snippet.
     shopIntro: z.string().optional(),
     shopEmbed: z.string().optional(),
@@ -272,7 +272,7 @@ const site = defineCollection({
     // power users who want GA/Plausible/etc.
     cfAnalyticsToken: z.string().optional(),
     // Analytics provider preset. Pick one and paste its site id; we inject the
-    // right snippet. No visitor data passes through Easel. 'none' (default) and the
+    // right snippet. No visitor data passes through Gesso. 'none' (default) and the
     // legacy cfAnalyticsToken/analyticsSnippet keep older sites working untouched.
     analyticsProvider: z
       .enum(['none', 'ga4', 'plausible', 'fathom', 'umami', 'goatcounter', 'simpleanalytics', 'matomo', 'cloudflare'])

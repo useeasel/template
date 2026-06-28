@@ -1,5 +1,5 @@
 /**
- * Easel design-token system. Artist sites render entirely from these tokens, so a
+ * Gesso design-token system. Artist sites render entirely from these tokens, so a
  * "theme" is just a bundle of values. The site reads `settings.design`, falls back
  * to DEFAULT_DESIGN (Bauhaus), and maps everything onto the --ez-* CSS variables the
  * components already use — so adding themes needs no component changes.

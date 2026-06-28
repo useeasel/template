@@ -1,9 +1,9 @@
 /**
- * GitHub sign-in for the Easel editor. Reuses the shared easel-sveltia-auth relay
+ * GitHub sign-in for the Gesso editor. Reuses the shared gesso-sveltia-auth relay
  * (a Cloudflare Worker), but delivers the token over a SAME-ORIGIN channel:
  *   1. We open the relay's /auth in a popup, telling it where to send us back.
  *   2. The popup finishes OAuth on the relay, which 302-redirects it back to THIS
- *      origin at /admin/#easel_token=<token>.
+ *      origin at /admin/#gesso_token=<token>.
  *   3. A tiny inline handler on /admin (see src/pages/admin/index.astro) reads that
  *      fragment, stores the token, and broadcasts it to us over BroadcastChannel +
  *      a localStorage `storage` event, then closes itself.
@@ -18,10 +18,10 @@
  * The token is kept in localStorage so the artist stays signed in.
  */
 
-const TOKEN_KEY = 'easel_gh_token';
+const TOKEN_KEY = 'gesso_gh_token';
 /** Same-origin channels the popup-landing handler uses to hand us the result. */
-export const AUTH_CHANNEL = 'easel-auth';
-export const AUTH_SIGNAL_KEY = 'easel_auth_event';
+export const AUTH_CHANNEL = 'gesso-auth';
+export const AUTH_SIGNAL_KEY = 'gesso_auth_event';
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -52,7 +52,7 @@ export function signIn(authBaseUrl: string): Promise<string> {
     const top = window.screenY + (window.outerHeight - h) / 2;
     const popup = window.open(
       url,
-      'easel-auth',
+      'gesso-auth',
       `width=${w},height=${h},left=${left},top=${top}`,
     );
     if (!popup) {

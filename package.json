@@ -1,9 +1,9 @@
 {
-  "name": "easel-template",
+  "name": "gesso-template",
   "type": "module",
   "version": "0.41.0",
   "private": true,
-  "description": "Easel portfolio template — a Bauhaus-styled Astro static site for artists, editable via the custom Easel editor at /admin.",
+  "description": "Gesso portfolio template — a Bauhaus-styled Astro static site for artists, editable via the custom Gesso editor at /admin.",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build && (pagefind --site dist || true)",

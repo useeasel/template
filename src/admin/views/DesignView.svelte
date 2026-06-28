@@ -308,7 +308,7 @@
       <section class="ez-block">
         <strong>Footer</strong>
         <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.footer.socials} /><span>Show my social links</span></label>
-        <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.footer.credit} /><span>Show the "Made with Easel" credit</span></label>
+        <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.footer.credit} /><span>Show the "Made with Gesso" credit</span></label>
         <label class="ez-field"><span class="ez-label">Footer text (optional)</span>
           <input class="ez-input" bind:value={d.footer.text} placeholder="e.g. By appointment only" /></label>
       </section>

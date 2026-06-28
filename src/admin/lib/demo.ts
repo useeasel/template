@@ -1,5 +1,5 @@
 /**
- * Demo backend for the Easel editor. Implements the same surface as the GitHub
+ * Demo backend for the Gesso editor. Implements the same surface as the GitHub
  * client but entirely in-memory, seeded with sample content, so the whole UI can
  * be explored on localhost without signing in or touching a repo. Changes are
  * kept in memory only (a banner makes that clear).
@@ -116,7 +116,7 @@ class DemoGitHub {
         '## 0.8.0',
         '',
         '- **Custom domains made simpler.** Step-by-step help at',
-        '  [the guide](https://easel.rosematcha.com/custom-domain/).',
+        '  [the guide](https://usegesso.com/custom-domain/).',
         '',
       ].join('\n');
     return null;
@@ -137,16 +137,16 @@ class DemoGitHub {
       else this.files.set(c.path, c.encoding === 'base64' ? '[demo image]' : c.content ?? '');
     }
   }
-  // Sample history: a mix of the artist's own saves and Easel's system commits
+  // Sample history: a mix of the artist's own saves and Gesso's system commits
   // (version update, deploy, provisioning, initial). The History view keeps the
   // current state as a marker and hides older system commits from roll-back.
   async listCommits(): Promise<{ sha: string; message: string; date: string }[]> {
     return [
-      { sha: 'd0', message: 'chore(easel): update site to v0.40.0', date: '2026-06-27T20:08:00Z' },
+      { sha: 'd0', message: 'chore(gesso): update site to v0.40.0', date: '2026-06-27T20:08:00Z' },
       { sha: 'd1', message: 'Update site settings', date: '2026-06-27T15:07:00Z' },
       { sha: 'd2', message: 'Add artwork: Tide', date: '2026-06-26T11:20:00Z' },
-      { sha: 'd3', message: 'ci(easel): publish to GitHub Pages', date: '2026-06-25T10:04:00Z' },
-      { sha: 'd4', message: 'chore(easel): point the editor at this repo and the auth relay', date: '2026-06-25T10:04:00Z' },
+      { sha: 'd3', message: 'ci(gesso): publish to GitHub Pages', date: '2026-06-25T10:04:00Z' },
+      { sha: 'd4', message: 'chore(gesso): point the editor at this repo and the auth relay', date: '2026-06-25T10:04:00Z' },
       { sha: 'd5', message: 'Initial commit', date: '2026-06-25T10:04:00Z' },
     ];
   }

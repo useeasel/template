@@ -1,5 +1,5 @@
 /**
- * Minimal GitHub API client for the Easel editor. Runs in the browser with the
+ * Minimal GitHub API client for the Gesso editor. Runs in the browser with the
  * artist's OAuth token (from the auth relay). All writes go through the Git Data
  * API so a multi-file change (e.g. a new image + its entry) lands in ONE commit,
  * which means ONE Netlify rebuild.

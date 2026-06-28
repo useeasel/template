@@ -1,5 +1,5 @@
 <script lang="ts">
-  // The Easel brand mark — the little easel-with-shapes glyph. Extracted so the
+  // The Gesso brand mark — the little gesso-with-shapes glyph. Extracted so the
   // sidebar, mobile bar, and style wizard all share one source of truth.
   let { size = 28 }: { size?: number } = $props();
 </script>

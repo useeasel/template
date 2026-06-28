@@ -219,7 +219,7 @@
             </div>
           {:else if row.key === 'shop' && pages.shop}
             <div class="ez-pagerow__config">
-              <p class="ez-help">Paste a store embed from Gumroad, Big Cartel, or Shopify. People buy through your store, on your own site. Easel never touches the payment.</p>
+              <p class="ez-help">Paste a store embed from Gumroad, Big Cartel, or Shopify. People buy through your store, on your own site. Gesso never touches the payment.</p>
               <label class="ez-field"><span class="ez-label">Intro (optional)</span>
                 <textarea class="ez-input" rows="2" bind:value={settings.shopIntro} placeholder="A line about your shop."></textarea></label>
               <label class="ez-field"><span class="ez-label">Store embed code</span>

@@ -5,7 +5,7 @@ import svelte from '@astrojs/svelte';
 import aiProtect from './src/lib/ai-protect-integration.mjs';
 
 // Static portfolio site. The host rebuilds on every editor commit to `main`. The
-// custom Easel editor SPA lives at /admin (Svelte island).
+// custom Gesso editor SPA lives at /admin (Svelte island).
 export default defineConfig({
   // Drives canonical URLs, OG tags, and the sitemap. The host injects `URL` at
   // build time — the site's primary address (a custom domain once the artist sets

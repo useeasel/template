@@ -1,5 +1,5 @@
 <script lang="ts">
-  import EaselMark from './EaselMark.svelte';
+  import GessoMark from './GessoMark.svelte';
 
   export type NavId = 'home' | 'work' | 'pages' | 'design' | 'settings' | 'history' | 'updates';
 
@@ -45,8 +45,8 @@
 
 <aside class="ez-side" class:ez-side--open={open}>
   <div class="ez-side__brand">
-    <EaselMark size={30} />
-    <strong>easel</strong>
+    <GessoMark size={30} />
+    <strong>gesso</strong>
   </div>
 
   <nav class="ez-side__nav" aria-label="Sections">

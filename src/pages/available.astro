@@ -9,7 +9,7 @@ import { withBase, stripMd } from '../lib/href';
 // and a Buy or Inquire action. The page only appears in the menu when the artist
 // turns on "Available work" in Design; the per-piece actions follow the same
 // `sellEnabled` switch as the work pages, so this stays a plain price list until
-// the artist opts into selling. Easel never handles money — Buy links go out to
+// the artist opts into selling. Gesso never handles money — Buy links go out to
 // the artist's own checkout.
 const settings = (await getEntry('site', 'settings'))!.data;
 const artist = settings.logoText || settings.siteTitle;

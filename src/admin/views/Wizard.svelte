@@ -69,7 +69,7 @@
 
 <div class="ez-wiz">
   <header class="ez-wiz__head">
-    <div class="ez-wiz__brand"><strong>easel</strong><span class="ez-help">Let's set up your style</span></div>
+    <div class="ez-wiz__brand"><strong>gesso</strong><span class="ez-help">Let's set up your style</span></div>
     <ol class="ez-wiz__steps">
       {#each STEPS as label, i (label)}
         <li class:ez-wiz__step--on={i === step} class:ez-wiz__step--done={i < step}>{label}</li>

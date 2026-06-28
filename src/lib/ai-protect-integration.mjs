@@ -42,7 +42,7 @@ async function* walk(dir) {
 
 export default function aiProtect() {
   return {
-    name: 'easel-ai-protect',
+    name: 'gesso-ai-protect',
     hooks: {
       'astro:build:done': async ({ dir, logger }) => {
         const srcDir = fileURLToPath(new URL('../content/site/', import.meta.url));
