@@ -9,10 +9,11 @@ import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { resolveDesign } from './design';
 
 // Static (non-variable) Jost for the cards: satori can't parse variable fonts, and
-// it reads .woff directly (no woff2/decompression). The site itself still uses the
-// variable @fontsource-variable/jost — this is only for image generation.
+// it reads .woff directly (no woff2/decompression). The site itself loads Jost from
+// Google Fonts — this @fontsource/jost copy is only for build-time image generation.
 const require = createRequire(import.meta.url);
 const loadFont = (weight: 600 | 700) =>
   readFileSync(require.resolve(`@fontsource/jost/files/jost-latin-${weight}-normal.woff`));
@@ -34,6 +35,28 @@ export interface CardColors {
   accent: string;
   ink: string;
   paper: string;
+}
+
+/** Derive a card's palette from a site's resolved design tokens. */
+export function getCardColors(settings: { design?: unknown }): CardColors {
+  const design = resolveDesign(settings.design as any);
+  return {
+    accent: design.color.accent,
+    ink: design.color.text,
+    paper: design.color.background,
+  };
+}
+
+/** Wrap a rendered card PNG in an immutably-cached image response. */
+export function pngResponse(png: Buffer): Response {
+  // Re-wrap as a plain Uint8Array: TS won't accept Buffer<ArrayBufferLike> as a
+  // BodyInit (its backing buffer could be a SharedArrayBuffer).
+  return new Response(new Uint8Array(png), {
+    headers: {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    },
+  });
 }
 
 export interface ShareCardInput {
