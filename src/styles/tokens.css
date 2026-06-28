@@ -33,8 +33,8 @@
   /* --- Typography --- */
   /* Defaults; Base.astro may override --ez-font-display / --ez-font-body from
      the headingFont / bodyFont settings. */
-  --ez-font-display: 'Jost', 'Jost Variable', system-ui, sans-serif;
-  --ez-font-body: 'Hanken Grotesk', 'Hanken Grotesk Variable', system-ui, sans-serif;
+  --ez-font-display: 'Jost', system-ui, sans-serif;
+  --ez-font-body: 'Hanken Grotesk', system-ui, sans-serif;
 
   --ez-text-xs: 0.75rem;
   --ez-text-sm: 0.875rem;
