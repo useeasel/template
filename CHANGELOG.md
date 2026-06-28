@@ -7,6 +7,12 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.40.5
+
+- **Look back at earlier updates.** The Updates panel keeps every past version's notes under
+  an "Earlier updates" link, collapsed and out of the way, so you can revisit what changed
+  whenever you want.
+
 ## 0.40.4
 
 - **A tidier editor.** The tabs under Pages and Work now share one layout: a short

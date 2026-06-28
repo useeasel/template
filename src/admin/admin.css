@@ -472,6 +472,20 @@ details.ez-cl--old[open] > summary.ez-cl__ver::before { content: '\2013'; }
 .ez-changelog code { font-family: var(--ez-font-mono, ui-monospace, 'SF Mono', Menlo, monospace); font-size: 0.9em; background: var(--ez-paper); padding: 0 4px; }
 .ez-changelog a { color: var(--ez-blue); }
 
+/* Earlier updates: the versions the artist is already on. Deprioritized — quiet,
+   collapsed, set below "what's new". */
+.ez-changelog__past { margin-top: var(--ez-space-2); }
+.ez-changelog__past > summary {
+  cursor: pointer; list-style: none;
+  font-family: var(--ez-font-display); font-weight: 700; font-size: var(--ez-text-sm);
+  color: var(--ez-stone); display: inline-flex; align-items: center; gap: var(--ez-space-2);
+}
+.ez-changelog__past > summary::-webkit-details-marker { display: none; }
+.ez-changelog__past > summary::before { content: '+'; font-weight: 800; }
+.ez-changelog__past[open] > summary { margin-bottom: var(--ez-space-3); }
+.ez-changelog__past[open] > summary::before { content: '\2013'; }
+.ez-changelog__past .ez-changelog { font-size: var(--ez-text-sm); }
+
 /* Responsive: collapse the sidebar into a drawer below 880px. */
 @media (max-width: 879px) {
   .ez-side {

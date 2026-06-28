@@ -69,18 +69,25 @@
     return `<ul>${items.map((i) => `<li>${inline(i)}</li>`).join('')}</ul>`;
   }
 
-  // Versions newer than the artist's, newest first. Falls back to everything if
-  // we can't tell their version or nothing parses as newer.
-  let sections = $derived.by<Section[]>(() => {
-    if (!check?.notes) return [];
-    const all = parseChangelog(check.notes);
-    const cur = check.currentVersion ? semver(check.currentVersion) : null;
-    const newer = all.filter((s) => {
+  // Split the changelog around the artist's current version: what's new (newer,
+  // the focus) and earlier notes (what they're already on, kept collapsed and
+  // out of the way). When we can't tell their version, treat it all as new.
+  let allSections = $derived.by<Section[]>(() => (check?.notes ? parseChangelog(check.notes) : []));
+  let curVer = $derived(check?.currentVersion ? semver(check.currentVersion) : null);
+  let newSections = $derived(
+    allSections.filter((s) => {
       const v = semver(s.version);
-      return v && (!cur || cmp(v, cur) > 0);
-    });
-    return newer.length ? newer : all;
-  });
+      return v && (!curVer || cmp(v, curVer) > 0);
+    }),
+  );
+  let pastSections = $derived(
+    curVer
+      ? allSections.filter((s) => {
+          const v = semver(s.version);
+          return v && cmp(v, curVer) <= 0;
+        })
+      : [],
+  );
 
   async function runCheck() {
     phase = 'checking';
@@ -171,11 +178,11 @@
         <button class="ez-btn ez-btn--primary ez-btn--depth" onclick={doUpdate}>Update my site</button>
       </div>
 
-      {#if sections.length}
+      {#if newSections.length}
         <section>
           <h2 class="ez-updates__h">What’s new</h2>
           <div class="ez-changelog">
-            {#each sections as sec, i (sec.version)}
+            {#each newSections as sec, i (sec.version)}
               {#if i === 0}
                 <article class="ez-cl ez-cl--latest">
                   <h3 class="ez-cl__ver">{sec.version}</h3>
@@ -198,6 +205,20 @@
           <p>Your site is already on the latest template. We’ll let you know when there’s more.</p>
         </div>
       </div>
+    {/if}
+
+    {#if pastSections.length}
+      <details class="ez-changelog__past">
+        <summary>Earlier updates</summary>
+        <div class="ez-changelog">
+          {#each pastSections as sec (sec.version)}
+            <details class="ez-cl ez-cl--old">
+              <summary class="ez-cl__ver">{sec.version}</summary>
+              <div class="ez-cl__body">{@html renderBody(sec.body)}</div>
+            </details>
+          {/each}
+        </div>
+      </details>
     {/if}
   {/if}
 </div>

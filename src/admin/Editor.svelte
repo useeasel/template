@@ -273,7 +273,7 @@
           {:else if view === 'history'}
             <HistoryView {gh} {notify} />
           {:else if view === 'updates'}
-            <UpdatesView {gh} {notify} currentVersion={config?.easelVersion ?? null} />
+            <UpdatesView {gh} {notify} currentVersion={config?.easelVersion ?? (demo ? '0.9.0' : null)} />
           {/if}
         </main>
       </div>
