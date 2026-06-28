@@ -60,11 +60,37 @@
 
   // Turn a commit message into something an artist reads. The editor writes
   // friendly messages already ("Update site settings", "Add artwork: Tide"); this
-  // just smooths the few that lead with a verb phrase and hides the very first
-  // (current) entry's redundancy.
+  // smooths the few that lead with a verb phrase, and names Easel's own system
+  // commits plainly for the one place they can still appear (the current row).
   function friendly(msg: string): string {
-    return msg.replace(/^Merge .*/i, 'Combined changes').trim() || 'Saved changes';
+    const m = msg.trim();
+    let mm: RegExpMatchArray | null;
+    if (/^initial commit/i.test(m)) return 'Your site was created';
+    if ((mm = m.match(/update site to (v?[\d.]+)/i))) return `Updated Easel to ${mm[1]}`;
+    if (/point the editor at this repo/i.test(m)) return 'Site set up';
+    if (/publish to github pages/i.test(m)) return 'Published your site';
+    return m.replace(/^Merge .*/i, 'Combined changes') || 'Saved changes';
   }
+
+  // Easel's own commits (version updates, provisioning, the deploy workflow) are
+  // not artist content saves, so they're never roll-back targets. Rolling back
+  // only ever touches content (src/content, src/assets, public/assets); the
+  // version, template code, and deploy setup stay exactly where they are. The
+  // current state is still shown as a marker even when it's one of these.
+  function isSystemCommit(msg: string): boolean {
+    const m = msg.trim();
+    return /^initial commit/i.test(m)
+      || /^merge\b/i.test(m)
+      || /^(chore|ci|feat|fix|build|refactor|docs|style|perf|test)\(easel\)/i.test(m);
+  }
+
+  // Always keep the current state as a marker (first row, no Restore button);
+  // hide older system commits so artists only roll back to their own work.
+  let visible = $derived.by(() => {
+    if (items.length === 0) return [];
+    const [head, ...rest] = items;
+    return [head, ...rest.filter((s) => !isSystemCommit(s.message))];
+  });
 
   function when(iso: string): string {
     const d = new Date(iso);
@@ -111,7 +137,7 @@
 <div class="ez-view__head">
   <div>
     <h2>History</h2>
-    <p class="ez-help">Every time you save, Easel keeps a snapshot. Roll back to any earlier one, your later work stays in history, so you can always undo a rollback.</p>
+    <p class="ez-help">Every time you save, Easel keeps a snapshot. Roll back to any earlier one, your later work stays in history, so you can always undo a rollback. Rolling back changes your pages, artwork, and settings only; you stay on your current version of Easel.</p>
   </div>
 </div>
 
@@ -137,7 +163,7 @@
   <div class="ez-empty"><p>No history yet. It fills in as you make changes.</p></div>
 {:else}
   <ul class="ez-history">
-    {#each items as s, i (s.sha)}
+    {#each visible as s, i (s.sha)}
       <li class="ez-history__row">
         <div class="ez-history__info">
           <strong>{friendly(s.message)}</strong>

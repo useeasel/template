@@ -7,6 +7,12 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.40.2
+
+- **History rolls back your work, not Easel itself.** Rolling back now only offers your own
+  saves, not Easel's own updates, and it never changes which version of Easel you're on. It
+  still changes your pages, artwork, and settings only.
+
 ## 0.40.1
 
 - **Your settings are easier to find.** Settings now sit in clear groups. You choose which
