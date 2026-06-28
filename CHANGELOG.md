@@ -7,6 +7,12 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.40.7
+
+- **A cleaner Pages list.** The tabs under Pages now show only the pages you've turned on,
+  so the row matches what's in your site's menu. Turn a page on from the Menu tab and its
+  tab appears.
+
 ## 0.40.6
 
 - **Updating is steadier.** An update now keeps running if you switch tabs, with a small

@@ -140,16 +140,23 @@
     shell.guard(() => (tab = t));
   }
 
-  const TABS: { id: Tab; label: string }[] = [
+  // `page` ties a tab to its menu toggle: the tab only shows when that page is on.
+  // Menu has no page (always shown); Testimonials feed the About page, so they
+  // ride along with it.
+  const TABS: { id: Tab; label: string; page?: keyof DesignTokens['pages'] }[] = [
     { id: 'menu', label: 'Menu' },
-    { id: 'about', label: 'About' },
-    { id: 'contact', label: 'Contact' },
-    { id: 'cv', label: 'CV' },
-    { id: 'press', label: 'Press' },
-    { id: 'exhibitions', label: 'Exhibitions' },
-    { id: 'news', label: 'News' },
-    { id: 'testimonials', label: 'Testimonials' },
+    { id: 'about', label: 'About', page: 'about' },
+    { id: 'contact', label: 'Contact', page: 'contact' },
+    { id: 'cv', label: 'CV', page: 'cv' },
+    { id: 'press', label: 'Press', page: 'press' },
+    { id: 'exhibitions', label: 'Exhibitions', page: 'exhibitions' },
+    { id: 'news', label: 'News', page: 'news' },
+    { id: 'testimonials', label: 'Testimonials', page: 'about' },
   ];
+
+  // Only show tabs for pages that are turned on (plus the always-on Menu). The
+  // active tab stays visible even if just disabled, so its content never orphans.
+  let visibleTabs = $derived(TABS.filter((t) => !t.page || pages[t.page] || t.id === tab));
 
   // The pages shown in the Menu tab, in display order. Some expand to extra
   // config; the rest are a plain on/off.
@@ -168,7 +175,7 @@
 </script>
 
 <div class="ez-tabs" role="tablist" aria-label="Pages">
-  {#each TABS as t (t.id)}
+  {#each visibleTabs as t (t.id)}
     <button class="ez-tab" class:ez-tab--on={tab === t.id} role="tab" aria-selected={tab === t.id} onclick={() => switchTab(t.id)}>{t.label}</button>
   {/each}
 </div>
