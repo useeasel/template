@@ -188,18 +188,22 @@ export class GitHub {
     return commit.tree.sha;
   }
 
+  /** Every blob (path + content-addressed sha) under a root tree sha. */
+  private async blobsForTreeSha(treeSha: string, over?: Partial<RepoRef>): Promise<TreeEntry[]> {
+    const owner = over?.owner ?? this.ref.owner;
+    const repo = over?.repo ?? this.ref.repo;
+    const data = await this.api(`/repos/${owner}/${repo}/git/trees/${treeSha}?recursive=1`);
+    const tree: TreeEntry[] = Array.isArray(data.tree) ? data.tree : [];
+    return tree.filter((t) => t.type === 'blob');
+  }
+
   /**
    * Every blob (path + content-addressed sha) under a ref, recursively. Defaults to
    * this.ref. Trees/submodules are filtered out — only files. The site-update merge
    * compares these blob shas across the artist repo and the upstream template.
    */
   async treeRecursive(over?: Partial<RepoRef>): Promise<TreeEntry[]> {
-    const owner = over?.owner ?? this.ref.owner;
-    const repo = over?.repo ?? this.ref.repo;
-    const treeSha = await this.treeShaForRef(over);
-    const data = await this.api(`/repos/${owner}/${repo}/git/trees/${treeSha}?recursive=1`);
-    const tree: TreeEntry[] = Array.isArray(data.tree) ? data.tree : [];
-    return tree.filter((t) => t.type === 'blob');
+    return this.blobsForTreeSha(await this.treeShaForRef(over), over);
   }
 
   /** A blob's base64 content (newlines stripped), from any repo. */
@@ -231,11 +235,8 @@ export class GitHub {
 
   /** Every blob under the tree of a specific commit sha (not a branch). */
   private async treeAtCommit(sha: string): Promise<TreeEntry[]> {
-    const base = this.repoPath();
-    const commit = await this.api(`${base}/git/commits/${sha}`);
-    const data = await this.api(`${base}/git/trees/${commit.tree.sha}?recursive=1`);
-    const tree: TreeEntry[] = Array.isArray(data.tree) ? data.tree : [];
-    return tree.filter((t) => t.type === 'blob');
+    const commit = await this.api(`${this.repoPath()}/git/commits/${sha}`);
+    return this.blobsForTreeSha(commit.tree.sha);
   }
 
   /**
@@ -265,7 +266,9 @@ export class GitHub {
     }
     if (!tree.length) return 0;
 
-    const run = this.commitChain.then(() => this._pushTree(tree, message));
+    const run = this.commitChain.then(() =>
+      this.pushTreeEntries(tree, message, 'restore failed: branch kept moving'),
+    );
     this.commitChain = run.catch(() => {});
     await run;
     // Restored blobs are written by sha, so we can't seed the overlay with content;
@@ -274,8 +277,16 @@ export class GitHub {
     return tree.length;
   }
 
-  /** Push a prebuilt git tree (entries already carry blob shas) as one commit. */
-  private async _pushTree(treeEntries: any[], message: string): Promise<void> {
+  /**
+   * Push a prebuilt git tree (entries already carry blob shas) as one commit on the
+   * branch tip, retrying the fast-forward race. The branch tip can move between
+   * reading it and updating it — GitHub has read-after-write lag on refs, and two
+   * saves in quick succession race — making the ref update fail 422 "not a fast
+   * forward". Blobs are content-addressed (safe to reference once), so on a conflict
+   * we re-read the tip and rebuild the tree + commit on top of it. Only returns on a
+   * successful ref update; `failLabel` names the operation in the give-up error.
+   */
+  private async pushTreeEntries(treeEntries: any[], message: string, failLabel: string): Promise<void> {
     const base = this.repoPath();
     let lastErr: unknown;
     for (let attempt = 0; attempt < 5; attempt++) {
@@ -306,7 +317,7 @@ export class GitHub {
         throw e;
       }
     }
-    throw lastErr instanceof Error ? lastErr : new Error('restore failed: branch kept moving');
+    throw lastErr instanceof Error ? lastErr : new Error(failLabel);
   }
 
   /**
@@ -345,45 +356,15 @@ export class GitHub {
       treeEntries.push({ path: c.path, mode: '100644', type: 'blob', sha: blob.sha });
     }
 
-    let lastErr: unknown;
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const ref = await this.api(`${base}/git/ref/heads/${this.ref.branch}`);
-      const latest = ref.object.sha;
-      const headCommit = await this.api(`${base}/git/commits/${latest}`);
+    // pushTreeEntries only returns once the ref update succeeds (it throws
+    // otherwise), so seeding the overlay here matches the old in-loop placement.
+    await this.pushTreeEntries(treeEntries, message, 'commit failed: branch kept moving (not a fast forward)');
 
-      const newTree = await this.api(`${base}/git/trees`, {
-        method: 'POST',
-        body: JSON.stringify({ base_tree: headCommit.tree.sha, tree: treeEntries }),
-      });
-      const newCommit = await this.api(`${base}/git/commits`, {
-        method: 'POST',
-        body: JSON.stringify({ message, tree: newTree.sha, parents: [latest] }),
-      });
-      try {
-        await this.api(`${base}/git/refs/heads/${this.ref.branch}`, {
-          method: 'PATCH',
-          body: JSON.stringify({ sha: newCommit.sha }),
-        });
-        // Record what we just wrote so later reads are consistent despite CDN lag.
-        for (const c of changes) {
-          if (c.remove) this.overlay.set(c.path, { removed: true });
-          else this.overlay.set(c.path, { content: c.content ?? '', encoding: c.encoding ?? 'utf-8' });
-        }
-        this.lastCommitSha = newCommit.sha;
-        return;
-      } catch (e) {
-        lastErr = e;
-        // Only retry the fast-forward race; surface anything else immediately.
-        if (e instanceof Error && /\(422\)/.test(e.message) && /fast forward/i.test(e.message)) {
-          await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
-          continue;
-        }
-        throw e;
-      }
+    // Record what we just wrote so later reads are consistent despite CDN lag.
+    for (const c of changes) {
+      if (c.remove) this.overlay.set(c.path, { removed: true });
+      else this.overlay.set(c.path, { content: c.content ?? '', encoding: c.encoding ?? 'utf-8' });
     }
-    throw lastErr instanceof Error
-      ? lastErr
-      : new Error('commit failed: branch kept moving (not a fast forward)');
   }
 
   /**
@@ -415,13 +396,7 @@ export class GitHub {
   }
 }
 
-/** UTF-8-safe base64 helpers (btoa/atob alone mangle non-ASCII). */
-export function encodeBase64(text: string): string {
-  const bytes = new TextEncoder().encode(text);
-  let bin = '';
-  bytes.forEach((b) => (bin += String.fromCharCode(b)));
-  return btoa(bin);
-}
+/** UTF-8-safe base64 decode (atob alone mangles non-ASCII). */
 export function decodeBase64(b64: string): string {
   const bin = atob(b64.replace(/\n/g, ''));
   const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
