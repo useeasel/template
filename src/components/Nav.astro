@@ -16,6 +16,8 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 // editor can toggle them live. `key` matches the ez-page-<key>-off classes.
 const links = [
   { href: '/', label: 'Work', key: 'work' },
+  // The gallery's own URL — shown only when the homepage is the about intro (CSS toggle).
+  { href: '/work', label: 'Work', key: 'workpage' },
   { href: '/available', label: 'Available', key: 'available' },
   { href: '/about', label: 'About', key: 'about' },
   { href: '/cv', label: 'CV', key: 'cv' },
@@ -114,6 +116,13 @@ const isActive = (href: string) => {
   :global(html.ez-page-presskit-off) .ez-pagelink-presskit,
   :global(html.ez-page-commissions-off) .ez-pagelink-commissions,
   :global(html.ez-page-shop-off) .ez-pagelink-shop { display: none; }
+
+  /* Landing route: default homepage is the gallery, so the gallery's own /work link
+     is redundant. When the homepage is the about intro, swap to the /work link and
+     drop the now-redundant About link (the landing already is About). */
+  :global(html.ez-home-work) .ez-pagelink-workpage { display: none; }
+  :global(html.ez-home-about) .ez-pagelink-work,
+  :global(html.ez-home-about) .ez-pagelink-about { display: none; }
 
   /* Top layout: name on its own centered row, links centered below. */
   :global(html.ez-nav-top) .ez-nav { position: relative; }

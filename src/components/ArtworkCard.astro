@@ -48,6 +48,8 @@ const mediaBadge = hasVideo ? '▶' : hasAudio ? '♪' : null;
 const mediaLabel = hasVideo ? 'Has video' : hasAudio ? 'Has audio' : null;
 
 const metaParts = [year, medium, dimensions].filter(Boolean);
+// Orientation drives the adaptive-span grid (landscape pieces take two columns).
+const orientation = image.width > image.height ? 'landscape' : 'portrait';
 
 // Same trigger element, two behaviors: a link to the artwork's own page, or a
 // button that opens the lightbox. A dynamic tag keeps the image markup in one place.
@@ -63,7 +65,7 @@ const triggerProps = href
     };
 ---
 
-<article class="ez-card ez-artcard" data-status={status} data-series={series}>
+<article class="ez-card ez-artcard" data-status={status} data-series={series} data-orientation={orientation}>
   <Trigger {...triggerProps}>
     {isProtected ? (
       // Protected (Glaze/Nightshade): serve the original bytes, never transformed.

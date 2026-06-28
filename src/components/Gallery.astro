@@ -1,0 +1,157 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { getImage } from 'astro:assets';
+import ArtworkCard from './ArtworkCard.astro';
+import Lightbox from './Lightbox.astro';
+import { resolveDesign } from '../lib/design';
+import { withBase, stripMd } from '../lib/href';
+
+const settings = (await getEntry('site', 'settings'))!.data;
+const design = resolveDesign(settings.design as any);
+const linkToPage = design.gallery.click === 'page';
+
+const artworks = (await getCollection('artworks')).sort(
+  (a, b) => a.data.order - b.data.order
+);
+
+// Opt-in filter chips (design.gallery.filters): by series actually present, plus an
+// "Available" shortcut. Filtering is client-side over data-* on each card.
+const seriesEntries = (await getCollection('collections')).sort((a, b) => a.data.order - b.data.order);
+const presentSeries = new Set(
+  artworks.map((a) => (a.data.collection ? stripMd(a.data.collection.id) : null)).filter(Boolean) as string[]
+);
+const seriesChips = seriesEntries
+  .filter((s) => presentSeries.has(stripMd(s.id)))
+  .map((s) => ({ slug: stripMd(s.id), title: s.data.title }));
+const hasAvailable = artworks.some((a) => a.data.status === 'available');
+const showFilters = design.gallery.filters && artworks.length > 1 && (seriesChips.length > 0 || hasAvailable);
+
+// Build lightbox payload (resolved, full-size URLs + gallery labels) — only when
+// the gallery actually opens a lightbox; in page-link mode it never renders.
+const lightboxItems = linkToPage
+  ? []
+  : await Promise.all(
+      artworks.map(async (a) => {
+        const img = await getImage({ src: a.data.image, width: 1600 });
+        const meta = [a.data.year, a.data.medium, a.data.dimensions].filter(Boolean).join(' · ');
+        return { src: img.src, alt: a.data.alt, title: a.data.title, meta };
+      })
+    );
+---
+
+{artworks.length === 0 ? (
+  <div class="ez-firstrun">
+    <h2 class="ez-firstrun__title">Your portfolio is ready.</h2>
+    <p class="ez-firstrun__body">
+      This is your new site. Add your first piece in the editor and it will
+      appear right here.
+    </p>
+    <a class="ez-btn ez-btn--primary ez-btn--lg" href={withBase('/admin')}>Open your editor</a>
+  </div>
+) : (
+  <>
+    {showFilters && (
+      <div class="ez-filters" data-ez-filters hidden>
+        <button class="ez-filter is-active" type="button" data-filter="all">All</button>
+        {hasAvailable && <button class="ez-filter" type="button" data-filter="status:available">Available</button>}
+        {seriesChips.map((s) => (
+          <button class="ez-filter" type="button" data-filter={`series:${s.slug}`}>{s.title}</button>
+        ))}
+      </div>
+    )}
+    <div class="ez-portfolio">
+      {artworks.map((a, i) => (
+        <ArtworkCard
+          image={a.data.image}
+          title={a.data.title}
+          alt={a.data.alt}
+          year={a.data.year}
+          medium={a.data.medium}
+          dimensions={a.data.dimensions}
+          price={a.data.price}
+          status={a.data.status}
+          series={a.data.collection ? stripMd(a.data.collection.id) : undefined}
+          index={i}
+          href={linkToPage ? withBase(`/work/${stripMd(a.id)}/`) : undefined}
+          hasVideo={!!a.data.video}
+          hasAudio={!!a.data.audio}
+          protected={a.data.protected}
+        />
+      ))}
+    </div>
+  </>
+)}
+
+{!linkToPage && artworks.length > 0 && <Lightbox items={lightboxItems} />}
+
+{showFilters && (
+  <script>
+    const bar = document.querySelector('[data-ez-filters]');
+    if (bar) {
+      bar.hidden = false;
+      const cards = Array.from(document.querySelectorAll('.ez-portfolio .ez-artcard'));
+      const matches = (f, card) => {
+        if (f === 'all') return true;
+        if (f.startsWith('status:')) return card.dataset.status === f.slice(7);
+        if (f.startsWith('series:')) return card.dataset.series === f.slice(7);
+        return true;
+      };
+      bar.addEventListener('click', (e) => {
+        const btn = e.target.closest('.ez-filter');
+        if (!btn || !bar.contains(btn)) return;
+        bar.querySelectorAll('.ez-filter').forEach((b) => b.classList.toggle('is-active', b === btn));
+        const f = btn.dataset.filter;
+        cards.forEach((card) => { card.hidden = !matches(f, card); });
+      });
+    }
+  </script>
+)}
+
+<style>
+  .ez-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ez-space-3);
+    margin-bottom: var(--ez-space-6);
+  }
+  .ez-filter {
+    font-family: var(--ez-font-display);
+    font-weight: 700;
+    font-size: var(--ez-text-sm);
+    color: var(--ez-ink);
+    background: var(--ez-white);
+    border: var(--ez-border-width) solid var(--ez-border);
+    border-radius: var(--ez-radius);
+    padding: var(--ez-space-2) var(--ez-space-4);
+    cursor: pointer;
+  }
+  .ez-filter:hover { border-color: var(--ez-blue); color: var(--ez-blue); }
+  .ez-filter.is-active {
+    background: var(--ez-blue);
+    color: var(--ez-pill-available-text, #fff);
+    border-color: var(--ez-blue);
+  }
+
+  .ez-firstrun {
+    border: var(--ez-border-width) solid var(--ez-border);
+    box-shadow: var(--ez-shadow);
+    background: var(--ez-white);
+    padding: var(--ez-space-7) var(--ez-space-5);
+    text-align: center;
+    display: grid;
+    justify-items: center;
+    gap: var(--ez-space-4);
+    max-width: 560px;
+    margin: var(--ez-space-6) auto;
+  }
+  .ez-firstrun__title {
+    font-family: var(--ez-font-display);
+    margin: 0;
+  }
+  .ez-firstrun__body {
+    color: var(--ez-stone);
+    font-size: var(--ez-text-lg);
+    max-width: 42ch;
+    margin: 0;
+  }
+</style>

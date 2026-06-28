@@ -7,6 +7,20 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.41.0
+
+- **More ways to show your work.** New gallery options let you drop the frames for bare
+  images, trim captions down to just the title, let wide pieces span two columns while
+  upright ones stay single, butt images edge-to-edge with no gaps, and even make your
+  About page the first thing visitors see. All off by default — turn on what you like in
+  the Design tab.
+- **Five new styles to start from.** Gallery wall, Seamless, Salon, Monograph, and
+  Spotlight join the style picker, each built around one of the new layouts. Noir, Bold,
+  and Brutalist got a matching refresh.
+- **A clearer setup.** In the wizard, "What do you make?" now sets up a fitting layout and
+  the pages your medium tends to need, while "What's the vibe?" sets the whole look — so
+  the two steps no longer undo each other.
+
 ## 0.40.8
 
 - **Quietly faster, under the hood.** Your pages load a touch quicker — the default fonts now

@@ -224,7 +224,7 @@
               <option value="narrow">Narrow</option><option value="normal">Normal</option><option value="wide">Wide</option></select></label>
           <label class="ez-field"><span class="ez-label">Space between items</span>
             <select class="ez-input" bind:value={d.gallery.gutter}>
-              <option value="tight">Tight</option><option value="normal">Normal</option><option value="loose">Loose</option></select></label>
+              <option value="none">None (seamless)</option><option value="tight">Tight</option><option value="normal">Normal</option><option value="loose">Loose</option></select></label>
         </div>
         <div class="ez-row">
           <label class="ez-field"><span class="ez-label">Captions</span>
@@ -233,6 +233,14 @@
           <label class="ez-field"><span class="ez-label">Lightbox</span>
             <select class="ez-input" bind:value={d.lightbox.transition}>
               <option value="fade">Fade</option><option value="slide">Slide</option></select></label>
+        </div>
+        <div class="ez-row">
+          <label class="ez-field"><span class="ez-label">Piece style</span>
+            <select class="ez-input" bind:value={d.gallery.cardStyle}>
+              <option value="card">Framed card</option><option value="bare">Bare image (no frame)</option></select></label>
+          <label class="ez-field"><span class="ez-label">Caption detail</span>
+            <select class="ez-input" bind:value={d.gallery.captionDetail}>
+              <option value="full">Full (title, details, status)</option><option value="minimal">Minimal (title only)</option></select></label>
         </div>
         <label class="ez-field--check"><input type="checkbox" bind:checked={d.lightbox.zoom} />
           <span>Let visitors click to zoom into fine detail</span></label>
@@ -243,6 +251,7 @@
             <span class="ez-help">Its own page is better for long descriptions, video, and sharing a single piece.</span></label>
         </div>
         <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.gallery.featureFirst} /><span>Feature the first piece (span two columns)</span></label>
+        <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.gallery.adaptiveSpans} /><span>Let wide pieces span two columns (even grid only)</span></label>
         <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.gallery.filters} /><span>Show filter chips on the home page (by series &amp; availability)</span></label>
       </section>
 
@@ -255,6 +264,12 @@
           <label class="ez-field"><span class="ez-label">Logo</span>
             <select class="ez-input" bind:value={d.logo.mode}>
               <option value="none">Just my name</option><option value="image">An image</option></select></label>
+        </div>
+        <div class="ez-row">
+          <label class="ez-field"><span class="ez-label">Homepage shows</span>
+            <select class="ez-input" bind:value={d.home.landing}>
+              <option value="work">My work gallery</option><option value="about">My about page</option></select>
+            <span class="ez-help">“About” makes your intro the landing page; your work moves to its own Work link.</span></label>
         </div>
         {#if d.logo.mode === 'image'}
           <label class="ez-field"><span class="ez-label">Logo image</span>

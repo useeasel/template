@@ -1,0 +1,38 @@
+---
+import { getEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Gallery from '../components/Gallery.astro';
+import { withBase } from '../lib/href';
+
+// The work gallery's permanent URL. Used directly when the homepage is the about
+// intro (design.home.landing === 'about'); otherwise it mirrors the home gallery.
+const settings = (await getEntry('site', 'settings'))!.data;
+---
+
+<Base pageTitle="Work" pageDescription={settings.tagline} pageImage={withBase('/og/home.png')}>
+  <div class="ez-container">
+    <header class="ez-home-head ez-hero">
+      <div>
+        <h1>{settings.siteTitle}</h1>
+        {settings.tagline && <p class="ez-home-tagline">{settings.tagline}</p>}
+      </div>
+    </header>
+    <Gallery />
+  </div>
+</Base>
+
+<style>
+  .ez-home-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--ez-space-5);
+    flex-wrap: wrap;
+    margin-bottom: var(--ez-space-7);
+  }
+  .ez-home-tagline {
+    color: var(--ez-stone);
+    font-size: var(--ez-text-lg);
+    margin: 0;
+  }
+</style>

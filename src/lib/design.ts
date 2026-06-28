@@ -37,6 +37,8 @@ export interface DesignTokens {
   contentWidth: 'narrow' | 'normal' | 'wide';
   motion: 'smooth' | 'rigid' | 'none';
   nav: { layout: 'side' | 'top' };
+  /** Which page is the landing route at '/': the work gallery or the about intro. */
+  home: { landing: 'work' | 'about' };
   logo: { mode: 'none' | 'text' | 'image'; image?: string };
   background: { type: 'solid' | 'texture' | 'none' };
   thumb: { fit: 'cover' | 'contain'; hover: 'none' | 'zoom' | 'lift' };
@@ -44,9 +46,15 @@ export interface DesignTokens {
     layout: 'grid' | 'masonry' | 'cinematic' | 'fullbleed';
     /** Target size of each piece; columns auto-fit to the window. */
     size: 'small' | 'medium' | 'large';
-    gutter: 'tight' | 'normal' | 'loose';
+    gutter: 'tight' | 'normal' | 'loose' | 'none';
     caption: 'below' | 'hover' | 'hidden';
+    /** Bordered card vs a bare image sitting directly on the page. */
+    cardStyle: 'card' | 'bare';
+    /** How much a caption shows: everything, or just the title. */
+    captionDetail: 'full' | 'minimal';
     featureFirst: boolean;
+    /** In the even grid, let landscape pieces span two columns. */
+    adaptiveSpans: boolean;
     /** What a thumbnail click does: open the lightbox, or go to its own page. */
     click: 'lightbox' | 'page';
     /** Show filter chips on the home gallery (by series + availability). */
@@ -84,10 +92,11 @@ export const DEFAULT_DESIGN: DesignTokens = {
   contentWidth: 'normal',
   motion: 'smooth',
   nav: { layout: 'side' },
+  home: { landing: 'work' },
   logo: { mode: 'none' },
   background: { type: 'solid' },
   thumb: { fit: 'contain', hover: 'zoom' },
-  gallery: { layout: 'masonry', size: 'medium', gutter: 'normal', caption: 'below', featureFirst: false, click: 'lightbox', filters: false },
+  gallery: { layout: 'masonry', size: 'medium', gutter: 'normal', caption: 'below', cardStyle: 'card', captionDetail: 'full', featureFirst: false, adaptiveSpans: false, click: 'lightbox', filters: false },
   lightbox: { transition: 'fade', zoom: false },
   hero: { enabled: false, align: 'left', size: 'small' },
   footer: { socials: true, credit: true },
@@ -95,9 +104,20 @@ export const DEFAULT_DESIGN: DesignTokens = {
   pages: { about: true, contact: true, cv: true, press: true, exhibitions: false, news: false, available: false, presskit: false, commissions: false, shop: false },
 };
 
+/**
+ * A recursively-optional design — lets a preset or override set just the nested
+ * fields it cares about (e.g. `gallery: { layout: 'grid' }`) without spelling out
+ * the whole sub-object. `mergeOver` fills the rest from the base.
+ */
+export type DesignOverride = {
+  [K in keyof DesignTokens]?: DesignTokens[K] extends object
+    ? Partial<DesignTokens[K]>
+    : DesignTokens[K];
+};
+
 /** Deep-merge a partial design over a base token bundle. */
-function mergeOver(base: DesignTokens, partial: Partial<DesignTokens> | undefined): DesignTokens {
-  const d = (partial ?? {}) as Partial<DesignTokens>;
+function mergeOver(base: DesignTokens, partial: DesignOverride | undefined): DesignTokens {
+  const d = (partial ?? {}) as DesignOverride;
   return {
     ...base,
     ...d,
@@ -106,6 +126,7 @@ function mergeOver(base: DesignTokens, partial: Partial<DesignTokens> | undefine
     type: { ...base.type, ...(d.type ?? {}) },
     shape: { ...base.shape, ...(d.shape ?? {}) },
     nav: { ...base.nav, ...(d.nav ?? {}) },
+    home: { ...base.home, ...(d.home ?? {}) },
     logo: { ...base.logo, ...(d.logo ?? {}) },
     background: { ...base.background, ...(d.background ?? {}) },
     thumb: { ...base.thumb, ...(d.thumb ?? {}) },
@@ -119,7 +140,7 @@ function mergeOver(base: DesignTokens, partial: Partial<DesignTokens> | undefine
 }
 
 /** Merge a partial design over the Bauhaus defaults (used to build presets). */
-export function withDefaults(partial: Partial<DesignTokens> | undefined): DesignTokens {
+export function withDefaults(partial: DesignOverride | undefined): DesignTokens {
   return mergeOver(DEFAULT_DESIGN, partial);
 }
 
@@ -128,7 +149,7 @@ export function withDefaults(partial: Partial<DesignTokens> | undefined): Design
  * preset's bundle (or Bauhaus), then layer any granular overrides on top. So
  * `{ preset: 'editorial' }` themes the whole site, and tweaks just add fields.
  */
-export function resolveDesign(partial: Partial<DesignTokens> | undefined): DesignTokens {
+export function resolveDesign(partial: DesignOverride | undefined): DesignTokens {
   const base = (partial?.preset && PRESETS[partial.preset]?.design) || DEFAULT_DESIGN;
   const r = mergeOver(base, partial);
   // Materialize link/heading so they default to this design's accent/text.
@@ -138,7 +159,7 @@ export function resolveDesign(partial: Partial<DesignTokens> | undefined): Desig
 }
 
 const DENSITY_GAP = { compact: '1rem', normal: '1.5rem', airy: '2.5rem' };
-const GUTTER = { tight: '0.75rem', normal: '1.5rem', loose: '2.5rem' };
+const GUTTER = { tight: '0.75rem', normal: '1.5rem', loose: '2.5rem', none: '0' };
 const CONTENT_WIDTH = { narrow: '880px', normal: '1200px', wide: '1500px' };
 // Target min width per piece; the grid fits as many columns as the window allows.
 const ITEM_MIN = { small: '200px', medium: '290px', large: '400px' };
@@ -195,9 +216,13 @@ export function designClasses(d: DesignTokens): string {
     `ez-light-${d.lightbox.transition}`,
     d.lightbox.zoom ? 'ez-lbzoom' : '',
     `ez-cap-${d.gallery.caption}`,
+    `ez-card-${d.gallery.cardStyle}`,
+    `ez-cap-detail-${d.gallery.captionDetail}`,
+    `ez-home-${d.home.landing}`,
     `ez-heroalign-${d.hero.align}`,
     `ez-herosize-${d.hero.size}`,
     d.gallery.featureFirst ? 'ez-feature-first' : '',
+    d.gallery.adaptiveSpans ? 'ez-adaptive-spans' : '',
     d.shape.shadows === 'none' ? 'ez-flat' : '',
     d.hero.enabled ? 'ez-hero-on' : 'ez-hero-off',
     d.logo.mode === 'image' ? 'ez-logo-image' : 'ez-logo-text',
@@ -332,32 +357,60 @@ export function allFontsHref(): string {
 }
 
 /**
- * Discipline starter templates — a friendly first question in the wizard. Each
- * maps to a base preset plus a couple of smart defaults for that medium.
+ * Discipline starter templates — the wizard's "what do you make?" question. A
+ * craft only seeds *layout* and the *pages* that medium tends to need; it never
+ * touches styling (color/type/shape). The look comes entirely from the vibe step.
  */
 export const DISCIPLINES: {
   id: string;
   label: string;
-  preset: string;
-  overrides?: Partial<DesignTokens>;
+  overrides?: DesignOverride;
 }[] = [
-  { id: 'painter', label: 'Painter', preset: 'editorial', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'contain', hover: 'zoom' } } },
-  { id: 'photographer', label: 'Photographer', preset: 'minimal', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'contain', hover: 'zoom' } } },
-  { id: 'ceramicist', label: 'Ceramicist / sculptor', preset: 'warm', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'cover', hover: 'lift' } } },
-  { id: 'illustrator', label: 'Illustrator', preset: 'bauhaus', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'contain', hover: 'zoom' } } },
-  { id: 'designer', label: 'Designer', preset: 'bold', overrides: { gallery: { layout: 'grid' }, thumb: { fit: 'cover', hover: 'zoom' } } },
-  { id: 'other', label: 'Something else', preset: 'minimal' },
+  { id: 'painter', label: 'Painter', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'contain', hover: 'zoom' }, pages: { available: true, commissions: true } } },
+  { id: 'photographer', label: 'Photographer', overrides: { gallery: { layout: 'grid' }, thumb: { fit: 'cover', hover: 'zoom' }, pages: { available: true } } },
+  { id: 'ceramicist', label: 'Ceramicist / sculptor', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'cover', hover: 'lift' }, pages: { available: true, commissions: true, shop: true } } },
+  { id: 'illustrator', label: 'Illustrator', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'contain', hover: 'zoom' }, pages: { commissions: true, shop: true } } },
+  { id: 'designer', label: 'Designer', overrides: { gallery: { layout: 'grid' }, thumb: { fit: 'cover', hover: 'zoom' }, pages: { commissions: true } } },
+  { id: 'other', label: 'Something else', overrides: {} },
 ];
 
-/** Resolve a discipline id into a full token set (preset + its smart defaults). */
-export function disciplineDesign(id: string): DesignTokens {
+/**
+ * Apply a craft to an existing design: reset layout + pages to their defaults,
+ * then layer the craft's seeds on top — so switching crafts doesn't accumulate,
+ * and the current styling is left untouched.
+ */
+export function applyDiscipline(base: DesignTokens, id: string): DesignTokens {
   const disc = DISCIPLINES.find((d) => d.id === id) ?? DISCIPLINES[0];
-  return mergeOver(resolveDesign({ preset: disc.preset }), disc.overrides);
+  const reset: DesignOverride = {
+    gallery: DEFAULT_DESIGN.gallery,
+    thumb: DEFAULT_DESIGN.thumb,
+    nav: DEFAULT_DESIGN.nav,
+    hero: DEFAULT_DESIGN.hero,
+    home: DEFAULT_DESIGN.home,
+    contentWidth: DEFAULT_DESIGN.contentWidth,
+    pages: DEFAULT_DESIGN.pages,
+  };
+  return mergeOver(mergeOver(base, reset), disc.overrides);
+}
+
+/**
+ * Apply a vibe to an existing design: take the preset's full look — styling *and*
+ * its layout — keeping only the pages the craft step chose (the one thing a vibe
+ * shouldn't decide).
+ */
+export function applyVibe(base: DesignTokens, preset: string): DesignTokens {
+  const p = resolveDesign({ preset });
+  return { ...p, pages: base.pages };
 }
 
 /** Vibes — the wizard's first question + the Design tab gallery. Each maps to a preset. */
 export const VIBES: { preset: string; label: string; blurb: string }[] = [
   { preset: 'minimal', label: 'Minimal & quiet', blurb: 'Clean, lots of space' },
+  { preset: 'gallerywall', label: 'Gallery wall', blurb: 'Bare grid, title-only tags' },
+  { preset: 'seamless', label: 'Seamless', blurb: 'Edge-to-edge, hover captions' },
+  { preset: 'salon', label: 'Salon', blurb: 'Wide pieces span two columns' },
+  { preset: 'monograph', label: 'Monograph', blurb: 'Your story is the homepage' },
+  { preset: 'spotlight', label: 'Spotlight', blurb: 'One dramatic piece per row' },
   { preset: 'editorial', label: 'Editorial', blurb: 'Serif type, gallery feel' },
   { preset: 'classic', label: 'Classic serif', blurb: 'Elegant, timeless' },
   { preset: 'newsprint', label: 'Newsprint', blurb: 'Cream paper, ink type' },
@@ -434,7 +487,7 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       shape: { radius: 0, borderWidth: 3, shadows: 'hard' },
       density: 'normal',
       thumb: { fit: 'cover', hover: 'zoom' },
-      gallery: { layout: 'grid' },
+      gallery: { layout: 'grid', adaptiveSpans: true },
     }),
   },
   noir: {
@@ -445,8 +498,8 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Archivo', bodyFont: 'Inter', headingWeight: 800, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: -0.02 },
       shape: { radius: 0, borderWidth: 2, shadows: 'none' },
       density: 'normal',
-      thumb: { fit: 'contain', hover: 'zoom' },
-      gallery: { layout: 'masonry' },
+      thumb: { fit: 'cover', hover: 'none' },
+      gallery: { layout: 'grid', gutter: 'tight', cardStyle: 'bare', captionDetail: 'minimal' },
     }),
   },
   pastel: {
@@ -565,7 +618,7 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       shape: { radius: 0, borderWidth: 3, shadows: 'hard' },
       density: 'compact',
       thumb: { fit: 'cover', hover: 'zoom' },
-      gallery: { layout: 'grid' },
+      gallery: { layout: 'grid', gutter: 'none' },
     }),
   },
   classic: {
@@ -576,6 +629,77 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Cormorant Garamond', bodyFont: 'EB Garamond', headingWeight: 600, bodyWeight: 400, baseSize: 19, headingTransform: 'none', letterSpacing: 0 },
       shape: { radius: 2, borderWidth: 1, shadows: 'none' },
       density: 'airy',
+    }),
+  },
+  // Bare, even grid of square crops with title-only tags — the work carries the page.
+  gallerywall: {
+    label: 'Gallery wall',
+    design: withDefaults({
+      preset: 'gallerywall',
+      color: { background: '#ffffff', surface: '#ffffff', text: '#171717', muted: '#9b9b9b', accent: '#171717', accent2: '#a33a2f', border: '#ececec' },
+      type: { headingFont: 'Inter', bodyFont: 'Inter', headingWeight: 500, bodyWeight: 400, baseSize: 16, headingTransform: 'none', letterSpacing: -0.01 },
+      shape: { radius: 0, borderWidth: 1, shadows: 'none' },
+      density: 'airy',
+      contentWidth: 'wide',
+      nav: { layout: 'top' },
+      thumb: { fit: 'cover', hover: 'none' },
+      gallery: { layout: 'grid', size: 'medium', gutter: 'tight', caption: 'below', cardStyle: 'bare', captionDetail: 'minimal' },
+    }),
+  },
+  // Edge-to-edge grid, no gaps; details slide up only on hover. Stark and immersive.
+  seamless: {
+    label: 'Seamless',
+    design: withDefaults({
+      preset: 'seamless',
+      color: { background: '#ffffff', surface: '#ffffff', text: '#0a0a0a', muted: '#737373', accent: '#0a0a0a', accent2: '#ff3b30', border: '#0a0a0a' },
+      type: { headingFont: 'Archivo', bodyFont: 'Inter', headingWeight: 700, bodyWeight: 400, baseSize: 16, headingTransform: 'none', letterSpacing: -0.02 },
+      shape: { radius: 0, borderWidth: 1, shadows: 'none' },
+      density: 'compact',
+      contentWidth: 'wide',
+      nav: { layout: 'top' },
+      thumb: { fit: 'cover', hover: 'none' },
+      gallery: { layout: 'grid', size: 'large', gutter: 'none', caption: 'hover', cardStyle: 'bare', captionDetail: 'full' },
+    }),
+  },
+  // Mixed-orientation hang: wide pieces span two columns, portraits sit one across.
+  salon: {
+    label: 'Salon',
+    design: withDefaults({
+      preset: 'salon',
+      color: { background: '#f7f4ef', surface: '#ffffff', text: '#1f1d1a', muted: '#7c766c', accent: '#3a4a5a', accent2: '#9a3b2e', border: '#1f1d1a' },
+      type: { headingFont: 'Fraunces', bodyFont: 'Hanken Grotesk', headingWeight: 500, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 0, borderWidth: 1, shadows: 'none' },
+      density: 'normal',
+      thumb: { fit: 'contain', hover: 'lift' },
+      gallery: { layout: 'grid', size: 'medium', gutter: 'loose', caption: 'below', captionDetail: 'minimal', adaptiveSpans: true },
+    }),
+  },
+  // Your story leads: the about page is the landing, work lives one click away.
+  monograph: {
+    label: 'Monograph',
+    design: withDefaults({
+      preset: 'monograph',
+      color: { background: '#faf8f4', surface: '#ffffff', text: '#201d1a', muted: '#7b7568', accent: '#9a3b2e', accent2: '#2f6f5e', border: '#ddd6c9' },
+      type: { headingFont: 'Cormorant Garamond', bodyFont: 'EB Garamond', headingWeight: 600, bodyWeight: 400, baseSize: 19, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 0, borderWidth: 1, shadows: 'none' },
+      density: 'airy',
+      nav: { layout: 'top' },
+      home: { landing: 'about' },
+      gallery: { layout: 'masonry', caption: 'below' },
+    }),
+  },
+  // One dramatic piece per row, centered in a dark room with a big title up top.
+  spotlight: {
+    label: 'Spotlight',
+    design: withDefaults({
+      preset: 'spotlight',
+      color: { background: '#101010', surface: '#161616', text: '#f0f0f0', muted: '#8a8a8a', accent: '#e8e2d4', accent2: '#c2643f', border: '#2a2a2a' },
+      type: { headingFont: 'Spectral', bodyFont: 'Spectral', headingWeight: 600, bodyWeight: 400, baseSize: 18, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 0, borderWidth: 1, shadows: 'none' },
+      density: 'normal',
+      thumb: { fit: 'contain', hover: 'none' },
+      gallery: { layout: 'cinematic', size: 'large', caption: 'below', captionDetail: 'minimal' },
+      hero: { enabled: true, align: 'center', size: 'large' },
     }),
   },
 };

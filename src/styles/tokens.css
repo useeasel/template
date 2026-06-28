@@ -326,6 +326,11 @@ img {
 /* Structural toggles driven by root classes (so the editor previews them live). */
 :root.ez-hero-off .ez-hero { display: none; }
 
+/* Landing route: '/' shows the work gallery (default) or the about intro. The index
+   page renders both blocks; this picks which one is visible (so it previews live). */
+:root.ez-home-work .ez-home-about-intro { display: none; }
+:root.ez-home-about .ez-home-gallery { display: none; }
+
 /* Gallery layout: even grid vs masonry, column count from --ez-columns. Keyed on
    the root class so the editor can toggle it live. */
 /* Columns auto-fit to the window based on the chosen item size (--ez-item-min);
@@ -346,6 +351,11 @@ img {
 }
 /* Feature the first piece: span two columns in grid mode. */
 :root.ez-feature-first.ez-layout-grid .ez-portfolio > :first-child {
+  grid-column: span 2;
+}
+/* Adaptive spans: in the even grid, landscape pieces take two columns (portrait
+   stays one). Orientation comes from data-orientation on each card. */
+:root.ez-adaptive-spans.ez-layout-grid .ez-portfolio > [data-orientation='landscape'] {
   grid-column: span 2;
 }
 
@@ -380,6 +390,16 @@ img {
   margin-inline: auto;
   width: 100%;
 }
+
+/* Bare cards: no frame — naked image with text sitting directly on the page. */
+:root.ez-card-bare .ez-artcard { background: none; border: 0; border-radius: 0; }
+:root.ez-card-bare .ez-artcard__trigger { border-bottom: 0; border-radius: 0; background: none; }
+:root.ez-card-bare .ez-artcard__body { padding-inline: 0; padding-bottom: 0; }
+
+/* Minimal caption: show the title only, drop the meta line, status pill, and price. */
+:root.ez-cap-detail-minimal .ez-artcard__meta,
+:root.ez-cap-detail-minimal .ez-artcard__price,
+:root.ez-cap-detail-minimal .ez-artcard__head .ez-pill { display: none; }
 
 /* Caption display: under the image (default), reveal on hover, or hidden. */
 :root.ez-cap-hidden .ez-artcard__body { display: none; }

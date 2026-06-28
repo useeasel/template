@@ -2,7 +2,7 @@
   import type { GitHub } from '../lib/github';
   import type { Settings } from '../lib/content';
   import { loadSettings, saveSettings } from '../lib/store';
-  import { VIBES, DISCIPLINES, disciplineDesign, SUGGESTED_FONTS, resolveDesign, type DesignTokens } from '../../lib/design';
+  import { VIBES, DISCIPLINES, applyDiscipline, applyVibe, SUGGESTED_FONTS, resolveDesign, type DesignTokens } from '../../lib/design';
   import LivePreview from './LivePreview.svelte';
   import FontPicker from './FontPicker.svelte';
   import ContrastNotice from './ContrastNotice.svelte';
@@ -38,11 +38,13 @@
 
   function pickCraft(id: string) {
     craft = id;
-    d = disciplineDesign(id);
+    // Craft seeds layout + default pages only; the current styling is preserved.
+    d = applyDiscipline(d, id);
   }
 
   function pickVibe(preset: string) {
-    d = resolveDesign({ preset });
+    // Vibe sets the look (color/type/shape/…) but keeps the craft's layout + pages.
+    d = applyVibe(d, preset);
   }
 
   function next() { if (step < STEPS.length - 1) step += 1; }
@@ -90,7 +92,7 @@
         {/if}
       {:else if step === 1}
         <h1>What do you make?</h1>
-        <p class="ez-help">We'll start you with a layout that suits your work. You can change everything next.</p>
+        <p class="ez-help">We'll set up a layout and the pages your work tends to need — your colors and type come next.</p>
         <div class="ez-wiz__grid">
           {#each DISCIPLINES as c (c.id)}
             <button class="ez-wiz__card" class:ez-wiz__card--on={craft === c.id} onclick={() => pickCraft(c.id)}>
