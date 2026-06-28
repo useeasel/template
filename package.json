@@ -14,8 +14,6 @@
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.2.1",
     "@astrojs/svelte": "^7.0.0",
-    "@fontsource-variable/hanken-grotesk": "^5.2.8",
-    "@fontsource-variable/jost": "^5.2.8",
     "@fontsource/jost": "^5.2.8",
     "@resvg/resvg-js": "^2.6.2",
     "astro": "^5.1.0",
@@ -27,5 +25,9 @@
     "satori": "^0.26.0",
     "sharp": "^0.33.5",
     "svelte": "^5.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "typescript": "^5.9.3"
   }
 }
