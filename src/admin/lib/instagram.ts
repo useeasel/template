@@ -19,7 +19,6 @@ export interface ImportedItem {
 }
 
 const IMG_RE = /\.(jpe?g|png|webp|gif|heic)$/i;
-const JSON_RE = /\.json$/i;
 // Posts live in files like content/posts_1.json, your_instagram_activity/media/
 // posts_1.json, etc. Match the family without pinning one layout.
 const POSTS_JSON_RE = /posts.*\.json$/i;
@@ -96,7 +95,7 @@ export async function parseInstagramExport(zipFile: File): Promise<ImportedItem[
   // Pass 1: gather caption/date metadata from every posts JSON we can find.
   const meta = new Map<string, PostMeta>();
   const jsonEntries = Object.values(zip.files).filter(
-    (f) => !f.dir && JSON_RE.test(f.name) && POSTS_JSON_RE.test(f.name),
+    (f) => !f.dir && POSTS_JSON_RE.test(f.name),
   );
   for (const entry of jsonEntries) {
     try {

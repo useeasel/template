@@ -230,11 +230,6 @@ export function googleFontsHref(d: DesignTokens): string {
   return `https://fonts.googleapis.com/css2?${families}&display=swap`;
 }
 
-/**
- * One comprehensive, alphabetized font list, offered for both heading and body so
- * every font any preset uses is always pickable. (All on Google Fonts.) If a new
- * preset introduces a font, add it here too — `assertPresetFontsListed` guards it.
- */
 // ---------- Contrast (readability) checks ----------
 
 function hexToRgb(hex: string): [number, number, number] | null {
@@ -314,6 +309,11 @@ export function contrastIssues(d: DesignTokens): ContrastIssue[] {
     .filter((ch) => ch.ratio < ch.min);
 }
 
+/**
+ * One comprehensive, alphabetized font list, offered for both heading and body so
+ * every font any preset uses is always pickable. (All on Google Fonts.) If a new
+ * preset introduces a font, add it here too.
+ */
 export const FONTS = [
   'Anton', 'Archivo', 'Atkinson Hyperlegible', 'Bebas Neue', 'Bricolage Grotesque',
   'Cormorant Garamond', 'DM Serif Display', 'EB Garamond', 'Fraunces', 'Hanken Grotesk',

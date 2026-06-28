@@ -29,7 +29,9 @@
   let seriesList = $state<Series[]>([]);
   let errorMsg = $state('');
   let authBaseUrl = $state('');
-  let siteUrl = $state('/');
+  // No published-URL source exists client-side (config.host is a provider id like
+  // "netlify", not a URL), so "view your site" links resolve to the site root.
+  const siteUrl = '/';
   let designEmpty = $state(false);
 
   let demo = $state(false);
@@ -47,7 +49,7 @@
 
   // The shared editor shell (save/dirty/guard/publish-status). Created once and
   // provided to every section view via context.
-  const shell = createShell(notify, { demo: false });
+  const shell = createShell(notify);
   provideShell(shell);
 
   let config: {

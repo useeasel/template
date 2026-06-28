@@ -35,11 +35,11 @@ type Notify = (msg: string, kind?: 'info' | 'error') => void;
 
 const KEY = Symbol('easel-shell');
 
-export function createShell(notify: Notify, opts: { demo?: boolean } = {}) {
+export function createShell(notify: Notify) {
   // The publishing window: how long we optimistically say "your site is
-  // updating" after a successful commit. Demo commits are instant, so we keep it
-  // short there just to let the chip visibly cycle back to "live".
-  let publishMs = opts.demo ? 2500 : 75000;
+  // updating" after a successful commit. Demo mode shortens this via demoTiming()
+  // once the editor knows it's running against the sample dataset.
+  let publishMs = 75000;
 
   // $state.raw: we only ever reassign `active` (never mutate its fields), and we
   // compare it by identity in the unregister cleanup — a deep proxy would break

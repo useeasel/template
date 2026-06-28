@@ -18,7 +18,6 @@ const palette = {
   yellow: '#F4C20D',
   ink: '#161616',
   paper: '#F7F4EC',
-  white: '#FFFFFF',
   stone: '#6B6B63',
 };
 

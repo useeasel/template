@@ -81,7 +81,6 @@
     const pick = ids[Math.floor(Math.random() * ids.length)];
     const base = resolveDesign({ preset: pick });
     const hue = Math.floor(Math.random() * 360);
-    base.color.accent = `hsl(${hue} 70% 45%)`;
     base.shape.radius = [0, 0, 6, 16][Math.floor(Math.random() * 4)];
     base.nav.layout = Math.random() > 0.5 ? 'side' : 'top';
     // type=color needs hex; convert via a canvas-free quick hsl→hex.

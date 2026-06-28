@@ -54,19 +54,6 @@
 }
 .ez-brand { display: flex; align-items: center; gap: var(--ez-space-2); }
 .ez-brand strong { font-family: var(--ez-font-display); font-size: var(--ez-text-xl); }
-.ez-nav { display: flex; gap: var(--ez-space-1); flex: 1; }
-.ez-navbtn {
-  font-family: var(--ez-font-display);
-  font-weight: 700;
-  font-size: var(--ez-text-base);
-  background: transparent;
-  border: var(--ez-border-width) solid transparent;
-  padding: var(--ez-space-2) var(--ez-space-4);
-  cursor: pointer;
-  color: var(--ez-ink);
-}
-.ez-navbtn--on { background: var(--ez-ink); color: var(--ez-white); }
-.ez-topbar__right { display: flex; align-items: center; gap: var(--ez-space-3); }
 .ez-who { font-size: var(--ez-text-sm); color: var(--ez-stone); }
 
 /* Main column */
@@ -265,8 +252,6 @@
 
 /* Bare top bar for the pre-app states (loading / sign-in / error). */
 .ez-topbar--bare { justify-content: flex-start; }
-.ez-brand { display: flex; align-items: center; gap: var(--ez-space-2); }
-.ez-brand strong { font-family: var(--ez-font-display); font-size: var(--ez-text-xl); }
 
 /* Sidebar (desktop: sticky rail; mobile: off-canvas drawer) */
 .ez-side {

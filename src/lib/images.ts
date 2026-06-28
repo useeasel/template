@@ -16,6 +16,3 @@ export function cardSizes(columns: number): string {
   const pct = Math.round(100 / Math.max(1, columns));
   return `(max-width: 640px) 100vw, ${pct}vw`;
 }
-
-/** Quality used for build-time JPEG/WebP encoding. */
-export const IMAGE_QUALITY = 80;

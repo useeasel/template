@@ -73,7 +73,6 @@ const isActive = (href: string) => {
   .ez-nav__link { font-family: var(--ez-font-display); font-weight: 700; text-decoration: none; color: var(--ez-ink); padding-bottom: 2px; border-bottom: var(--ez-border-width) solid transparent; }
   .ez-nav__link:hover { border-bottom-color: var(--ez-ink); }
   .ez-nav__link.is-active { border-bottom-color: var(--ez-blue); color: var(--ez-blue); }
-  .ez-nav__tools { display: flex; align-items: center; }
 
   /* Pagefind search box — themed to the artist's design tokens. */
   .ez-nav__search {
@@ -120,7 +119,6 @@ const isActive = (href: string) => {
   :global(html.ez-nav-top) .ez-nav { position: relative; }
   :global(html.ez-nav-top) .ez-nav__inner { flex-direction: column; align-items: center; gap: var(--ez-space-3); text-align: center; }
   :global(html.ez-nav-top) .ez-nav__brand { margin-right: 0; }
-  :global(html.ez-nav-top) .ez-nav__tools { position: absolute; right: var(--ez-space-5); top: var(--ez-space-4); }
 
   @media (max-width: 640px) {
     .ez-nav__inner { gap: var(--ez-space-3); }
