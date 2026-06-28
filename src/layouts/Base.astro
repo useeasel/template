@@ -104,16 +104,13 @@ const rssHref = design.pages.news ? withBase('/rss.xml') : undefined;
       })();
     </script>
 
-    {/* Privacy-friendly analytics (Cloudflare Web Analytics) — one token, no cookies. */}
-    {settings.cfAnalyticsToken && (
-      <script
-        is:inline
-        defer
-        src="https://static.cloudflareinsights.com/beacon.min.js"
-        data-cf-beacon={`{"token": "${settings.cfAnalyticsToken}"}`}
-      ></script>
-    )}
     <Analytics provider={settings.analyticsProvider} id={settings.analyticsId} host={settings.analyticsHost} />
+    {/* Legacy Cloudflare token (predates the provider picker). Routed through the
+        same component so the beacon markup lives in one place; skipped when the
+        provider is already Cloudflare so the beacon can't double-fire. */}
+    {settings.cfAnalyticsToken && settings.analyticsProvider !== 'cloudflare' && (
+      <Analytics provider="cloudflare" id={settings.cfAnalyticsToken} />
+    )}
     {settings.analyticsSnippet && <Fragment set:html={settings.analyticsSnippet} />}
     {settings.customCss && <style set:html={settings.customCss}></style>}
 
