@@ -56,6 +56,18 @@ const faviconHref =
 
 // RSS feed for News — only advertised (head + footer) when the News page is on.
 const rssHref = design.pages.news ? withBase('/rss.xml') : undefined;
+
+// "Available for work" banner. Off by default; missing settings read as off, so
+// existing sites are unchanged on update. The CTA falls back to the Commissions
+// page when it's enabled, otherwise Contact. An external URL (http/mailto) is used
+// as-is; anything else is treated as an internal path.
+const availableForWork = settings.availableForWork === true;
+const availableForWorkText = settings.availableForWorkText?.trim() || 'Available for work';
+const rawCta = settings.availableForWorkCta?.trim();
+const defaultCta = design.pages.commissions ? '/commissions/' : '/contact/';
+const ctaTarget = rawCta || defaultCta;
+const ctaIsExternal = /^(https?:|mailto:)/i.test(ctaTarget);
+const availableForWorkCta = ctaIsExternal ? ctaTarget : withBase(ctaTarget);
 ---
 
 <!doctype html>
@@ -148,6 +160,14 @@ const rssHref = design.pages.news ? withBase('/rss.xml') : undefined;
 
     <Nav logoText={settings.logoText} logo={design.logo} search={settings.searchEnabled} />
 
+    {availableForWork && (
+      <aside class="ez-available" data-pagefind-ignore aria-label="Availability">
+        <span class="ez-available__dot" aria-hidden="true"></span>
+        <span class="ez-available__text">{availableForWorkText}</span>
+        <a class="ez-available__cta" href={availableForWorkCta} {...(ctaIsExternal ? { rel: 'noopener', target: '_blank' } : {})}>Get in touch</a>
+      </aside>
+    )}
+
     <main id="main" class="ez-main" data-pagefind-body>
       <slot />
     </main>
@@ -203,5 +223,48 @@ const rssHref = design.pages.news ? withBase('/rss.xml') : undefined;
   .ez-main {
     min-height: 50vh;
     padding-block: var(--ez-space-7);
+  }
+
+  /* Slim site-wide "available for work" banner. Sits between the nav and main,
+     styled from design tokens so it inherits the artist's theme (incl. dark). */
+  .ez-available {
+    display: flex;
+    align-items: center;
+    gap: var(--ez-space-3);
+    flex-wrap: wrap;
+    padding: var(--ez-space-3) var(--ez-space-5);
+    background: var(--ez-blue);
+    color: var(--ez-pill-available-text);
+    font-size: 0.95rem;
+    border-bottom: var(--ez-border-width) solid var(--ez-border);
+  }
+  .ez-available__dot {
+    width: 0.55em;
+    height: 0.55em;
+    border-radius: 50%;
+    background: currentColor;
+    flex: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ez-available__dot {
+      animation: ez-available-pulse 2.4s ease-in-out infinite;
+    }
+  }
+  @keyframes ez-available-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  .ez-available__text {
+    font-weight: 600;
+  }
+  .ez-available__cta {
+    margin-inline-start: auto;
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .ez-available__cta:hover {
+    text-decoration: none;
   }
 </style>

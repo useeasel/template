@@ -242,6 +242,21 @@
           <span class="ez-toggle__label">Show Buy / Inquire buttons on pieces for sale</span>
           <span class="ez-help">Pieces with a Buy / shop link get a <strong>Buy</strong> button; the rest get an <strong>Inquire</strong> button that opens your contact form with the piece's title filled in. Set each piece's link and availability under Work.</span></span>
         <input type="checkbox" class="ez-switch" bind:checked={s.sellEnabled} /></label>
+
+      <label class="ez-toggle"><span class="ez-toggle__text">
+          <span class="ez-toggle__label">Show an "available for work" banner</span>
+          <span class="ez-help">A slim bar across the top of every page that tells visitors you're taking on work. Off by default.</span></span>
+        <input type="checkbox" class="ez-switch" bind:checked={s.availableForWork} /></label>
+      {#if s.availableForWork}
+        <div class="ez-reveal">
+          <label class="ez-field"><span class="ez-label">Banner text</span>
+            <input class="ez-input" bind:value={s.availableForWorkText} placeholder="Open for commissions this fall" />
+            <span class="ez-help">Leave blank for a simple "Available for work".</span></label>
+          <label class="ez-field"><span class="ez-label">Button goes to</span>
+            <input class="ez-input" bind:value={s.availableForWorkCta} placeholder="/commissions/" />
+            <span class="ez-help">A page on your site (like <strong>/commissions/</strong>) or a full web address. Leave blank to send people to your commissions or contact page.</span></label>
+        </div>
+      {/if}
     </section>
 
     <section class="ez-group">

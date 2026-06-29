@@ -285,6 +285,11 @@ const site = defineCollection({
     // (Buy when the piece carries a buyLink, otherwise a prefilled contact link).
     // Off by default, so existing sites are unchanged until the artist opts in.
     sellEnabled: z.boolean().default(false),
+    // A site-wide "open to work / commissions" banner. Off by default so existing
+    // sites are unaffected on update. CTA points wherever the artist takes inquiries.
+    availableForWork: z.boolean().default(false),
+    availableForWorkText: z.string().optional(), // e.g. "Open for commissions this fall"
+    availableForWorkCta: z.string().optional(), // internal path or external URL
     // Newsletter signup. When enabled, a signup block renders on the contact page.
     newsletterEnabled: z.boolean().default(false),
     newsletterHeading: z.string().optional(),
