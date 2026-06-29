@@ -180,6 +180,10 @@ export interface Settings {
   analyticsHost?: string;
   analyticsSnippet?: string;
   sellEnabled?: boolean;
+  /** Site-wide "available for work" banner. Off by default. */
+  availableForWork?: boolean;
+  availableForWorkText?: string;
+  availableForWorkCta?: string;
   newsletterEnabled?: boolean;
   newsletterHeading?: string;
   newsletterBlurb?: string;
