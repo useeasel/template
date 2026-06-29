@@ -2,10 +2,11 @@
   import type { GitHub } from '../lib/github';
   import type { Settings } from '../lib/content';
   import { loadSettings, saveSettings } from '../lib/store';
-  import { VIBES, DISCIPLINES, applyDiscipline, applyVibe, SUGGESTED_FONTS, resolveDesign, type DesignTokens } from '../../lib/design';
+  import { DISCIPLINES, applyDiscipline, SUGGESTED_FONTS, resolveDesign, type DesignTokens } from '../../lib/design';
   import LivePreview from './LivePreview.svelte';
   import FontPicker from './FontPicker.svelte';
   import ContrastNotice from './ContrastNotice.svelte';
+  import PresetGallery from './PresetGallery.svelte';
   import GessoMark from '../GessoMark.svelte';
 
   let {
@@ -20,6 +21,7 @@
 
   let s = $state<Settings | null>(null);
   let d = $state<DesignTokens>(resolveDesign(undefined));
+  let previewD = $state<DesignTokens | null>(null);
   let step = $state(0);
   let saving = $state(false);
 
@@ -43,13 +45,8 @@
     d = applyDiscipline(d, id);
   }
 
-  function pickVibe(preset: string) {
-    // Vibe sets the look (color/type/shape/…) but keeps the craft's layout + pages.
-    d = applyVibe(d, preset);
-  }
-
-  function next() { if (step < STEPS.length - 1) step += 1; }
-  function back() { if (step > 0) step -= 1; }
+  function next() { if (step < STEPS.length - 1) step += 1; previewD = null; }
+  function back() { if (step > 0) step -= 1; previewD = null; }
 
   async function finish() {
     if (!s) return;
@@ -103,15 +100,12 @@
         </div>
       {:else if step === 2}
         <h1>What's the vibe?</h1>
-        <p class="ez-help">Pick the feeling you're after. You can fine-tune everything next.</p>
-        <div class="ez-wiz__grid">
-          {#each VIBES as v (v.preset)}
-            <button class="ez-wiz__card" class:ez-wiz__card--on={d.preset === v.preset} onclick={() => pickVibe(v.preset)}>
-              <span class="ez-wiz__card-title">{v.label}</span>
-              <span class="ez-help">{v.blurb}</span>
-            </button>
-          {/each}
-        </div>
+        <p class="ez-help">Hover any style to try it on. Click to keep it. You can fine-tune everything next.</p>
+        <PresetGallery
+          design={d}
+          onConfirm={(next) => (d = next)}
+          onPreview={(p) => (previewD = p)}
+        />
       {:else if step === 3}
         <h1>Choose your type</h1>
         <label class="ez-field"><span class="ez-label">Heading font</span>
@@ -172,7 +166,7 @@
     </div>
 
     <div class="ez-wiz__preview">
-      <LivePreview design={d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline, footerText: d.footer.text }} filler />
+      <LivePreview design={step === 2 && previewD ? previewD : d} content={{ logoText: s?.logoText, siteTitle: s?.siteTitle, tagline: s?.tagline, footerText: d.footer.text }} filler />
     </div>
   </div>
 

@@ -171,8 +171,48 @@
 .ez-preview__bar { display: flex; justify-content: space-between; align-items: center; padding: var(--ez-space-2) var(--ez-space-3); border-bottom: var(--ez-border-width) solid var(--ez-border); }
 .ez-preview__vp { display: flex; gap: var(--ez-space-2); }
 .ez-preview__stage { height: 72vh; overflow: hidden; background: var(--ez-paper); display: flex; justify-content: center; }
-.ez-preview__stage iframe { width: 100%; height: 100%; border: 0; }
+.ez-preview__stage iframe { width: 100%; height: 100%; border: 0; transition: opacity 140ms ease; }
 .ez-preview__stage--mobile iframe { width: 390px; max-width: 100%; }
+/* Light cross-fade while a new design is applied, so structural swaps don't snap. */
+.ez-preview__stage--swapping iframe { opacity: 0.55; }
+
+/* Preset gallery — glance-able swatches; hover previews, click confirms. The grid has
+   no gap and each button is padded instead, so neighbouring hit areas tile edge to edge
+   (no dead space to fall through while moving between presets). The negative margin pulls
+   the perimeter padding back so cards still sit flush with the block. */
+.ez-presetgrid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0;
+  margin: calc(var(--ez-space-3) / -2);
+}
+.ez-presetcard {
+  display: block; padding: calc(var(--ez-space-3) / 2);
+  border: 0; background: none; color: var(--ez-ink); cursor: pointer; text-align: left;
+  font: inherit;
+}
+.ez-presetcard__inner {
+  display: flex; flex-direction: column; gap: var(--ez-space-1); height: 100%;
+  border: var(--ez-border-width) solid var(--ez-border); border-radius: var(--ez-radius);
+  background: var(--ez-white); overflow: hidden;
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+.ez-presetgrid--hoverable .ez-presetcard:hover .ez-presetcard__inner,
+.ez-presetcard--previewing .ez-presetcard__inner { transform: translateY(-2px); box-shadow: var(--ez-shadow-soft, 0 6px 18px rgba(0,0,0,0.12)); }
+.ez-presetcard--selected .ez-presetcard__inner { border-color: var(--ez-blue); box-shadow: 0 0 0 2px var(--ez-blue) inset; }
+.ez-presetcard:focus-visible .ez-presetcard__inner { outline: 2px solid var(--ez-blue); outline-offset: 2px; }
+.ez-presetcard__swatch {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  height: 76px; margin: var(--ez-space-2); overflow: hidden;
+}
+.ez-presetcard__tile { display: flex; align-items: center; justify-content: center; width: 70%; height: 64%; }
+.ez-presetcard__aa { font-size: 1.6rem; line-height: 1; }
+.ez-presetcard__dots { position: absolute; left: 8px; bottom: 6px; display: flex; gap: 4px; }
+.ez-presetcard__dots i { width: 9px; height: 9px; border-radius: 50%; display: block; box-shadow: 0 0 0 1px rgba(127,127,127,0.25); }
+.ez-presetcard__check {
+  position: absolute; top: 5px; right: 6px; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--ez-blue); color: #fff; font-size: 11px; line-height: 18px; text-align: center; font-weight: 700;
+}
+.ez-presetcard__label { font-family: var(--ez-font-display); font-weight: 700; font-size: var(--ez-text-sm); padding: 0 var(--ez-space-3); }
+.ez-presetcard__blurb { padding: 0 var(--ez-space-3) var(--ez-space-3); }
 .ez-colorgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: var(--ez-space-3); }
 .ez-color { display: flex; align-items: center; gap: var(--ez-space-2); font-size: var(--ez-text-sm); }
 .ez-color input[type='color'] { width: 36px; height: 36px; padding: 0; border: var(--ez-border-width) solid var(--ez-border); background: none; cursor: pointer; flex: none; }
@@ -418,6 +458,10 @@
 .ez-switch:focus-visible { outline: 3px solid var(--ez-blue); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   .ez-switch, .ez-switch::after { transition: none; }
+  .ez-preview__stage iframe,
+  .ez-presetcard__inner { transition: none; }
+  .ez-presetgrid--hoverable .ez-presetcard:hover .ez-presetcard__inner,
+  .ez-presetcard--previewing .ez-presetcard__inner { transform: none; }
 }
 
 /* A labelled on/off row: text on the left, switch pinned right. */

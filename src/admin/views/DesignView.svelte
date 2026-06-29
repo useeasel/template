@@ -139,12 +139,6 @@
   <div class="ez-design">
     <div class="ez-design__controls">
       <section class="ez-block">
-        <strong>Start fresh</strong>
-        <p class="ez-help">The style wizard walks you through a whole look in about a minute. Or just tweak the details below.</p>
-        <button class="ez-btn ez-btn--primary" onclick={onWizard}>Open the style wizard</button>
-      </section>
-
-      <section class="ez-block">
         <strong>Colors</strong>
         <div class="ez-colorgrid">
           {#each COLORS as c (c.key)}
@@ -316,6 +310,12 @@
         <label class="ez-field ez-field--check"><input type="checkbox" bind:checked={d.footer.credit} /><span>Show the "Made with Gesso" credit</span></label>
         <label class="ez-field"><span class="ez-label">Footer text (optional)</span>
           <input class="ez-input" bind:value={d.footer.text} placeholder="e.g. By appointment only" /></label>
+      </section>
+
+      <section class="ez-block">
+        <strong>Start fresh</strong>
+        <p class="ez-help">Want to start over? The style wizard walks you through a whole new look in about a minute.</p>
+        <button class="ez-btn ez-btn--primary" onclick={onWizard}>Open the style wizard</button>
       </section>
     </div>
 

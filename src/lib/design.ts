@@ -418,32 +418,52 @@ export function applyVibe(base: DesignTokens, preset: string): DesignTokens {
   return { ...p, pages: base.pages };
 }
 
-/** Vibes — the wizard's first question + the Design tab gallery. Each maps to a preset. */
+/**
+ * Vibes — the wizard's vibe step + the Design tab preset gallery. Each maps to a preset.
+ * Ordered as a deliberate spectrum (light → warm → cool → playful/bold → cinematic →
+ * dark) so the wall reads as a gradient, not a pile. Keep new presets in their family.
+ */
 export const VIBES: { preset: string; label: string; blurb: string }[] = [
+  // Light & quiet
   { preset: 'minimal', label: 'Minimal & quiet', blurb: 'Clean, lots of space' },
   { preset: 'gallerywall', label: 'Gallery wall', blurb: 'Bare grid, title-only tags' },
   { preset: 'seamless', label: 'Seamless', blurb: 'Edge-to-edge, hover captions' },
-  { preset: 'salon', label: 'Salon', blurb: 'Wide pieces span two columns' },
-  { preset: 'monograph', label: 'Monograph', blurb: 'Your story is the homepage' },
-  { preset: 'spotlight', label: 'Spotlight', blurb: 'One dramatic piece per row' },
   { preset: 'editorial', label: 'Editorial', blurb: 'Serif type, gallery feel' },
   { preset: 'classic', label: 'Classic serif', blurb: 'Elegant, timeless' },
-  { preset: 'newsprint', label: 'Newsprint', blurb: 'Cream paper, ink type' },
+  { preset: 'atelier', label: 'Atelier', blurb: 'Textured cream, fine serif' },
+  // Warm
   { preset: 'warm', label: 'Warm studio', blurb: 'Soft, earthy, rounded' },
   { preset: 'clay', label: 'Clay', blurb: 'Handmade and tactile' },
-  { preset: 'botanical', label: 'Botanical', blurb: 'Greens and naturals' },
   { preset: 'sunset', label: 'Sunset', blurb: 'Warm corals and amber' },
+  { preset: 'newsprint', label: 'Newsprint', blurb: 'Cream paper, ink type' },
+  { preset: 'botanical', label: 'Botanical', blurb: 'Greens and naturals' },
+  // Cool
   { preset: 'ocean', label: 'Ocean', blurb: 'Cool blues and teal' },
+  { preset: 'frost', label: 'Frost', blurb: 'Cool blues and violet' },
   { preset: 'pastel', label: 'Pastel', blurb: 'Soft and gentle' },
+  // Playful & bold
   { preset: 'candy', label: 'Candy', blurb: 'Bright and playful' },
+  { preset: 'fete', label: 'Fête', blurb: 'Playful serif, bright pops' },
   { preset: 'bauhaus', label: 'Playful & geometric', blurb: 'Primaries, hard edges' },
   { preset: 'zine', label: 'Zine', blurb: 'Riso pink + blue' },
+  { preset: 'poster', label: 'Poster', blurb: 'Heavy type, calm canvas' },
   { preset: 'bold', label: 'Bold & graphic', blurb: 'Big type, high impact' },
-  { preset: 'noir', label: 'Noir', blurb: 'Stark black & white' },
+  { preset: 'kinetic', label: 'Kinetic', blurb: 'Snappy, electric, graphic' },
   { preset: 'brutalist', label: 'Brutalist', blurb: 'Raw, heavy, loud' },
+  { preset: 'noir', label: 'Noir', blurb: 'Stark black & white' },
+  // Cinematic & showcase
+  { preset: 'salon', label: 'Salon', blurb: 'Wide pieces span two columns' },
+  { preset: 'monograph', label: 'Monograph', blurb: 'Your story is the homepage' },
+  { preset: 'catalog', label: 'Catalog', blurb: 'Filter chips for lots of work' },
+  { preset: 'marquee', label: 'Marquee', blurb: 'Big type, one per row' },
+  { preset: 'immersive', label: 'Immersive', blurb: 'Edge-to-edge, full screen' },
+  { preset: 'spotlight', label: 'Spotlight', blurb: 'One dramatic piece per row' },
+  // Dark & moody
   { preset: 'dark', label: 'Dark & moody', blurb: 'Low-light, dramatic' },
   { preset: 'midnight', label: 'Midnight', blurb: 'Deep blue night' },
   { preset: 'forest', label: 'Forest', blurb: 'Dark, green, calm' },
+  { preset: 'ember', label: 'Ember', blurb: 'Warm dark, amber glow' },
+  { preset: 'reel', label: 'Reel', blurb: 'Warm cinema, scrolling' },
 ];
 
 /** Theme presets: each is a bundle layered over the defaults. */
@@ -459,6 +479,7 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       density: 'airy',
       thumb: { fit: 'contain', hover: 'none' },
       gallery: { layout: 'masonry' },
+      lightbox: { transition: 'fade', zoom: true },
     }),
   },
   editorial: {
@@ -469,6 +490,8 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Fraunces', bodyFont: 'Lora', headingWeight: 600, bodyWeight: 400, baseSize: 18, headingTransform: 'none', letterSpacing: 0 },
       shape: { radius: 0, borderWidth: 1, shadows: 'none' },
       density: 'airy',
+      readingWidth: 'spacious',
+      lightbox: { transition: 'slide', zoom: false },
     }),
   },
   warm: {
@@ -491,6 +514,7 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Space Grotesk', bodyFont: 'Space Grotesk', headingWeight: 700, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: -0.01 },
       shape: { radius: 4, borderWidth: 1, shadows: 'none' },
       density: 'normal',
+      lightbox: { transition: 'fade', zoom: true },
     }),
   },
   bold: {
@@ -503,6 +527,7 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       density: 'normal',
       thumb: { fit: 'cover', hover: 'zoom' },
       gallery: { layout: 'grid', adaptiveSpans: true },
+      motion: 'rigid',
     }),
   },
   noir: {
@@ -515,6 +540,7 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       density: 'normal',
       thumb: { fit: 'cover', hover: 'none' },
       gallery: { layout: 'grid', gutter: 'tight', cardStyle: 'bare', captionDetail: 'minimal' },
+      lightbox: { transition: 'slide', zoom: false },
     }),
   },
   pastel: {
@@ -536,6 +562,8 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Fraunces', bodyFont: 'Lora', headingWeight: 600, bodyWeight: 400, baseSize: 18, headingTransform: 'none', letterSpacing: 0 },
       shape: { radius: 6, borderWidth: 1, shadows: 'none' },
       density: 'airy',
+      background: { type: 'texture' },
+      hero: { enabled: true, align: 'left', size: 'small' },
     }),
   },
   sunset: {
@@ -557,6 +585,8 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Outfit', bodyFont: 'Inter', headingWeight: 600, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: 0 },
       shape: { radius: 10, borderWidth: 1, shadows: 'none' },
       density: 'normal',
+      thumb: { fit: 'cover', hover: 'lift' },
+      gallery: { layout: 'grid', featureFirst: true },
     }),
   },
   zine: {
@@ -579,6 +609,8 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Playfair Display', bodyFont: 'Lora', headingWeight: 700, bodyWeight: 400, baseSize: 18, headingTransform: 'none', letterSpacing: 0 },
       shape: { radius: 0, borderWidth: 1, shadows: 'none' },
       density: 'airy',
+      background: { type: 'texture' },
+      gallery: { click: 'page' },
     }),
   },
   candy: {
@@ -600,6 +632,8 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Outfit', bodyFont: 'Inter', headingWeight: 700, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: -0.01 },
       shape: { radius: 8, borderWidth: 1, shadows: 'none' },
       density: 'normal',
+      gallery: { featureFirst: true },
+      lightbox: { transition: 'fade', zoom: true },
     }),
   },
   forest: {
@@ -622,6 +656,7 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       density: 'airy',
       thumb: { fit: 'cover', hover: 'lift' },
       gallery: { layout: 'masonry' },
+      background: { type: 'texture' },
     }),
   },
   brutalist: {
@@ -634,6 +669,7 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       density: 'compact',
       thumb: { fit: 'cover', hover: 'zoom' },
       gallery: { layout: 'grid', gutter: 'none' },
+      motion: 'rigid',
     }),
   },
   classic: {
@@ -644,6 +680,8 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       type: { headingFont: 'Cormorant Garamond', bodyFont: 'EB Garamond', headingWeight: 600, bodyWeight: 400, baseSize: 19, headingTransform: 'none', letterSpacing: 0 },
       shape: { radius: 2, borderWidth: 1, shadows: 'none' },
       density: 'airy',
+      readingWidth: 'spacious',
+      lightbox: { transition: 'slide', zoom: false },
     }),
   },
   // Bare, even grid of square crops with title-only tags — the work carries the page.
@@ -715,6 +753,152 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       thumb: { fit: 'contain', hover: 'none' },
       gallery: { layout: 'cinematic', size: 'large', caption: 'below', captionDetail: 'minimal' },
       hero: { enabled: true, align: 'center', size: 'large' },
+      lightbox: { transition: 'slide', zoom: true },
+    }),
+  },
+  // Textured cream with a fine modern serif — a quiet studio look, off the Cormorant path.
+  atelier: {
+    label: 'Atelier',
+    design: withDefaults({
+      preset: 'atelier',
+      color: { background: '#f1ece2', surface: '#fbf8f2', text: '#2b2620', muted: '#837a6c', accent: '#6b5d4f', accent2: '#9c5a3c', border: '#d8cdbb' },
+      type: { headingFont: 'Libre Baskerville', bodyFont: 'Lora', headingWeight: 700, bodyWeight: 400, baseSize: 18, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 4, borderWidth: 1, shadows: 'soft' },
+      density: 'airy',
+      background: { type: 'texture' },
+      thumb: { fit: 'cover', hover: 'lift' },
+      gallery: { layout: 'masonry' },
+    }),
+  },
+  // Cool pastel — the blue-violet answer to warm Pastel. Soft, rounded, gentle.
+  frost: {
+    label: 'Frost',
+    design: withDefaults({
+      preset: 'frost',
+      color: { background: '#f3f5fb', surface: '#ffffff', text: '#29304a', muted: '#7a83a3', accent: '#5a72c8', accent2: '#9a7bd0', border: '#dfe3f0' },
+      type: { headingFont: 'Outfit', bodyFont: 'Nunito Sans', headingWeight: 600, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 18, borderWidth: 1, shadows: 'soft' },
+      density: 'airy',
+      thumb: { fit: 'cover', hover: 'lift' },
+    }),
+  },
+  // Warm dark — deep brown with an amber glow and a subtle grain. The cozy dark mode.
+  ember: {
+    label: 'Ember',
+    design: withDefaults({
+      preset: 'ember',
+      color: { background: '#1a130e', surface: '#241a12', text: '#f3e7d6', muted: '#ac9576', accent: '#e0922f', accent2: '#c75b39', border: '#3a2c1f' },
+      type: { headingFont: 'Fraunces', bodyFont: 'Nunito Sans', headingWeight: 600, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 8, borderWidth: 1, shadows: 'none' },
+      density: 'normal',
+      background: { type: 'texture' },
+      thumb: { fit: 'cover', hover: 'lift' },
+      gallery: { layout: 'masonry' },
+      lightbox: { transition: 'fade', zoom: true },
+    }),
+  },
+  // Heavy display type on a calm, low-contrast canvas — bold without the shout.
+  poster: {
+    label: 'Poster',
+    design: withDefaults({
+      preset: 'poster',
+      color: { background: '#eceae3', surface: '#f6f4ee', text: '#26251f', muted: '#76746a', accent: '#b5462f', accent2: '#2f5747', border: '#cfccc0' },
+      type: { headingFont: 'Archivo', bodyFont: 'Mulish', headingWeight: 800, bodyWeight: 400, baseSize: 18, headingTransform: 'uppercase', letterSpacing: 0 },
+      shape: { radius: 0, borderWidth: 1, shadows: 'none' },
+      density: 'normal',
+      thumb: { fit: 'cover', hover: 'none' },
+      gallery: { layout: 'grid' },
+    }),
+  },
+  // Playful serif with bright pops and rounded corners — friendly and expressive.
+  fete: {
+    label: 'Fête',
+    design: withDefaults({
+      preset: 'fete',
+      color: { background: '#fff8f0', surface: '#ffffff', text: '#3a2230', muted: '#9a7e8c', accent: '#d83b78', accent2: '#f2b134', border: '#3a2230' },
+      type: { headingFont: 'Fraunces', bodyFont: 'Hanken Grotesk', headingWeight: 600, bodyWeight: 400, baseSize: 18, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 16, borderWidth: 2, shadows: 'hard' },
+      density: 'normal',
+      thumb: { fit: 'cover', hover: 'lift' },
+      gallery: { layout: 'masonry' },
+      lightbox: { transition: 'slide', zoom: false },
+    }),
+  },
+  // Snappy, electric, graphic — rigid motion and crops that pop on hover.
+  kinetic: {
+    label: 'Kinetic',
+    design: withDefaults({
+      preset: 'kinetic',
+      color: { background: '#faf9f7', surface: '#ffffff', text: '#14151a', muted: '#6c6e78', accent: '#ff5722', accent2: '#00bcd4', border: '#14151a' },
+      type: { headingFont: 'Space Grotesk', bodyFont: 'Space Grotesk', headingWeight: 700, bodyWeight: 400, baseSize: 17, headingTransform: 'none', letterSpacing: -0.01 },
+      shape: { radius: 4, borderWidth: 2, shadows: 'hard' },
+      density: 'normal',
+      motion: 'rigid',
+      thumb: { fit: 'cover', hover: 'zoom' },
+      gallery: { layout: 'grid', adaptiveSpans: true },
+      lightbox: { transition: 'slide', zoom: false },
+    }),
+  },
+  // For prolific bodies of work: filter chips, a featured lead piece, dedicated pages.
+  catalog: {
+    label: 'Catalog',
+    design: withDefaults({
+      preset: 'catalog',
+      color: { background: '#ffffff', surface: '#ffffff', text: '#1a1a1a', muted: '#777777', accent: '#2b4cff', accent2: '#1a1a1a', border: '#e2e2e2' },
+      type: { headingFont: 'IBM Plex Sans', bodyFont: 'IBM Plex Sans', headingWeight: 600, bodyWeight: 400, baseSize: 16, headingTransform: 'none', letterSpacing: -0.01 },
+      shape: { radius: 2, borderWidth: 1, shadows: 'none' },
+      density: 'compact',
+      contentWidth: 'wide',
+      nav: { layout: 'top' },
+      thumb: { fit: 'cover', hover: 'none' },
+      gallery: { layout: 'grid', size: 'small', gutter: 'tight', caption: 'below', cardStyle: 'card', captionDetail: 'minimal', featureFirst: true, filters: true, click: 'page' },
+    }),
+  },
+  // Edge-to-edge, one piece filling the screen at a time. Captions rise on hover.
+  immersive: {
+    label: 'Immersive',
+    design: withDefaults({
+      preset: 'immersive',
+      color: { background: '#0c0c0d', surface: '#161617', text: '#f4f4f2', muted: '#9a9a96', accent: '#f4f4f2', accent2: '#d8a24a', border: '#2a2a2c' },
+      type: { headingFont: 'Archivo', bodyFont: 'Inter', headingWeight: 700, bodyWeight: 400, baseSize: 16, headingTransform: 'none', letterSpacing: -0.01 },
+      shape: { radius: 0, borderWidth: 0, shadows: 'none' },
+      density: 'compact',
+      contentWidth: 'wide',
+      nav: { layout: 'top' },
+      thumb: { fit: 'cover', hover: 'none' },
+      gallery: { layout: 'fullbleed', size: 'large', gutter: 'none', caption: 'hover', cardStyle: 'bare', captionDetail: 'full' },
+      lightbox: { transition: 'fade', zoom: true },
+    }),
+  },
+  // Bright cinematic — big poster type, vivid primaries, one large piece per row.
+  marquee: {
+    label: 'Marquee',
+    design: withDefaults({
+      preset: 'marquee',
+      color: { background: '#fffef9', surface: '#ffffff', text: '#111014', muted: '#6b6a70', accent: '#ff2d55', accent2: '#1f44ff', border: '#111014' },
+      type: { headingFont: 'Anton', bodyFont: 'Work Sans', headingWeight: 400, bodyWeight: 400, baseSize: 18, headingTransform: 'uppercase', letterSpacing: 0 },
+      shape: { radius: 0, borderWidth: 2, shadows: 'hard' },
+      density: 'normal',
+      contentWidth: 'wide',
+      thumb: { fit: 'cover', hover: 'zoom' },
+      gallery: { layout: 'cinematic', size: 'large', caption: 'below', captionDetail: 'minimal' },
+      hero: { enabled: true, align: 'center', size: 'large' },
+      lightbox: { transition: 'slide', zoom: false },
+    }),
+  },
+  // Warm, scrolling cinema — sepia room, left-aligned title, slides between pieces.
+  reel: {
+    label: 'Reel',
+    design: withDefaults({
+      preset: 'reel',
+      color: { background: '#14110f', surface: '#1d1814', text: '#efe9e1', muted: '#948a7c', accent: '#cf7d4a', accent2: '#6f8f86', border: '#2c2620' },
+      type: { headingFont: 'Spectral', bodyFont: 'Spectral', headingWeight: 600, bodyWeight: 400, baseSize: 18, headingTransform: 'none', letterSpacing: 0 },
+      shape: { radius: 0, borderWidth: 1, shadows: 'none' },
+      density: 'normal',
+      thumb: { fit: 'contain', hover: 'none' },
+      gallery: { layout: 'cinematic', size: 'large', caption: 'below', captionDetail: 'minimal' },
+      hero: { enabled: true, align: 'left', size: 'large' },
+      lightbox: { transition: 'slide', zoom: true },
     }),
   },
 };

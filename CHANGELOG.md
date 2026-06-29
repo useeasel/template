@@ -7,6 +7,17 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.43.0
+
+- **Try a whole look before you pick it.** In the style walkthrough, hover any style to try it
+  on your site, then click to keep it.
+- **Many more styles to choose from**, each with its own personality, from quiet and textured
+  to bright and cinematic.
+- **See every style at a glance.** Each one shows a small preview of its colors and type, so
+  you can browse the whole set without opening them one by one.
+- Your current style stays exactly as it is until you pick a new one, so trying styles on
+  costs you nothing.
+
 ## 0.42.1
 
 - **Your pages line up as you move between them.** Text pages now share a consistent width,

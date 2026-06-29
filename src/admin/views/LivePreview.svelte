@@ -23,6 +23,14 @@
   let iframe: HTMLIFrameElement;
   let loaded = $state(false);
   let viewport = $state<'desktop' | 'mobile'>('desktop');
+  // A brief opacity dip when the design changes, to smooth abrupt structural jumps
+  // (layout/nav swaps can't tween from CSS-variable changes alone). Light by design.
+  let swapping = $state(false);
+  let firstApply = true;
+  let fadeTimer: ReturnType<typeof setTimeout> | undefined;
+  const prefersReduced =
+    typeof window !== 'undefined' &&
+    !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   // The site root, derived from the editor's own URL. On Netlify the editor lives at
   // /admin/ so this is '/'; on a GitHub Pages subpath it's /<repo>/admin/, so the
@@ -178,6 +186,21 @@
     JSON.stringify(content);
     if (loaded) apply();
   });
+
+  // Cross-fade only on design changes (not text edits). Skip the first run, reduced
+  // motion, and the "no animation" design — keep it subtle.
+  $effect(() => {
+    JSON.stringify(design);
+    if (!loaded) return;
+    if (firstApply) {
+      firstApply = false;
+      return;
+    }
+    if (prefersReduced || design.motion === 'none') return;
+    swapping = true;
+    clearTimeout(fadeTimer);
+    fadeTimer = setTimeout(() => (swapping = false), 180);
+  });
 </script>
 
 <div class="ez-preview">
@@ -188,7 +211,11 @@
       <button class="ez-btn ez-btn--sm" class:ez-btn--primary={viewport === 'mobile'} onclick={() => (viewport = 'mobile')}>Mobile</button>
     </div>
   </div>
-  <div class="ez-preview__stage" class:ez-preview__stage--mobile={viewport === 'mobile'}>
+  <div
+    class="ez-preview__stage"
+    class:ez-preview__stage--mobile={viewport === 'mobile'}
+    class:ez-preview__stage--swapping={swapping}
+  >
     <iframe
       bind:this={iframe}
       src={previewSrc}
