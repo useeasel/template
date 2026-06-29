@@ -290,6 +290,18 @@ const site = defineCollection({
     availableForWork: z.boolean().default(false),
     availableForWorkText: z.string().optional(), // e.g. "Open for commissions this fall"
     availableForWorkCta: z.string().optional(), // internal path or external URL
+    // Optional "where to buy" list — outbound stockist links (Etsy, galleries, shops).
+    // The page shows only when pages.stockists is on; empty by default.
+    stockists: z
+      .array(
+        z.object({
+          name: z.string(),
+          url: z.string().url(),
+          location: z.string().optional(),
+          note: z.string().optional(),
+        }),
+      )
+      .default([]),
     // Newsletter signup. When enabled, a signup block renders on the contact page.
     newsletterEnabled: z.boolean().default(false),
     newsletterHeading: z.string().optional(),

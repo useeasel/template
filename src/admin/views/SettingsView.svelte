@@ -257,6 +257,25 @@
             <span class="ez-help">A page on your site (like <strong>/commissions/</strong>) or a full web address. Leave blank to send people to your commissions or contact page.</span></label>
         </div>
       {/if}
+
+      <div class="ez-block">
+        <div class="ez-block__head"><strong>Where to buy</strong>
+          <button class="ez-btn ez-btn--sm" onclick={() => (s.stockists = [...(s.stockists ?? []), { name: '', url: '', location: '', note: '' }])}>Add stockist</button></div>
+        {#each s.stockists ?? [] as shop, i (i)}
+          <div class="ez-row">
+            <input class="ez-input" style="max-width:12rem" bind:value={shop.name} placeholder="Etsy shop" />
+            <input class="ez-input" bind:value={shop.url} placeholder="https://…" />
+            <button class="ez-btn ez-btn--sm" onclick={() => { if (i > 0) { const n = [...s.stockists]; [n[i-1], n[i]] = [n[i], n[i-1]]; s.stockists = n; } }} disabled={i === 0} aria-label="Move up">↑</button>
+            <button class="ez-btn ez-btn--sm" onclick={() => { if (i < s.stockists.length - 1) { const n = [...s.stockists]; [n[i+1], n[i]] = [n[i], n[i+1]]; s.stockists = n; } }} disabled={i === (s.stockists?.length ?? 0) - 1} aria-label="Move down">↓</button>
+            <button class="ez-btn ez-btn--sm ez-btn--ghost" onclick={() => (s.stockists = s.stockists.filter((_, j) => j !== i))} aria-label="Remove">×</button>
+          </div>
+          <div class="ez-row" style="margin:-0.25rem 0 0.5rem">
+            <input class="ez-input" style="max-width:12rem" bind:value={shop.location} placeholder="Location (optional)" />
+            <input class="ez-input" bind:value={shop.note} placeholder="Note (optional)" />
+          </div>
+        {/each}
+        <p class="ez-help">Outbound links to the shops and galleries that carry your work. Turn the <strong>Where to buy</strong> page on in the Menu tab.</p>
+      </div>
     </section>
 
     <section class="ez-group">

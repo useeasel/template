@@ -530,6 +530,7 @@ export async function loadSettings(gh: GitHub): Promise<Settings> {
     newsletterActionUrl: data.newsletterActionUrl,
     newsletterInFooter: !!data.newsletterInFooter,
     newsletterOnWork: !!data.newsletterOnWork,
+    stockists: Array.isArray(data.stockists) ? data.stockists : [],
     customCss: data.customCss,
     customCode: data.customCode,
     design: data.design,

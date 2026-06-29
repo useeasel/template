@@ -174,6 +174,7 @@
     { key: 'presskit', label: 'Press kit', hint: 'A bio and downloadable images for press.' },
     { key: 'commissions', label: 'Commissions', hint: 'Take commission requests.' },
     { key: 'shop', label: 'Shop', hint: 'Sell through a store you embed.' },
+    { key: 'stockists', label: 'Where to buy', hint: 'Outbound links to shops and galleries that carry your work. Edit the list under Settings.' },
   ];
 </script>
 

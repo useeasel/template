@@ -192,6 +192,8 @@ export interface Settings {
   /** Ambient placements of the same signup, off by default. */
   newsletterInFooter?: boolean;
   newsletterOnWork?: boolean;
+  /** "Where to buy" outbound links. Page shows when pages.stockists is on. */
+  stockists?: { name: string; url: string; location?: string; note?: string }[];
   customCss?: string;
   customCode?: string;
   /** Design tokens (theme). Opaque to the editor's basic settings; carried through

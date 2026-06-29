@@ -28,6 +28,7 @@ const links = [
   { href: '/press-kit', label: 'Press kit', key: 'presskit' },
   { href: '/commissions', label: 'Commissions', key: 'commissions' },
   { href: '/shop', label: 'Shop', key: 'shop' },
+  { href: '/stockists', label: 'Where to buy', key: 'stockists' },
   { href: '/contact', label: 'Contact', key: 'contact' },
 ];
 const isActive = (href: string) => {
@@ -117,7 +118,8 @@ const isActive = (href: string) => {
   :global(html.ez-page-available-off) .ez-pagelink-available,
   :global(html.ez-page-presskit-off) .ez-pagelink-presskit,
   :global(html.ez-page-commissions-off) .ez-pagelink-commissions,
-  :global(html.ez-page-shop-off) .ez-pagelink-shop { display: none; }
+  :global(html.ez-page-shop-off) .ez-pagelink-shop,
+  :global(html.ez-page-stockists-off) .ez-pagelink-stockists { display: none; }
 
   /* Landing route: default homepage is the gallery, so the gallery's own /work link
      is redundant. When the homepage is the about intro, swap to the /work link and

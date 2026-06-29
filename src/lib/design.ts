@@ -64,7 +64,7 @@ export interface DesignTokens {
   hero: { enabled: boolean; align: 'left' | 'center'; size: 'small' | 'large' };
   footer: { socials: boolean; credit: boolean; text?: string };
   favicon: { mode: 'initials' | 'image'; image?: string };
-  pages: { about: boolean; contact: boolean; cv: boolean; press: boolean; exhibitions: boolean; news: boolean; available: boolean; presskit: boolean; commissions: boolean; shop: boolean; projects: boolean };
+  pages: { about: boolean; contact: boolean; cv: boolean; press: boolean; exhibitions: boolean; news: boolean; available: boolean; presskit: boolean; commissions: boolean; shop: boolean; projects: boolean; stockists: boolean };
 }
 
 export const DEFAULT_DESIGN: DesignTokens = {
@@ -101,7 +101,7 @@ export const DEFAULT_DESIGN: DesignTokens = {
   hero: { enabled: false, align: 'left', size: 'small' },
   footer: { socials: true, credit: true },
   favicon: { mode: 'initials' },
-  pages: { about: true, contact: true, cv: true, press: true, exhibitions: false, news: false, available: false, presskit: false, commissions: false, shop: false, projects: false },
+  pages: { about: true, contact: true, cv: true, press: true, exhibitions: false, news: false, available: false, presskit: false, commissions: false, shop: false, projects: false, stockists: false },
 };
 
 /**
@@ -206,7 +206,7 @@ export function designVars(d: DesignTokens): string {
 
 /** Root classes that switch structural variants (so they preview live via CSS). */
 export function designClasses(d: DesignTokens): string {
-  const pages = ['about', 'contact', 'cv', 'press', 'exhibitions', 'news', 'available', 'presskit', 'commissions', 'shop', 'projects'] as const;
+  const pages = ['about', 'contact', 'cv', 'press', 'exhibitions', 'news', 'available', 'presskit', 'commissions', 'shop', 'projects', 'stockists'] as const;
   return [
     `ez-nav-${d.nav.layout}`,
     `ez-thumb-${d.thumb.hover}`,
@@ -368,8 +368,8 @@ export const DISCIPLINES: {
 }[] = [
   { id: 'painter', label: 'Painter', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'contain', hover: 'zoom' }, pages: { available: true, commissions: true } } },
   { id: 'photographer', label: 'Photographer', overrides: { gallery: { layout: 'grid' }, thumb: { fit: 'cover', hover: 'zoom' }, pages: { available: true } } },
-  { id: 'ceramicist', label: 'Ceramicist / sculptor', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'cover', hover: 'lift' }, pages: { available: true, commissions: true, shop: true } } },
-  { id: 'illustrator', label: 'Illustrator', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'contain', hover: 'zoom' }, pages: { commissions: true, shop: true } } },
+  { id: 'ceramicist', label: 'Ceramicist / sculptor', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'cover', hover: 'lift' }, pages: { available: true, commissions: true, shop: true, stockists: true } } },
+  { id: 'illustrator', label: 'Illustrator', overrides: { gallery: { layout: 'masonry' }, thumb: { fit: 'contain', hover: 'zoom' }, pages: { commissions: true, shop: true, stockists: true } } },
   { id: 'designer', label: 'Designer', overrides: { gallery: { layout: 'grid' }, thumb: { fit: 'cover', hover: 'zoom' }, pages: { commissions: true, projects: true } } },
   { id: 'other', label: 'Something else', overrides: {} },
 ];

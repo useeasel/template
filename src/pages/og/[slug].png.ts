@@ -24,6 +24,7 @@ export const getStaticPaths = (async () => {
     card('projects', 'Projects', name),
     card('exhibitions', 'Exhibitions', name),
     card('available', 'Available work', name),
+    card('stockists', 'Where to buy', name),
     card('links', name, settings.tagline || 'Links'),
     card('press-kit', 'Press kit', name),
   ];
