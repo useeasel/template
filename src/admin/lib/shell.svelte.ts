@@ -10,8 +10,17 @@
  * which a one-way prop can't express.
  */
 import { getContext, setContext } from 'svelte';
+import { LIVE_TIMING, DEMO_TIMING, type UpdateTiming } from './update';
 
 export type PublishState = 'idle' | 'saving' | 'publishing' | 'live' | 'error';
+
+/** A single row in an exclusive task's progress checklist (e.g. an update). */
+export interface BusyStep {
+  id: string;
+  label: string;
+  status: 'pending' | 'active' | 'done' | 'error';
+  detail?: string;
+}
 
 /** What a deploy probe reports for the most recent push. */
 export type DeployState = 'building' | 'live' | 'error' | 'unknown';
@@ -58,6 +67,12 @@ export function createShell(notify: Notify) {
   let busyOp = $state<string | null>(null);
   let busyLabel = $state('');
   let busyProgress = $state('');
+  // Structured progress for the in-flight task: a checklist the view renders.
+  // Lives here (not in the view) for the same reason busyOp does — it must
+  // survive navigating away from the tab that started the task.
+  let busySteps = $state<BusyStep[]>([]);
+  // Timing for the update's deploy wait. Demo mode shortens it via demoTiming().
+  let updateTiming = $state<UpdateTiming>(LIVE_TIMING);
   // The template version applied this session. The editor's `currentVersion` is
   // read from config at page load and won't reflect an in-session update, so this
   // is the source of truth for "what am I on now" until the next reload.
@@ -132,6 +147,12 @@ export function createShell(notify: Notify) {
     /** Switch to the short demo publishing window (demo mode is detected late). */
     demoTiming() {
       publishMs = 2500;
+      updateTiming = DEMO_TIMING;
+    },
+
+    /** Timing for the update's deploy wait (shortened in demo mode). */
+    get updateTiming() {
+      return updateTiming;
     },
 
     /**
@@ -180,6 +201,18 @@ export function createShell(notify: Notify) {
     get busyProgress() {
       return busyProgress;
     },
+    /** The in-flight task's progress checklist (empty when there are no steps). */
+    get busySteps() {
+      return busySteps;
+    },
+    /** Set or replace the checklist; every step starts pending. */
+    setSteps(steps: { id: string; label: string }[]) {
+      busySteps = steps.map((s) => ({ ...s, status: 'pending' as const }));
+    },
+    /** Move one step to a new status, optionally with a sub-line of detail. */
+    setStep(id: string, status: BusyStep['status'], detail?: string) {
+      busySteps = busySteps.map((s) => (s.id === id ? { ...s, status, detail } : s));
+    },
 
     /** The version applied this session, or null. */
     get updatedTo() {
@@ -208,12 +241,14 @@ export function createShell(notify: Notify) {
       busyOp = op;
       busyLabel = label;
       busyProgress = '';
+      busySteps = [];
       try {
         return await run((m) => (busyProgress = m));
       } finally {
         busyOp = null;
         busyLabel = '';
         busyProgress = '';
+        busySteps = [];
       }
     },
 

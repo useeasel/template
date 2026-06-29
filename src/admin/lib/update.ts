@@ -122,6 +122,53 @@ export interface UpdateCheck {
   notes: string | null;
 }
 
+// --- Step progress ---------------------------------------------------------
+// An update is reported as a short checklist so the editor can show what's
+// happening (and survive a tab switch — the step state lives on the shell).
+export type StepId = 'compare' | 'download' | 'publish' | 'deploy';
+export type StepStatus = 'pending' | 'active' | 'done' | 'error';
+
+/** The ordered checklist an update walks through, with artist-facing labels. */
+export const UPDATE_STEPS: { id: StepId; label: string }[] = [
+  { id: 'compare', label: 'Checking your site against the latest version' },
+  { id: 'download', label: 'Downloading the new files' },
+  { id: 'publish', label: 'Publishing your changes' },
+  { id: 'deploy', label: 'Building and going live' },
+];
+
+/** What the orchestrator pushes progress through; the view wires it to the shell. */
+export interface UpdateReporter {
+  /** Set or replace the checklist (id/label pairs; all start pending). */
+  setSteps(steps: { id: StepId; label: string }[]): void;
+  /** Move a step to a new status, optionally with a sub-line of detail. */
+  step(id: StepId, status: StepStatus, detail?: string): void;
+}
+
+// --- Deploy-wait timing ----------------------------------------------------
+// Artist sites are Netlify-hosted via the deploy-key path, so GitHub has no
+// build status to read (gh.deployState ⇒ 'unknown'). A Netlify build reliably
+// takes ~30s, so when the host reports nothing we wait that out and trust it's
+// live. Hosts that DO report (GitHub Pages, Netlify-with-status) finish early on
+// a real 'live'/'error'; if such a host is still 'building' past the hard cap we
+// stop waiting and report the soft "still building" state rather than guess.
+export interface UpdateTiming {
+  /** Gap between deploy-state polls. */
+  pollMs: number;
+  /** How long to wait when the host reports nothing, before trusting it's live. */
+  netlifyWaitMs: number;
+  /** Absolute ceiling for a host that keeps reporting 'building'. */
+  hardCapMs: number;
+}
+
+export const LIVE_TIMING: UpdateTiming = { pollMs: 3000, netlifyWaitMs: 30000, hardCapMs: 480000 };
+export const DEMO_TIMING: UpdateTiming = { pollMs: 400, netlifyWaitMs: 2500, hardCapMs: 6000 };
+
+/** Terminal result of waiting on the deploy. */
+export type UpdateOutcome =
+  | 'live' // confirmed live, or the trusted ~30s estimate elapsed with a silent host
+  | 'building' // a reporting host is still building past the hard cap (soft state)
+  | 'error'; // the host reported a failed build
+
 /**
  * Compare the site's stamped version against the upstream template's package.json
  * version, and fetch its changelog. Read-only — no commits.
@@ -162,14 +209,17 @@ export interface UpdateResult {
  * Apply the latest template to the artist's repo as a single commit on their branch.
  * Overwrites template code, preserves all user content, and bumps the stamped
  * `gessoVersion` in public/admin/config.json (keeping repo/branch/authBaseUrl).
+ *
+ * Walks the `compare` → `download` → `publish` steps of the checklist; the caller
+ * handles the `deploy` step (the build wait). Returns once the commit lands.
  */
 export async function applyUpdate(
   gh: GitHub,
-  opts: { version?: string | null; onProgress?: (msg: string) => void } = {},
+  opts: { version?: string | null; reporter?: UpdateReporter } = {},
 ): Promise<UpdateResult> {
-  const note = opts.onProgress ?? (() => {});
+  const r = opts.reporter;
 
-  note('Comparing your site with the latest template…');
+  r?.step('compare', 'active');
   const [tmplTree, mineTree] = await Promise.all([
     gh.treeRecursive(TEMPLATE),
     gh.treeRecursive(),
@@ -184,15 +234,19 @@ export async function applyUpdate(
   const toFetch = tmplTree.filter(
     (e) => !isUserContent(e.path) && mineByPath.get(e.path) !== e.sha,
   );
+  r?.step('compare', 'done');
+
   // Fetch the changed template blobs with bounded parallelism instead of one at a
   // time; they're independent reads, so this overlaps the round-trips.
+  r?.step('download', 'active', toFetch.length ? `0 of ${toFetch.length}` : undefined);
   let done = 0;
   const fetched = await mapPool(toFetch, 8, async (e) => {
     const content = await gh.getBlobBase64(e.sha, TEMPLATE);
-    note(`Updating files… (${++done}/${toFetch.length})`);
+    r?.step('download', 'active', `${++done} of ${toFetch.length}`);
     return { path: e.path, content, encoding: 'base64' as const };
   });
   changes.push(...fetched);
+  r?.step('download', 'done');
 
   // Remove template-code files the artist still has that upstream dropped.
   let removed = 0;
@@ -204,13 +258,14 @@ export async function applyUpdate(
     }
   }
 
+  r?.step('publish', 'active');
+
   // Recovery for sites stranded by a pre-fix update that deleted the Pages deploy
   // workflow: it lived outside the template, so the old remove-stale pass swept it up,
   // and the deletion commit triggered no run → the site silently stopped rebuilding.
   // If this is a Pages site now missing the workflow, restore it. Re-adding a
   // push-triggered workflow in THIS commit fires the run that republishes the site.
   if (!mineByPath.has(PAGES_WORKFLOW_PATH) && (await gh.pagesEnabled())) {
-    note('Restoring your site’s publish workflow…');
     const { owner, repo, branch } = gh.ref;
     changes.push({ path: PAGES_WORKFLOW_PATH, content: pagesWorkflow(owner, branch, repo) });
   }
@@ -231,9 +286,122 @@ export async function applyUpdate(
     content: JSON.stringify(cfg, null, 2) + '\n',
   });
 
-  note('Publishing the update…');
   const label = opts.version ? `v${opts.version}` : 'the latest template';
   await gh.commit(changes, `chore(gesso): update site to ${label}`);
+  r?.step('publish', 'done');
 
   return { changed: toFetch.length, removed, version: opts.version ?? null };
+}
+
+const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+/**
+ * Watch a pushed commit until its deploy is live, failed, or we stop waiting.
+ *
+ * How we know "live" depends on the host (see {@link gh.deployState}):
+ *  - GitHub Pages reports a real Actions check-run on the commit, so we have
+ *    genuine insight — wait for the true 'live'/'error', never a timer. Pass
+ *    `expectsSignal: true` for these.
+ *  - Netlify on the deploy-key path reports nothing to GitHub (always 'unknown'),
+ *    so there's nothing to wait on — trust that the build is done after the
+ *    `netlifyWaitMs` window (~30s, which it reliably takes).
+ *
+ * `hardCapMs` is the ceiling either way: a reporting host still 'building' past it
+ * resolves to the soft 'building' state rather than hanging forever.
+ */
+export async function waitForDeploy(
+  gh: GitHub,
+  sha: string,
+  timing: UpdateTiming,
+  expectsSignal: boolean,
+): Promise<UpdateOutcome> {
+  const start = Date.now();
+  for (;;) {
+    let state: 'building' | 'live' | 'error' | 'unknown' = 'unknown';
+    try {
+      state = await gh.deployState(sha);
+    } catch {
+      /* transient network blip — treat as still-unknown and keep waiting */
+    }
+    if (state === 'live') return 'live';
+    if (state === 'error') return 'error';
+
+    const elapsed = Date.now() - start;
+    // Silent host (no real signal coming): once the trusted window passes, it's live.
+    if (!expectsSignal && elapsed >= timing.netlifyWaitMs) return 'live';
+    // Reporting host genuinely still building past the ceiling: stop, report soft.
+    if (elapsed >= timing.hardCapMs) return 'building';
+    await sleep(timing.pollMs);
+  }
+}
+
+/** What an in-flight update persists so a reloaded editor can resume the wait. */
+export interface PendingUpdate {
+  sha: string;
+  version: string | null;
+  startedAt: number;
+}
+
+export interface UpdateRun extends UpdateResult {
+  outcome: UpdateOutcome;
+  sha: string | null;
+}
+
+/**
+ * Apply the update AND wait for its deploy, as one operation — success isn't
+ * declared until the build is actually live (or the trusted estimate elapses).
+ * `onCommitted` fires the moment the commit lands (with its sha) so the caller can
+ * persist a resume marker before the potentially long deploy wait.
+ */
+export async function applyUpdateAndWait(
+  gh: GitHub,
+  opts: {
+    version?: string | null;
+    reporter?: UpdateReporter;
+    timing?: UpdateTiming;
+    onCommitted?: (sha: string) => void;
+  } = {},
+): Promise<UpdateRun> {
+  const timing = opts.timing ?? LIVE_TIMING;
+  opts.reporter?.setSteps(UPDATE_STEPS);
+
+  const result = await applyUpdate(gh, { version: opts.version, reporter: opts.reporter });
+  const sha = gh.lastCommitSha;
+  if (sha) opts.onCommitted?.(sha);
+
+  opts.reporter?.step('deploy', 'active');
+  // GitHub Pages reports a real Actions check-run we can wait on; Netlify doesn't,
+  // so for Netlify we fall back to the timed estimate inside waitForDeploy.
+  const expectsSignal = await gh.pagesEnabled().catch(() => false);
+  // Without a sha we can't track the build; trust the commit and report soft.
+  const outcome = sha ? await waitForDeploy(gh, sha, timing, expectsSignal) : 'building';
+  return { ...result, outcome, sha };
+}
+
+/**
+ * Resume the deploy wait for an update whose commit already landed (the editor was
+ * reloaded mid-build). Marks the apply steps done and watches the same commit.
+ */
+export async function resumeUpdateWait(
+  gh: GitHub,
+  opts: { sha: string; timing?: UpdateTiming; reporter?: UpdateReporter; startedAt?: number },
+): Promise<UpdateOutcome> {
+  const timing = opts.timing ?? LIVE_TIMING;
+  if (opts.reporter) {
+    opts.reporter.setSteps(UPDATE_STEPS);
+    opts.reporter.step('compare', 'done');
+    opts.reporter.step('download', 'done');
+    opts.reporter.step('publish', 'done');
+    opts.reporter.step('deploy', 'active');
+  }
+  // Subtract time already spent before the reload so a long-gone build doesn't get
+  // a fresh full window — a silent host then resolves 'live' almost immediately.
+  const spent = opts.startedAt ? Math.max(0, Date.now() - opts.startedAt) : 0;
+  const adjusted: UpdateTiming = {
+    ...timing,
+    netlifyWaitMs: Math.max(0, timing.netlifyWaitMs - spent),
+    hardCapMs: Math.max(0, timing.hardCapMs - spent),
+  };
+  const expectsSignal = await gh.pagesEnabled().catch(() => false);
+  return waitForDeploy(gh, opts.sha, adjusted, expectsSignal);
 }

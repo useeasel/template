@@ -7,6 +7,12 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.43.1
+
+- **An update now waits until your site is live before it says it's done.** No more refreshing to find the old version still up.
+- **You see each step while an update runs,** so you know where it's up to.
+- **If an update hits a problem, you get a plain explanation and a one-click way to send us a report.** Your site stays exactly as it was.
+
 ## 0.43.0
 
 - **Try a whole look before you pick it.** In the style walkthrough, hover any style to try it

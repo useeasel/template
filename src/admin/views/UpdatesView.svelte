@@ -1,6 +1,15 @@
 <script lang="ts">
   import type { GitHub } from '../lib/github';
-  import { checkForUpdate, applyUpdate, type UpdateCheck } from '../lib/update';
+  import {
+    checkForUpdate,
+    applyUpdateAndWait,
+    resumeUpdateWait,
+    type UpdateCheck,
+    type UpdateRun,
+    type UpdateOutcome,
+    type UpdateReporter,
+    type PendingUpdate,
+  } from '../lib/update';
   import { useShell } from '../lib/shell.svelte';
 
   let {
@@ -17,15 +26,57 @@
 
   // The check lifecycle is local; the *update itself* lives on the shell
   // (shell.busyOp === 'update'), so it survives leaving and re-opening this tab
-  // and can't be started twice. `justDone` is the brief celebration on the
-  // instance that ran it.
+  // and can't be started twice. `done`/`errorCtx` are the terminal states shown
+  // on the instance that ran it.
   type Phase = 'checking' | 'ready' | 'error';
 
   let phase = $state<Phase>('checking');
   let check = $state<UpdateCheck | null>(null);
   let errorMsg = $state('');
-  let justDone = $state(false);
+  // Outcome of a finished update: 'live' (confirmed live or trusted estimate) or
+  // 'building' (published, still finishing — the soft state). Null until done.
+  let done = $state<UpdateOutcome | null>(null);
+  // Set when an update fails, carrying what's needed for the bug report.
+  let errorCtx = $state<{ step: string; message: string; sha: string | null } | null>(null);
   const updating = $derived(shell.busyOp === 'update');
+
+  const SUPPORT_EMAIL = 'howdy@usegesso.com';
+
+  // The orchestrator pushes step progress through here onto the shell, so the
+  // checklist survives a tab switch and shows the same state everywhere.
+  const reporter: UpdateReporter = {
+    setSteps: (steps) => shell.setSteps(steps),
+    step: (id, status, detail) => shell.setStep(id, status, detail),
+  };
+
+  // --- Resume marker -------------------------------------------------------
+  // A deploy can outlast the editor session. While we wait, persist the in-flight
+  // commit so a reloaded editor can pick the wait back up instead of falsely
+  // showing "up to date" while the old site is still live.
+  const markerKey = () => `gesso:pending-update:${gh.ref.owner}/${gh.ref.repo}`;
+  function writeMarker(sha: string, version: string | null) {
+    try {
+      localStorage.setItem(markerKey(), JSON.stringify({ sha, version, startedAt: Date.now() }));
+    } catch {
+      /* storage unavailable — resume just won't be possible, no harm */
+    }
+  }
+  function clearMarker() {
+    try {
+      localStorage.removeItem(markerKey());
+    } catch {
+      /* ignore */
+    }
+  }
+  function readMarker(): PendingUpdate | null {
+    try {
+      const raw = localStorage.getItem(markerKey());
+      const m = raw ? (JSON.parse(raw) as PendingUpdate) : null;
+      return m && typeof m.sha === 'string' ? m : null;
+    } catch {
+      return null;
+    }
+  }
 
   // When the running update finishes (busyOp clears), refresh the check so the
   // panel reflects the new version, even on an instance that didn't start it.
@@ -35,6 +86,54 @@
     if (prevBusy === 'update' && b === null) runCheck();
     prevBusy = b;
   });
+
+  function handleOutcome(run: UpdateRun) {
+    clearMarker();
+    if (run.outcome === 'error') {
+      fail('deploy', new Error('Your site’s build didn’t finish successfully.'), run.sha);
+      return;
+    }
+    shell.markUpdated(run.version);
+    done = run.outcome;
+    errorCtx = null;
+    if (run.outcome === 'live') {
+      notify(`Update complete — your site is live on ${run.version ? 'v' + run.version : 'the latest version'}.`);
+    } else {
+      notify('Update published — your site is finishing its build and will be live shortly.');
+    }
+  }
+
+  function fail(step: string, e: unknown, sha: string | null) {
+    clearMarker();
+    done = null;
+    errorCtx = {
+      step,
+      message: e instanceof Error ? e.message : 'The update could not be completed.',
+      sha,
+    };
+    notify('The update could not be completed.', 'error');
+  }
+
+  function bugReportHref(): string {
+    const { owner, repo, branch } = gh.ref;
+    const to = check?.latestVersion ?? 'latest';
+    const subject = `Gesso update problem (${effCur ?? '?'} → ${to})`;
+    const body = [
+      'Something went wrong while updating my site. Technical details are below.',
+      '',
+      `Site: ${owner}/${repo} (${branch})`,
+      `From version: ${effCur ?? 'unknown'}`,
+      `To version: ${to}`,
+      `Step: ${errorCtx?.step ?? 'unknown'}`,
+      `Error: ${errorCtx?.message ?? 'unknown'}`,
+      errorCtx?.sha ? `Commit: ${errorCtx.sha}` : '',
+      `When: ${new Date().toISOString()}`,
+      `Browser: ${navigator.userAgent}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
 
   // --- Changelog rendering -------------------------------------------------
   // The notes are the template's raw CHANGELOG.md. Split it into per-version
@@ -121,7 +220,6 @@
       phase = 'error';
     }
   }
-  runCheck();
 
   async function doUpdate() {
     if (!check || shell.busyOp) return;
@@ -131,41 +229,110 @@
         'New features stay off until you turn them on. Your site will rebuild a minute or so after.',
     );
     if (!ok) return;
+    done = null;
+    errorCtx = null;
     const version = check.latestVersion;
     try {
-      const result = await shell.runExclusive('update', 'Updating your site', (onProgress) =>
-        applyUpdate(gh, { version, onProgress }),
+      const run = await shell.runExclusive('update', 'Updating your site', () =>
+        applyUpdateAndWait(gh, {
+          version,
+          reporter,
+          timing: shell.updateTiming,
+          onCommitted: (sha) => writeMarker(sha, version),
+        }),
       );
-      if (!result) return; // another task was already running
-      shell.markUpdated(version);
-      justDone = true;
-      notify(
-        `Update published — ${result.changed} file${result.changed === 1 ? '' : 's'} updated. Your site is rebuilding.`,
-      );
+      if (!run) return; // another task was already running
+      handleOutcome(run);
     } catch (e) {
-      errorMsg = e instanceof Error ? e.message : 'The update could not be published.';
-      phase = 'error';
-      notify('The update could not be published.', 'error');
+      fail('publish', e, gh.lastCommitSha);
     }
   }
+
+  // Resume a deploy wait left in flight by a previous session (editor reloaded
+  // mid-build). If there's nothing pending, just run the normal check.
+  async function resumeOrCheck() {
+    const m = readMarker();
+    if (!m || shell.busyOp) {
+      runCheck();
+      return;
+    }
+    try {
+      const outcome = await shell.runExclusive('update', 'Finishing your update', () =>
+        resumeUpdateWait(gh, {
+          sha: m.sha,
+          timing: shell.updateTiming,
+          reporter,
+          startedAt: m.startedAt,
+        }),
+      );
+      if (outcome === undefined) return; // already busy
+      handleOutcome({ outcome, sha: m.sha, version: m.version, changed: 0, removed: 0 });
+    } catch (e) {
+      fail('deploy', e, m.sha);
+    }
+  }
+  resumeOrCheck();
 </script>
 
 <div class="ez-updates">
-  {#if updating}
+  {#if errorCtx}
+    <div class="ez-callout ez-callout--error">
+      <div>
+        <strong>We couldn’t finish the update</strong>
+        <p>
+          {#if errorCtx.step === 'deploy'}
+            Your site’s rebuild didn’t finish, so your previous site is still live and unchanged.
+          {:else}
+            Nothing on your site changed. You can try again, and if it keeps happening, send us a
+            note and we’ll sort it out.
+          {/if}
+        </p>
+        <p class="ez-help">{errorCtx.message}</p>
+        <div class="ez-updates__actions">
+          <button class="ez-btn ez-btn--primary" onclick={doUpdate} disabled={!!shell.busyOp}>Try again</button>
+          <a class="ez-btn ez-btn--outline" href={bugReportHref()}>Report a problem</a>
+        </div>
+      </div>
+    </div>
+  {:else if updating}
     <div class="ez-callout ez-callout--accent">
       <div>
-        <strong>Updating your site…</strong>
-        <p class="ez-help">{shell.busyProgress || 'Starting…'}</p>
+        <strong>{shell.busyLabel || 'Updating your site'}…</strong>
+        {#if shell.busySteps.length}
+          <ol class="ez-upsteps">
+            {#each shell.busySteps as s (s.id)}
+              <li class="ez-step ez-step--{s.status}">
+                <span class="ez-step__dot" aria-hidden="true"></span>
+                <span class="ez-step__label">
+                  {s.label}{#if s.detail && s.status === 'active'}
+                    <span class="ez-step__detail">({s.detail})</span>{/if}
+                </span>
+              </li>
+            {/each}
+          </ol>
+        {:else}
+          <p class="ez-help">{shell.busyProgress || 'Starting…'}</p>
+        {/if}
         <p class="ez-help">This keeps running if you switch tabs. We’ll let you know when it’s done.</p>
       </div>
     </div>
-  {:else if justDone}
+  {:else if done === 'live'}
     <div class="ez-callout ez-callout--blue">
       <div>
         <strong>You’re on the latest version 🎉</strong>
         <p>
-          Your site is rebuilding now and will be live in a minute or so. Nothing you added
-          changed, only the underlying template was refreshed.
+          Your site is live on the newest template. Nothing you added changed, only the
+          underlying template was refreshed.
+        </p>
+      </div>
+    </div>
+  {:else if done === 'building'}
+    <div class="ez-callout ez-callout--blue">
+      <div>
+        <strong>Update published — finishing up</strong>
+        <p>
+          Your changes are published and your site is doing its final build. It’ll be live in a
+          moment and will refresh on its own, no need to do anything.
         </p>
       </div>
     </div>
@@ -254,5 +421,84 @@
   .ez-updates__h {
     font-size: 1rem;
     margin: 0 0 0.5rem;
+  }
+
+  /* Failed-update callout: red-edged, inherits the base .ez-callout box. */
+  .ez-callout--error {
+    background: var(--ez-paper);
+    border-left: 6px solid var(--ez-red);
+  }
+  .ez-updates__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ez-space-3);
+    margin-top: var(--ez-space-3);
+  }
+  .ez-updates__actions .ez-btn {
+    text-decoration: none;
+  }
+
+  /* The update checklist (compare → download → publish → deploy). */
+  .ez-upsteps {
+    list-style: none;
+    margin: var(--ez-space-3) 0 0;
+    padding: 0;
+    display: grid;
+    gap: var(--ez-space-2);
+  }
+  .ez-step {
+    display: flex;
+    align-items: center;
+    gap: var(--ez-space-2);
+    font-size: var(--ez-text-sm);
+    color: var(--ez-stone);
+  }
+  .ez-step__dot {
+    flex: none;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: var(--ez-radius-pill);
+    border: var(--ez-border-width) solid currentColor;
+    background: transparent;
+  }
+  .ez-step--active {
+    color: var(--ez-ink);
+    font-weight: 600;
+  }
+  .ez-step--active .ez-step__dot {
+    background: var(--ez-ink);
+    animation: ez-step-pulse 1s ease-in-out infinite;
+  }
+  .ez-step--done {
+    color: var(--ez-ink);
+  }
+  .ez-step--done .ez-step__dot {
+    background: var(--ez-ink);
+    border-color: var(--ez-ink);
+  }
+  .ez-step--error {
+    color: var(--ez-red);
+  }
+  .ez-step--error .ez-step__dot {
+    background: var(--ez-red);
+    border-color: var(--ez-red);
+  }
+  .ez-step__detail {
+    color: var(--ez-stone);
+    font-weight: 400;
+  }
+  @keyframes ez-step-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(0.7);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ez-step--active .ez-step__dot {
+      animation: none;
+    }
   }
 </style>

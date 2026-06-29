@@ -80,6 +80,7 @@ function seed(): Map<string, string> {
 class DemoGitHub {
   ref = { owner: 'demo', repo: 'portfolio', branch: 'main' };
   files = seed();
+  lastCommitSha: string | null = null;
 
   async getLogin(): Promise<string> {
     return 'demo-artist';
@@ -143,6 +144,11 @@ class DemoGitHub {
       if (c.remove) this.files.delete(c.path);
       else this.files.set(c.path, c.encoding === 'base64' ? '[demo image]' : c.content ?? '');
     }
+    this.lastCommitSha = 'demo-commit';
+  }
+  // The demo deploy is always "live" — the update's deploy wait resolves at once.
+  async deployState(): Promise<'building' | 'live' | 'error' | 'unknown'> {
+    return 'live';
   }
   // Sample history: a mix of the artist's own saves and Gesso's system commits
   // (version update, deploy, provisioning, initial). The History view keeps the
