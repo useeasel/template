@@ -7,6 +7,20 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.42.0
+
+- **Show you're open for work.** Turn on a slim banner across the top of your site that lets
+  visitors know you're taking commissions or new projects. Off by default, so nothing changes
+  until you switch it on in Settings.
+- **A clearer "available" page.** Your available work now reads like a price list: a status tag
+  on each piece, and a separate button for every size or print edition.
+- **Tell the story behind a project.** New project pages walk visitors through a piece of work
+  from first idea to finished result, with your words and images side by side. Off by default;
+  turn Projects on in the Menu tab.
+- **Point people to where you sell.** A new "Where to buy" page sends visitors to the shops and
+  galleries that carry your work. Off by default; add your shops in Settings, then switch the
+  page on.
+
 ## 0.41.0
 
 - **More ways to show your work.** New gallery options let you drop the frames for bare
