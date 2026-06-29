@@ -12,6 +12,7 @@ export const PATHS = {
   posts: 'src/content/posts',
   exhibitions: 'src/content/exhibitions',
   testimonials: 'src/content/testimonials',
+  projects: 'src/content/projects',
   settings: 'src/content/site/settings.json',
   assets: 'src/assets',
 };
@@ -52,6 +53,21 @@ export interface Post {
   date: string; // YYYY-MM-DD
   excerpt?: string;
   cover?: string;
+  draft: boolean;
+  body: string;
+}
+
+export interface Project {
+  id: string;
+  title: string;
+  summary?: string;
+  cover?: string;
+  role?: string;
+  client?: string;
+  year?: string;
+  tags: string[];
+  order: number;
+  featured: boolean;
   draft: boolean;
   body: string;
 }

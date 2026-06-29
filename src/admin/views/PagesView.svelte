@@ -9,6 +9,7 @@
   import { resolveDesign, type DesignTokens } from '../../lib/design';
   import { useShell } from '../lib/shell.svelte';
   import NewsView from './NewsView.svelte';
+  import ProjectsView from './ProjectsView.svelte';
   import ExhibitionsView from './ExhibitionsView.svelte';
   import TestimonialsView from './TestimonialsView.svelte';
 
@@ -24,10 +25,10 @@
 
   const shell = useShell();
 
-  type Tab = 'menu' | 'about' | 'contact' | 'cv' | 'press' | 'exhibitions' | 'news' | 'testimonials';
+  type Tab = 'menu' | 'about' | 'contact' | 'cv' | 'press' | 'exhibitions' | 'news' | 'projects' | 'testimonials';
   const isTab = (t: string | null): t is Tab =>
     t === 'menu' || t === 'about' || t === 'contact' || t === 'cv' || t === 'press' ||
-    t === 'exhibitions' || t === 'news' || t === 'testimonials';
+    t === 'exhibitions' || t === 'news' || t === 'projects' || t === 'testimonials';
   let tab = $state<Tab>(isTab(initialTab) ? initialTab : 'menu');
   let loading = $state(true);
 
@@ -76,7 +77,7 @@
     return tab === 'about' ? about : tab === 'contact' ? contact : tab === 'cv' ? cv : press;
   }
 
-  const selfManaged = (t: Tab) => t === 'news' || t === 'exhibitions' || t === 'testimonials';
+  const selfManaged = (t: Tab) => t === 'news' || t === 'projects' || t === 'exhibitions' || t === 'testimonials';
 
   // --- Menu tab (settings-backed) ---
   const isDirtyMenu = () => !loading && !!menuBaseline && menuSig() !== menuBaseline;
@@ -151,6 +152,7 @@
     { id: 'press', label: 'Press', page: 'press' },
     { id: 'exhibitions', label: 'Exhibitions', page: 'exhibitions' },
     { id: 'news', label: 'News', page: 'news' },
+    { id: 'projects', label: 'Projects', page: 'projects' },
     { id: 'testimonials', label: 'Testimonials', page: 'about' },
   ];
 
@@ -167,6 +169,7 @@
     { key: 'press', label: 'Press', hint: 'Mentions and reviews.' },
     { key: 'exhibitions', label: 'Exhibitions', hint: 'A list of your shows.' },
     { key: 'news', label: 'News', hint: 'Posts and updates.' },
+    { key: 'projects', label: 'Projects', hint: 'Case studies for narrative work.' },
     { key: 'available', label: 'Available work', hint: 'A page collecting the pieces you have for sale.' },
     { key: 'presskit', label: 'Press kit', hint: 'A bio and downloadable images for press.' },
     { key: 'commissions', label: 'Commissions', hint: 'Take commission requests.' },
@@ -308,6 +311,8 @@
   {/each}
 {:else if tab === 'news'}
   <NewsView {gh} {notify} />
+{:else if tab === 'projects'}
+  <ProjectsView {gh} {notify} />
 {:else if tab === 'testimonials'}
   <TestimonialsView {gh} {notify} />
 {:else}

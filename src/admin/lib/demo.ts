@@ -44,6 +44,13 @@ function seed(): Map<string, string> {
   });
   f.set('src/content/collections/forms.md', md({ title: 'Forms', description: 'Single geometric forms.', order: 0 }));
   f.set('src/content/collections/color.md', md({ title: 'Color', description: 'Where two colors meet.', order: 1 }));
+  f.set(
+    'src/content/projects/acme-rebrand.md',
+    md(
+      { title: 'Acme Studio rebrand', summary: 'A new identity for a growing design studio.', role: 'Designer', client: 'Acme Studio', year: '2024', tags: ['branding', 'print'], order: 0, featured: true },
+      '## The problem\n\nThe old mark no longer fit.\n\n## The approach\n\nA refreshed wordmark and palette.\n\n## The result\n\nA cohesive system across print and web.',
+    ),
+  );
   f.set('src/content/pages/about.md', md({ title: 'About', statement: 'Painter working in oil and gouache.' }, 'I make work about colour and edge.'));
   f.set('src/content/pages/contact.md', md({ title: 'Contact', intro: "I'd love to hear from you.", email: 'hello@example.com', formEnabled: true }));
   f.set('src/content/pages/cv.md', `---\ntitle: CV\ncv:\n  - heading: Exhibitions\n    items:\n      - year: "2024"\n        text: Solo show, Gallery X\n---\n`);

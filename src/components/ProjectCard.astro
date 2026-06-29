@@ -1,0 +1,60 @@
+---
+import { Image } from 'astro:assets';
+import { CARD_WIDTHS, cardSizes } from '../lib/images';
+import { withBase, stripMd } from '../lib/href';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'projects'>;
+}
+const { entry } = Astro.props;
+const p = entry.data;
+const href = withBase(`/projects/${stripMd(entry.id)}/`);
+const meta = [p.role, p.client, p.year].filter(Boolean).join(' · ');
+---
+
+<li class="ez-projcard">
+  <a class="ez-projcard__link" href={href} aria-label={p.title}>
+    {p.cover && (
+      <span class="ez-projcard__media">
+        <Image src={p.cover} alt={p.title} widths={CARD_WIDTHS} sizes={cardSizes(3)} loading="lazy" class="ez-projcard__img" />
+      </span>
+    )}
+    <span class="ez-projcard__body">
+      <h2 class="ez-projcard__title">{p.title}</h2>
+      {meta && <span class="ez-projcard__meta">{meta}</span>}
+      {p.summary && <span class="ez-projcard__summary">{p.summary}</span>}
+      {p.tags.length > 0 && (
+        <span class="ez-projcard__tags">
+          {p.tags.map((t) => <span class="ez-projcard__tag">{t}</span>)}
+        </span>
+      )}
+    </span>
+  </a>
+</li>
+
+<style>
+  .ez-projcard {
+    background: var(--ez-white);
+    border: var(--ez-border-width) solid var(--ez-border);
+    display: flex;
+  }
+  .ez-projcard__link { display: flex; flex-direction: column; text-decoration: none; color: var(--ez-ink); width: 100%; }
+  .ez-projcard__media { display: block; border-bottom: var(--ez-border-width) solid var(--ez-border); background: var(--ez-paper); }
+  .ez-projcard__img { width: 100%; height: auto; display: block; }
+  .ez-projcard__body { padding: var(--ez-space-4); display: flex; flex-direction: column; gap: var(--ez-space-2); }
+  .ez-projcard__title { font-size: var(--ez-text-lg); margin: 0; }
+  .ez-projcard__link:hover .ez-projcard__title { color: var(--ez-blue); }
+  .ez-projcard__meta { color: var(--ez-stone); font-size: var(--ez-text-sm); }
+  .ez-projcard__summary { color: var(--ez-stone); }
+  .ez-projcard__tags { display: flex; flex-wrap: wrap; gap: var(--ez-space-2); margin-top: var(--ez-space-1); }
+  .ez-projcard__tag {
+    font-family: var(--ez-font-display);
+    font-size: var(--ez-text-xs);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 0.25em 0.6em;
+    border: 1px solid var(--ez-border);
+    color: var(--ez-stone);
+  }
+</style>

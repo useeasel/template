@@ -310,6 +310,29 @@ const site = defineCollection({
   }),
 });
 
+// Project / case-study pages — narrative work ("problem → approach → result"),
+// text and images interleaved in the Markdown body. A standalone story, separate
+// from series (which are galleries of artwork pieces). All metadata is optional, so
+// a project can be just a title + body. The page only shows when pages.projects is on.
+const projects = defineCollection({
+  type: 'content',
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      // One-line summary for the listing card + meta description.
+      summary: z.string().optional(),
+      cover: image().optional(),
+      // Optional case-study metadata.
+      role: z.string().optional(),
+      client: z.string().optional(),
+      year: z.string().optional(),
+      tags: z.array(z.string()).default([]),
+      order: z.number().default(0),
+      featured: z.boolean().default(false),
+      draft: z.boolean().default(false),
+    }),
+});
+
 export const collections = {
   artworks,
   collections: seriesCollection,
@@ -317,5 +340,6 @@ export const collections = {
   posts,
   exhibitions,
   testimonials,
+  projects,
   site,
 };

@@ -1,0 +1,39 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { withBase } from '../../lib/href';
+
+// Listing of non-draft projects, sorted by `order` then title. The page only
+// appears in the menu when the artist turns Projects on (pages.projects); the
+// route always builds so a direct link still works.
+const settings = (await getEntry('site', 'settings'))!.data;
+
+const projects = (await getCollection('projects'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title));
+---
+
+<Base pageTitle="Projects" pageDescription={`Selected projects by ${settings.siteTitle}`} pageImage={withBase('/og/projects.png')}>
+  <div class="ez-container ez-projects">
+    <h1>Projects</h1>
+    {projects.length === 0 && <p class="ez-projects__empty">No projects yet — check back soon.</p>}
+    {projects.length > 0 && (
+      <ul class="ez-projects__grid" role="list">
+        {projects.map((entry) => <ProjectCard {entry} />)}
+      </ul>
+    )}
+  </div>
+</Base>
+
+<style>
+  .ez-projects__empty { color: var(--ez-stone); }
+  .ez-projects__grid {
+    list-style: none;
+    margin: var(--ez-space-6) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--ez-item-min), 1fr));
+    gap: var(--ez-gallery-gap);
+  }
+</style>

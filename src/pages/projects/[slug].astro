@@ -1,0 +1,105 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, getEntry, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import { FULL_WIDTHS } from '../../lib/images';
+import { withBase, stripMd } from '../../lib/href';
+import { creativeWorkLd, breadcrumbLd } from '../../lib/structured-data';
+
+export const getStaticPaths = (async () => {
+  const projects = (await getCollection('projects')).filter((p) => !p.data.draft);
+  return projects.map((entry) => ({ params: { slug: stripMd(entry.id) }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const p = entry.data;
+const { Content } = await render(entry);
+const slug = stripMd(entry.id);
+
+const settings = (await getEntry('site', 'settings'))!.data;
+const artist = settings.logoText || settings.siteTitle;
+const origin = (Astro.site ?? Astro.url).origin;
+const abs = (path: string) => new URL(withBase(path), origin).href;
+
+const metaParts = [p.role && `Role: ${p.role}`, p.client && `Client: ${p.client}`, p.year].filter(Boolean) as string[];
+
+const jsonLd = [
+  creativeWorkLd(
+    {
+      title: p.title,
+      url: abs(`/projects/${slug}/`),
+      description: p.summary,
+      imageUrl: p.cover ? abs(p.cover.src) : undefined,
+      year: p.year,
+      keywords: p.tags,
+    },
+    { name: artist, url: origin },
+  ),
+  breadcrumbLd([
+    ['Projects', abs('/projects/')],
+    [p.title, abs(`/projects/${slug}/`)],
+  ]),
+];
+---
+
+<Base pageTitle={p.title} pageDescription={p.summary} pageImage={withBase(`/og/project-${slug}.png`)} {jsonLd}>
+  <article class="ez-container ez-project">
+    <p class="ez-back"><a href={withBase('/projects/')}>← All projects</a></p>
+    <header class="ez-project__head">
+      <h1 class="ez-project__title">{p.title}</h1>
+      {p.summary && <p class="ez-project__summary">{p.summary}</p>}
+      {metaParts.length > 0 && (
+        <dl class="ez-project__meta">
+          {p.role && <div><dt>Role</dt><dd>{p.role}</dd></div>}
+          {p.client && <div><dt>Client</dt><dd>{p.client}</dd></div>}
+          {p.year && <div><dt>Year</dt><dd>{p.year}</dd></div>}
+        </dl>
+      )}
+      {p.tags.length > 0 && (
+        <ul class="ez-project__tags" role="list">
+          {p.tags.map((t) => <li class="ez-project__tag">{t}</li>)}
+        </ul>
+      )}
+    </header>
+    {p.cover && (
+      <Image src={p.cover} alt={p.title} widths={FULL_WIDTHS} sizes="(max-width: 960px) 100vw, 960px" class="ez-project__cover" />
+    )}
+    <div class="ez-project__body">
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .ez-project { max-width: 960px; }
+  .ez-back { margin-bottom: var(--ez-space-4); font-weight: 700; }
+  .ez-project__head { margin-bottom: var(--ez-space-5); }
+  .ez-project__title { margin: 0 0 var(--ez-space-3); }
+  .ez-project__summary { font-size: var(--ez-text-lg); color: var(--ez-stone); margin: 0 0 var(--ez-space-4); max-width: 60ch; }
+  .ez-project__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ez-space-2) var(--ez-space-6);
+    margin: 0 0 var(--ez-space-4);
+  }
+  .ez-project__meta div { display: flex; flex-direction: column; }
+  .ez-project__meta dt { font-family: var(--ez-font-display); font-size: var(--ez-text-xs); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ez-stone); }
+  .ez-project__meta dd { margin: 0; font-weight: 600; }
+  .ez-project__tags { list-style: none; display: flex; flex-wrap: wrap; gap: var(--ez-space-2); margin: 0; padding: 0; }
+  .ez-project__tag {
+    font-family: var(--ez-font-display);
+    font-size: var(--ez-text-xs);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 0.3em 0.7em;
+    border: 1px solid var(--ez-border);
+    color: var(--ez-stone);
+  }
+  .ez-project__cover { width: 100%; height: auto; border: var(--ez-border-width) solid var(--ez-border); margin-bottom: var(--ez-space-6); }
+  .ez-project__body { line-height: 1.7; }
+  .ez-project__body :global(p) { margin: 0 0 var(--ez-space-4); }
+  .ez-project__body :global(h2) { margin: var(--ez-space-6) 0 var(--ez-space-3); }
+  .ez-project__body :global(h3) { margin: var(--ez-space-5) 0 var(--ez-space-2); }
+  .ez-project__body :global(img) { max-width: 100%; height: auto; border: var(--ez-border-width) solid var(--ez-border); margin: var(--ez-space-4) 0; }
+</style>

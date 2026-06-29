@@ -141,6 +141,31 @@ export function articleLd(a: LdArticle, author: { name: string; url: string }): 
   });
 }
 
+export interface LdProject {
+  title: string;
+  url: string; // absolute
+  description?: string;
+  imageUrl?: string; // absolute
+  year?: string;
+  keywords?: string[];
+}
+
+/** A project / case study as a CreativeWork, for portfolio rich results. */
+export function creativeWorkLd(p: LdProject, author: { name: string; url: string }): Record<string, unknown> {
+  return prune({
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: p.title,
+    url: p.url,
+    mainEntityOfPage: p.url,
+    description: p.description,
+    image: p.imageUrl,
+    dateCreated: p.year || undefined,
+    keywords: p.keywords && p.keywords.length ? p.keywords.join(', ') : undefined,
+    creator: { '@type': 'Person', name: author.name, url: author.url },
+  });
+}
+
 /** A breadcrumb trail. `items` are [name, absoluteUrl] in order. */
 export function breadcrumbLd(items: Array<[string, string]>): Record<string, unknown> {
   return {
