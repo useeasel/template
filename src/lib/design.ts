@@ -155,13 +155,25 @@ export function withDefaults(partial: DesignOverride | undefined): DesignTokens 
  * Resolve stored `settings.design` into a full token set: start from the named
  * preset's bundle (or Bauhaus), then layer any granular overrides on top. So
  * `{ preset: 'editorial' }` themes the whole site, and tweaks just add fields.
+ *
+ * Memoized by the input object's identity: a static build resolves the one
+ * `settings.design` object once per page, so caching collapses those N identical
+ * resolves to a single computation (the deep merge + contrast math below isn't
+ * free across hundreds of pages). The WeakMap keys on the partial, so distinct
+ * inputs (e.g. the editor's live preview) still resolve independently.
  */
+const resolveCache = new WeakMap<object, DesignTokens>();
 export function resolveDesign(partial: DesignOverride | undefined): DesignTokens {
+  if (partial) {
+    const hit = resolveCache.get(partial);
+    if (hit) return hit;
+  }
   const base = (partial?.preset && PRESETS[partial.preset]?.design) || DEFAULT_DESIGN;
   const r = mergeOver(base, partial);
   // Materialize link/heading so they default to this design's accent/text.
   if (!r.color.link) r.color.link = r.color.accent;
   if (!r.color.heading) r.color.heading = r.color.text;
+  if (partial) resolveCache.set(partial, r);
   return r;
 }
 
@@ -182,7 +194,10 @@ const SHADOW = {
 };
 
 /** Map design tokens onto the --ez-* CSS variables, as an inline style string. */
+const varsCache = new WeakMap<DesignTokens, string>();
 export function designVars(d: DesignTokens): string {
+  const cached = varsCache.get(d);
+  if (cached) return cached;
   const v: Record<string, string> = {
     '--ez-paper': d.color.background,
     '--ez-white': d.color.surface,
@@ -221,13 +236,18 @@ export function designVars(d: DesignTokens): string {
     // Never let a text+media page run wider than the gallery width.
     '--ez-prose-wide-max': `min(${PROSE_WIDE[d.readingWidth]}, var(--ez-content-max))`,
   };
-  return `font-size:${d.type.baseSize}px;` + Object.entries(v).map(([k, val]) => `${k}:${val}`).join(';');
+  const out = `font-size:${d.type.baseSize}px;` + Object.entries(v).map(([k, val]) => `${k}:${val}`).join(';');
+  varsCache.set(d, out);
+  return out;
 }
 
 /** Root classes that switch structural variants (so they preview live via CSS). */
+const classesCache = new WeakMap<DesignTokens, string>();
 export function designClasses(d: DesignTokens): string {
+  const cached = classesCache.get(d);
+  if (cached) return cached;
   const pages = ['about', 'contact', 'cv', 'press', 'exhibitions', 'news', 'available', 'presskit', 'commissions', 'shop', 'projects', 'stockists'] as const;
-  return [
+  const out = [
     `ez-nav-${d.nav.layout}`,
     `ez-thumb-${d.thumb.hover}`,
     `ez-fit-${d.thumb.fit}`,
@@ -253,6 +273,8 @@ export function designClasses(d: DesignTokens): string {
   ]
     .filter(Boolean)
     .join(' ');
+  classesCache.set(d, out);
+  return out;
 }
 
 export function motionAttr(d: DesignTokens): 'full' | 'reduced' {
