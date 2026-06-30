@@ -241,6 +241,13 @@
             <select class="ez-input" bind:value={d.gallery.captionDetail}>
               <option value="full">Full (title, details, status)</option><option value="minimal">Minimal (title only)</option></select></label>
         </div>
+        {#if d.gallery.caption === 'hover'}
+          <div class="ez-row">
+            <label class="ez-field"><span class="ez-label">Caption style</span>
+              <select class="ez-input" bind:value={d.gallery.captionOverlay}>
+                <option value="surface">Match the piece (card colors)</option><option value="scrim">Dark overlay on the image</option></select></label>
+          </div>
+        {/if}
         <label class="ez-field--check"><input type="checkbox" bind:checked={d.lightbox.zoom} />
           <span>Let visitors click to zoom into fine detail</span></label>
         <div class="ez-row">

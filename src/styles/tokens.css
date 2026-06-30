@@ -420,14 +420,28 @@ img {
 :root.ez-cap-hover .ez-artcard__body {
   position: absolute;
   left: 0; right: 0; bottom: 0;
-  background: var(--ez-ink);
-  color: var(--ez-white);
   transform: translateY(100%);
   transition: transform var(--ez-motion-base) var(--ez-ease);
 }
 :root.ez-cap-hover .ez-artcard:hover .ez-artcard__body,
 :root.ez-cap-hover .ez-artcard:focus-within .ez-artcard__body { transform: translateY(0); }
-:root.ez-cap-hover .ez-artcard__meta { color: var(--ez-white); opacity: 0.7; }
+
+/* Surface (default): the card's own caption colors, so every preset's hover
+   caption matches its palette instead of inverting to a black box. */
+:root.ez-capoverlay-surface.ez-cap-hover .ez-artcard__body {
+  background: var(--ez-white);
+  color: var(--ez-ink);
+}
+/* meta/price keep their normal --ez-stone / --ez-blue (already readable on surface). */
+
+/* Scrim: a translucent dark gradient with light text — the classic photo overlay,
+   readable over any image or theme. */
+:root.ez-capoverlay-scrim.ez-cap-hover .ez-artcard__body {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.55));
+  color: #fff;
+}
+:root.ez-capoverlay-scrim.ez-cap-hover .ez-artcard__meta { color: #fff; opacity: 0.8; }
+:root.ez-capoverlay-scrim.ez-cap-hover .ez-artcard__price { color: #fff; }
 
 /* Hero alignment + size. */
 :root.ez-heroalign-center .ez-hero { text-align: center; }

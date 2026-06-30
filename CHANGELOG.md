@@ -13,6 +13,7 @@ always preserved, and new features stay off until you turn them on.
 - **Moving between pages feels instant.** The next page starts loading the moment a visitor hovers its link, so it is ready by the time they click.
 - **Switching between styles in the walkthrough now animates.** Colors fade, fonts settle into focus, and your gallery slides into its new layout instead of flashing white.
 - **The setup walkthrough now shows which step you're on.** The current step stands out in your accent color and slides forward as you go, so you can see how far along you are.
+- **Hover captions now take on your style's colors instead of a plain black box,** and you can choose how they look: matching the piece, or a dark overlay sitting on the image. Find it under Design when captions are set to appear on hover.
 
 ## 0.43.1
 
