@@ -3,6 +3,7 @@
  * series, pages, and settings through the GitHub client. Each save is one commit.
  */
 import { GitHub, fileToBase64, type FileChange } from './github';
+import { mapPool } from './concurrency';
 import {
   PATHS,
   parseFrontmatter,
@@ -29,8 +30,13 @@ const ARTWORK_IMG_DIR = `${PATHS.assets}/artworks`;
 
 /**
  * Load every `.md` entry in a content directory, parse its frontmatter, map it to
- * a typed record, and sort. One GitHub `listDir` plus a parallel `getFile` per
- * entry — the shared shape behind loadArtworks/Series/Posts/Exhibitions/Testimonials.
+ * a typed record, and sort. One GitHub `listDir` plus a `getFile` per entry — the
+ * shared shape behind loadArtworks/Series/Posts/Exhibitions/Testimonials.
+ *
+ * The per-file reads run through a bounded pool (not unbounded `Promise.all`): a
+ * large portfolio would otherwise fire dozens of simultaneous requests, which both
+ * trips GitHub's secondary rate limits and stalls the editor on the slowest of a
+ * huge fan-out. Eight at a time keeps it fast without the burst.
  */
 async function loadMarkdownDir<T>(
   gh: GitHub,
@@ -39,13 +45,11 @@ async function loadMarkdownDir<T>(
   sort: (a: T, b: T) => number,
 ): Promise<T[]> {
   const entries = (await gh.listDir(dir)).filter((e) => e.name.endsWith('.md'));
-  const items = await Promise.all(
-    entries.map(async (e) => {
-      const file = await gh.getFile(e.path);
-      const { data, body } = parseFrontmatter(file?.text ?? '');
-      return map(data, body, e.name.replace(/\.md$/, ''));
-    }),
-  );
+  const items = await mapPool(entries, 8, async (e) => {
+    const file = await gh.getFile(e.path);
+    const { data, body } = parseFrontmatter(file?.text ?? '');
+    return map(data, body, e.name.replace(/\.md$/, ''));
+  });
   return items.sort(sort);
 }
 
