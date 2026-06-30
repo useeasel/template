@@ -7,6 +7,11 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.43.3
+
+- **Your photos load faster and use less data.** Images now come in a newer, smaller format on browsers that support it, and the full-screen viewer loads a size that fits the screen instead of the largest one every time.
+- **The editor opens quicker.** It starts with less to load and brings in your work a few pieces at a time, so a large portfolio comes up faster.
+
 ## 0.43.2
 
 - **Your site loads faster.** Your fonts now come from your own site instead of a third party, so text and your first images show up sooner, and pages a visitor has seen before come back quicker.
