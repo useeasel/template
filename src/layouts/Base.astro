@@ -2,11 +2,12 @@
 import '../styles/tokens.css';
 
 import { getEntry } from 'astro:content';
+import { Font } from 'astro:assets';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import SEO from '../components/SEO.astro';
 import Analytics from '../components/Analytics.astro';
-import { resolveDesign, designVars, designClasses, motionAttr, googleFontsHref, faviconDataUri, readableOn } from '../lib/design';
+import { resolveDesign, designVars, designClasses, motionAttr, chosenFonts, faviconDataUri, readableOn } from '../lib/design';
 import { websiteLd, personLd } from '../lib/structured-data';
 import { withBase } from '../lib/href';
 import { BUILD_ID } from '../lib/version';
@@ -47,7 +48,8 @@ const siteJsonLd = [
 const design = resolveDesign(settings.design as any);
 const rootStyle = designVars(design);
 const rootClass = designClasses(design);
-const fontsHref = googleFontsHref(design);
+// The families this site uses, self-hosted via Astro's Fonts API (see astro.config).
+const fonts = chosenFonts(design);
 // Favicon: the artist's uploaded image, or their initials on the accent color.
 const faviconHref =
   design.favicon.mode === 'image' && design.favicon.image
@@ -79,9 +81,10 @@ const availableForWorkCta = ctaIsExternal ? ctaTarget : withBase(ctaTarget);
     <meta name="generator" content={Astro.generator} />
     {settings.protectFromAI && <meta name="robots" content="noai, noimageai" />}
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href={fontsHref} />
+    {/* Self-hosted fonts (no third-party request on the critical path). Astro emits
+        the @font-face + a preload for each family the site uses; designVars() points
+        --ez-font-* at these same family names. */}
+    {fonts.map((f) => <Font cssVariable={f.cssVariable} preload />)}
 
     <SEO
       siteTitle={settings.siteTitle}

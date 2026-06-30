@@ -56,6 +56,8 @@ export interface DesignTokens {
     cardStyle: 'card' | 'bare';
     /** How much a caption shows: everything, or just the title. */
     captionDetail: 'full' | 'minimal';
+    /** Hover-caption look: the card's own colors, or a dark photo scrim. */
+    captionOverlay: 'surface' | 'scrim';
     featureFirst: boolean;
     /** In the even grid, let landscape pieces span two columns. */
     adaptiveSpans: boolean;
@@ -101,7 +103,7 @@ export const DEFAULT_DESIGN: DesignTokens = {
   logo: { mode: 'none' },
   background: { type: 'solid' },
   thumb: { fit: 'contain', hover: 'zoom' },
-  gallery: { layout: 'masonry', size: 'medium', gutter: 'normal', caption: 'below', cardStyle: 'card', captionDetail: 'full', featureFirst: false, adaptiveSpans: false, click: 'lightbox', filters: false },
+  gallery: { layout: 'masonry', size: 'medium', gutter: 'normal', caption: 'below', cardStyle: 'card', captionDetail: 'full', captionOverlay: 'surface', featureFirst: false, adaptiveSpans: false, click: 'lightbox', filters: false },
   lightbox: { transition: 'fade', zoom: false },
   hero: { enabled: false, align: 'left', size: 'small' },
   footer: { socials: true, credit: true },
@@ -197,8 +199,12 @@ export function designVars(d: DesignTokens): string {
     '--ez-pill-sold-text': readableOn(d.color.accent2),
     '--ez-pill-inquire-text': readableOn(mixHex(d.color.accent, d.color.accent2)),
     '--ez-pill-nfs-text': readableOn(d.color.muted),
-    '--ez-font-display': `'${d.type.headingFont}', system-ui, sans-serif`,
-    '--ez-font-body': `'${d.type.bodyFont}', system-ui, sans-serif`,
+    // Prefer the self-hosted face Astro's Fonts API exposes (its @font-face name is
+    // hash-suffixed, reachable only through this var, and carries fallback metrics that
+    // cut layout shift on swap). The raw-name fallback covers contexts with no <Font>
+    // tag, e.g. the editor's live-preview iframe, which loads the family from Google.
+    '--ez-font-display': `var(${fontCssVar(d.type.headingFont)}, '${d.type.headingFont}', system-ui, sans-serif)`,
+    '--ez-font-body': `var(${fontCssVar(d.type.bodyFont)}, '${d.type.bodyFont}', system-ui, sans-serif)`,
     '--ez-heading-weight': String(d.type.headingWeight),
     '--ez-body-weight': String(d.type.bodyWeight),
     '--ez-heading-transform': d.type.headingTransform,
@@ -232,6 +238,7 @@ export function designClasses(d: DesignTokens): string {
     `ez-cap-${d.gallery.caption}`,
     `ez-card-${d.gallery.cardStyle}`,
     `ez-cap-detail-${d.gallery.captionDetail}`,
+    `ez-capoverlay-${d.gallery.captionOverlay}`,
     `ez-home-${d.home.landing}`,
     `ez-heroalign-${d.hero.align}`,
     `ez-herosize-${d.hero.size}`,
@@ -250,6 +257,36 @@ export function designClasses(d: DesignTokens): string {
 
 export function motionAttr(d: DesignTokens): 'full' | 'reduced' {
   return d.motion === 'none' ? 'reduced' : 'full';
+}
+
+/**
+ * The heading + body families a site actually uses, deduped (a site can pick the
+ * same font for both), each with the weights it needs (always 400 plus the chosen
+ * weight). Shared by astro.config.mjs (to declare which fonts the build self-hosts)
+ * and Base.astro (to emit their <Font> tags) so the two never drift. The cssVariable
+ * is required by Astro's Fonts API; we key it off the family name, and since the
+ * --ez-font-* vars reference each family by name, the self-hosted @font-face Astro
+ * emits under that same name is what the page actually loads.
+ */
+export function fontCssVar(name: string): string {
+  return '--ezf-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+}
+
+export function chosenFonts(d: DesignTokens): { name: string; weights: number[]; cssVariable: string }[] {
+  const byName = new Map<string, Set<number>>();
+  const add = (name: string, w: number) => {
+    const set = byName.get(name) ?? new Set<number>();
+    set.add(400);
+    set.add(w);
+    byName.set(name, set);
+  };
+  add(d.type.headingFont, d.type.headingWeight);
+  add(d.type.bodyFont, d.type.bodyWeight);
+  return [...byName.entries()].map(([name, weights]) => ({
+    name,
+    weights: [...weights].sort((a, b) => a - b),
+    cssVariable: fontCssVar(name),
+  }));
 }
 
 /** A Google Fonts stylesheet href covering the chosen heading + body families. */
@@ -866,7 +903,7 @@ export const PRESETS: Record<string, { label: string; design: DesignTokens }> = 
       contentWidth: 'wide',
       nav: { layout: 'top' },
       thumb: { fit: 'cover', hover: 'none' },
-      gallery: { layout: 'fullbleed', size: 'large', gutter: 'none', caption: 'hover', cardStyle: 'bare', captionDetail: 'full' },
+      gallery: { layout: 'fullbleed', size: 'large', gutter: 'none', caption: 'hover', cardStyle: 'bare', captionDetail: 'full', captionOverlay: 'scrim' },
       lightbox: { transition: 'fade', zoom: true },
     }),
   },

@@ -7,6 +7,10 @@ newer version includes before they choose to update.
 Every update is opt-in and non-destructive: your artwork, pages, settings, and style are
 always preserved, and new features stay off until you turn them on.
 
+## 0.43.2
+
+- **Your site loads faster.** Your fonts now come from your own site instead of a third party, so text and your first images show up sooner, and pages a visitor has seen before come back quicker.
+
 ## 0.43.1
 
 - **An update now waits until your site is live before it says it's done.** No more refreshing to find the old version still up.
