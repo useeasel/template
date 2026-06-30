@@ -1,7 +1,20 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { readdir } from 'node:fs/promises';
+import { availableParallelism } from 'node:os';
 import { join, extname } from 'node:path';
+
+/** Run `fn` over `items` with at most `limit` in flight (parallelize sharp work). */
+async function mapPool(items, limit, fn) {
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++;
+      await fn(items[i]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+}
 
 // Build-time half of the AI-scraper shield. When the artist turns on
 // `protectFromAI`, this stamps a "do not train" rights note into the rights /
@@ -90,9 +103,15 @@ export default function aiProtect() {
           return;
         }
 
-        let tagged = 0;
+        // Collect first, then stamp in parallel: image re-encoding is CPU-bound, so
+        // a bounded pool across cores is far faster than one-at-a-time on big sites.
+        const files = [];
         for await (const file of walk(root)) {
-          if (!RASTER.has(extname(file).toLowerCase())) continue;
+          if (RASTER.has(extname(file).toLowerCase())) files.push(file);
+        }
+
+        let tagged = 0;
+        await mapPool(files, Math.max(2, availableParallelism()), async (file) => {
           try {
             const buf = await readFile(file);
             const out = await sharp(buf)
@@ -105,7 +124,7 @@ export default function aiProtect() {
           } catch {
             /* unsupported/corrupt image — leave it untouched, never fail the build */
           }
-        }
+        });
         logger.info(`AI shield: tagged ${tagged} image(s) "do not train".`);
       },
     },
