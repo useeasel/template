@@ -10,6 +10,7 @@ always preserved, and new features stay off until you turn them on.
 ## 0.43.2
 
 - **Your site loads faster.** Your fonts now come from your own site instead of a third party, so text and your first images show up sooner, and pages a visitor has seen before come back quicker.
+- **Moving between pages feels instant.** The next page starts loading the moment a visitor hovers its link, so it is ready by the time they click.
 
 ## 0.43.1
 

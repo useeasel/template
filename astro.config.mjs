@@ -35,6 +35,10 @@ export default defineConfig({
   // go through withBase() (src/lib/href.ts) so they pick this up.
   base: process.env.BASE_PATH || undefined,
   output: 'static',
+  // Warm the next page on link hover so navigation feels instant. Hover-only (not
+  // eager on load) keeps the initial page's bandwidth for its own assets; nav links
+  // are plain <a>, so this applies with no markup change.
+  prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   integrations: [sitemap(), svelte(), aiProtect()],
   image: {
     // astro:assets uses Sharp at build time to emit responsive, modern formats.
