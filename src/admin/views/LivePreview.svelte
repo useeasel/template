@@ -23,14 +23,29 @@
   let iframe: HTMLIFrameElement;
   let loaded = $state(false);
   let viewport = $state<'desktop' | 'mobile'>('desktop');
-  // A brief opacity dip when the design changes, to smooth abrupt structural jumps
-  // (layout/nav swaps can't tween from CSS-variable changes alone). Light by design.
-  let swapping = $state(false);
   let firstApply = true;
-  let fadeTimer: ReturnType<typeof setTimeout> | undefined;
   const prefersReduced =
     typeof window !== 'undefined' &&
     !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  // Shared motion feel for the preview swap (matches the site's --ez-motion-* tokens).
+  const SWAP_EASE = 'cubic-bezier(0.2, 0.8, 0.2, 1)';
+  // Colours/lengths registered with @property so a plain CSS transition can tween them
+  // (custom properties only animate once registered). Injected into the iframe, so this
+  // never touches a built artist site — it only smooths the editor's own preview.
+  const COLOR_VARS = [
+    '--ez-paper', '--ez-white', '--ez-ink', '--ez-stone', '--ez-blue', '--ez-red',
+    '--ez-yellow', '--ez-border', '--ez-link', '--ez-heading',
+    '--ez-pill-available-text', '--ez-pill-sold-text', '--ez-pill-inquire-text',
+    '--ez-pill-nfs-text',
+  ];
+  const LENGTH_VARS = ['--ez-radius', '--ez-border-width'];
+  const SWAP_CSS = `
+${COLOR_VARS.map((v) => `@property ${v} { syntax: '<color>'; inherits: true; initial-value: transparent; }`).join('\n')}
+${LENGTH_VARS.map((v) => `@property ${v} { syntax: '<length>'; inherits: true; initial-value: 0px; }`).join('\n')}
+html[data-ez-anim] { transition: ${[...COLOR_VARS, ...LENGTH_VARS].map((v) => `${v} 360ms ${SWAP_EASE}`).join(', ')}; }
+`;
+  const swapDisabled = (d: DesignTokens) => prefersReduced || d.motion === 'none';
 
   // The site root, derived from the editor's own URL. On Netlify the editor lives at
   // /admin/ so this is '/'; on a GitHub Pages subpath it's /<repo>/admin/, so the
@@ -46,6 +61,19 @@
     const doc = iframe?.contentDocument;
     if (!doc) return;
     const html = doc.documentElement;
+
+    // Register the colour/length tokens as animatable @property values so the palette
+    // crossfades instead of flashing. Inject once; the transition is gated by the
+    // data-ez-anim attribute so reduced-motion / "no animation" still snaps.
+    if (!doc.getElementById('ez-preview-anim')) {
+      const style = doc.createElement('style');
+      style.id = 'ez-preview-anim';
+      style.textContent = SWAP_CSS;
+      doc.head.appendChild(style);
+    }
+    if (swapDisabled(design)) html.removeAttribute('data-ez-anim');
+    else html.setAttribute('data-ez-anim', '');
+
     html.style.cssText = designVars(design);
     html.className = designClasses(design);
     html.setAttribute('data-motion', motionAttr(design));
@@ -187,8 +215,41 @@
     if (loaded) apply();
   });
 
-  // Cross-fade only on design changes (not text edits). Skip the first run, reduced
-  // motion, and the "no animation" design — keep it subtle.
+  // A kinetic settle on design changes (not text edits): fonts blur into focus and the
+  // gallery/nav rise in with a stagger. Colours crossfade on their own via the injected
+  // @property transition. Skip the first run, reduced motion, and the "no animation"
+  // design. Driven by element.animate() (preview-only — never ships to an artist site).
+  function runSwapAnimation() {
+    const doc = iframe?.contentDocument;
+    if (!doc) return;
+
+    // Fonts: blur+rise the headline text so a new typeface visibly resolves into focus.
+    const textEls = doc.querySelectorAll(
+      '.ez-home-head h1, .ez-home-tagline, .ez-nav__logotext, .ez-artcard__title',
+    );
+    textEls.forEach((el) => {
+      el.animate(
+        [
+          { filter: 'blur(6px)', opacity: 0.55, transform: 'translateY(6px)' },
+          { filter: 'blur(0)', opacity: 1, transform: 'none' },
+        ],
+        { duration: 280, easing: SWAP_EASE, fill: 'backwards' },
+      );
+    });
+
+    // Layout: stagger the cards (and nav links) into their freshly-snapped positions.
+    const items = doc.querySelectorAll('.ez-portfolio .ez-card, .ez-nav__links > *');
+    items.forEach((el, i) => {
+      el.animate(
+        [
+          { opacity: 0, transform: 'translateY(12px) scale(0.97)' },
+          { opacity: 1, transform: 'none' },
+        ],
+        { duration: 300, delay: Math.min(i * 35, 420), easing: SWAP_EASE, fill: 'backwards' },
+      );
+    });
+  }
+
   $effect(() => {
     JSON.stringify(design);
     if (!loaded) return;
@@ -196,10 +257,10 @@
       firstApply = false;
       return;
     }
-    if (prefersReduced || design.motion === 'none') return;
-    swapping = true;
-    clearTimeout(fadeTimer);
-    fadeTimer = setTimeout(() => (swapping = false), 180);
+    if (swapDisabled(design)) return;
+    // Let apply() snap the new vars/classes (colours start tweening, layout reflows),
+    // then animate elements into their settled positions on the next frame.
+    requestAnimationFrame(() => runSwapAnimation());
   });
 </script>
 
@@ -214,7 +275,6 @@
   <div
     class="ez-preview__stage"
     class:ez-preview__stage--mobile={viewport === 'mobile'}
-    class:ez-preview__stage--swapping={swapping}
   >
     <iframe
       bind:this={iframe}
