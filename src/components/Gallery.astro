@@ -76,6 +76,7 @@ const lightboxItems = linkToPage
           hasVideo={!!a.data.video}
           hasAudio={!!a.data.audio}
           protected={a.data.protected}
+          priority={i === 0}
         />
       ))}
     </div>

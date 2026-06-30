@@ -26,6 +26,8 @@ interface Props {
   hasAudio?: boolean;
   /** Glaze/Nightshade-protected — serve the original file untouched (no transform). */
   protected?: boolean;
+  /** Above-the-fold (the LCP candidate) — load eagerly with high priority. */
+  priority?: boolean;
 }
 const {
   image,
@@ -43,6 +45,7 @@ const {
   hasVideo,
   hasAudio,
   protected: isProtected,
+  priority = false,
 } = Astro.props;
 const mediaBadge = hasVideo ? '▶' : hasAudio ? '♪' : null;
 const mediaLabel = hasVideo ? 'Has video' : hasAudio ? 'Has audio' : null;
@@ -69,14 +72,15 @@ const triggerProps = href
   <Trigger {...triggerProps}>
     {isProtected ? (
       // Protected (Glaze/Nightshade): serve the original bytes, never transformed.
-      <img src={image.src} width={image.width} height={image.height} alt={alt} loading="lazy" class="ez-artcard__img" />
+      <img src={image.src} width={image.width} height={image.height} alt={alt} loading={priority ? 'eager' : 'lazy'} fetchpriority={priority ? 'high' : undefined} class="ez-artcard__img" />
     ) : (
       <Image
         src={image}
         alt={alt}
         widths={CARD_WIDTHS}
         sizes={cardSizes(columns)}
-        loading="lazy"
+        loading={priority ? 'eager' : 'lazy'}
+        fetchpriority={priority ? 'high' : undefined}
         class="ez-artcard__img"
       />
     )}

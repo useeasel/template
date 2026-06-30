@@ -92,13 +92,13 @@ const jsonLd = [
         {a.protected ? (
           // Protected (Glaze/Nightshade): original bytes, untransformed, no lightbox
           // (the lightbox would show a re-encoded copy).
-          <img src={a.image.src} width={a.image.width} height={a.image.height} alt={a.alt} class="ez-work__img" />
+          <img src={a.image.src} width={a.image.width} height={a.image.height} alt={a.alt} fetchpriority="high" class="ez-work__img" />
         ) : hasGallery ? (
           <button type="button" class="ez-work__imgbtn" data-ez-lightbox data-index="0" aria-label={`View ${a.title} larger`}>
-            <Image src={a.image} alt={a.alt} widths={FULL_WIDTHS} sizes="(max-width: 800px) 100vw, 60vw" class="ez-work__img" />
+            <Image src={a.image} alt={a.alt} widths={FULL_WIDTHS} sizes="(max-width: 800px) 100vw, 60vw" loading="eager" fetchpriority="high" class="ez-work__img" />
           </button>
         ) : (
-          <Image src={a.image} alt={a.alt} widths={FULL_WIDTHS} sizes="(max-width: 800px) 100vw, 60vw" class="ez-work__img" />
+          <Image src={a.image} alt={a.alt} widths={FULL_WIDTHS} sizes="(max-width: 800px) 100vw, 60vw" loading="eager" fetchpriority="high" class="ez-work__img" />
         )}
         {hasGallery && (
           <div class="ez-work__thumbs">

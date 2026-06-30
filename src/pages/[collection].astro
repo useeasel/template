@@ -52,7 +52,7 @@ const heroLayout = !!series.data.storyLayout && !!cover;
 <Base pageTitle={series.data.title} pageDescription={series.data.description} pageImage={withBase(`/og/series-${seriesSlug}.png`)}>
   {heroLayout && (
     <section class="ez-series-hero">
-      <Image src={cover} alt={series.data.title} widths={[768, 1280, 1920]} sizes="100vw" class="ez-series-hero__img" />
+      <Image src={cover} alt={series.data.title} widths={[768, 1280, 1920]} sizes="100vw" loading="eager" fetchpriority="high" class="ez-series-hero__img" />
       <div class="ez-series-hero__cap">
         <h1 class="ez-series-hero__title">{series.data.title}</h1>
         {lede && <p class="ez-series-hero__lede">{lede}</p>}
@@ -64,7 +64,7 @@ const heroLayout = !!series.data.storyLayout && !!cover;
     {!heroLayout && (
       <header class="ez-series-head">
         {cover && (
-          <Image src={cover} alt={series.data.title} widths={[480, 960]} sizes="(max-width: 700px) 100vw, 700px" class="ez-series-head__img" />
+          <Image src={cover} alt={series.data.title} widths={[480, 960]} sizes="(max-width: 700px) 100vw, 700px" loading="eager" fetchpriority="high" class="ez-series-head__img" />
         )}
         <h1>{series.data.title}</h1>
         {lede && <p class="ez-series-lede">{lede}</p>}

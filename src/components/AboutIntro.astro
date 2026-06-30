@@ -18,6 +18,8 @@ const testimonials = (await getCollection('testimonials')).sort((a, b) => a.data
       alt="Portrait of the artist"
       widths={[400, 600, 800]}
       sizes="(max-width: 640px) 100vw, 360px"
+      loading="eager"
+      fetchpriority="high"
       class="ez-about__portrait"
     />
   )}
