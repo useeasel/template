@@ -13,11 +13,10 @@
   import HomeView from './views/HomeView.svelte';
   import WorkView from './views/WorkView.svelte';
   import PagesView from './views/PagesView.svelte';
-  import DesignView from './views/DesignView.svelte';
   import SettingsView from './views/SettingsView.svelte';
-  import HistoryView from './views/HistoryView.svelte';
-  import UpdatesView from './views/UpdatesView.svelte';
-  import Wizard from './views/Wizard.svelte';
+  // DesignView (live-preview iframe + preset gallery), HistoryView, UpdatesView, and
+  // the Wizard are heavy and only shown on demand, so they're code-split: the initial
+  // editor chunk loads without them and pulls each in the first time it's opened.
 
   type Status = 'loading' | 'signin' | 'ready' | 'error' | 'unconfigured';
 
@@ -230,7 +229,10 @@
       </div>
     </div>
   {:else if status === 'ready' && wizard && gh && !isNarrow}
-    <Wizard {gh} {notify} onClose={finishWizard} />
+    {#await import('./views/Wizard.svelte') then mod}
+      {@const Wizard = mod.default}
+      <Wizard {gh} {notify} onClose={finishWizard} />
+    {/await}
   {:else if status === 'ready' && gh}
     <div class="ez-shell" class:ez-shell--navopen={navOpen}>
       <Sidebar {view} nav={(id) => go(id)} {login} {demo} {siteUrl} bind:open={navOpen} onSignOut={signOut} />
@@ -273,13 +275,22 @@
           {:else if view === 'pages'}
             <PagesView {gh} {notify} initialTab={pendingTab} />
           {:else if view === 'design'}
-            <DesignView {gh} {notify} onWizard={() => (wizard = true)} />
+            {#await import('./views/DesignView.svelte') then mod}
+              {@const DesignView = mod.default}
+              <DesignView {gh} {notify} onWizard={() => (wizard = true)} />
+            {/await}
           {:else if view === 'settings'}
             <SettingsView {gh} {notify} host={config?.host} repo={config?.repo} />
           {:else if view === 'history'}
-            <HistoryView {gh} {notify} />
+            {#await import('./views/HistoryView.svelte') then mod}
+              {@const HistoryView = mod.default}
+              <HistoryView {gh} {notify} />
+            {/await}
           {:else if view === 'updates'}
-            <UpdatesView {gh} {notify} currentVersion={config?.gessoVersion ?? (demo ? '0.9.0' : null)} />
+            {#await import('./views/UpdatesView.svelte') then mod}
+              {@const UpdatesView = mod.default}
+              <UpdatesView {gh} {notify} currentVersion={config?.gessoVersion ?? (demo ? '0.9.0' : null)} />
+            {/await}
           {/if}
         </main>
       </div>
