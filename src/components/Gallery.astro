@@ -4,6 +4,7 @@ import { getImage } from 'astro:assets';
 import ArtworkCard from './ArtworkCard.astro';
 import Lightbox from './Lightbox.astro';
 import { resolveDesign } from '../lib/design';
+import { FULL_WIDTHS, LIGHTBOX_SIZES } from '../lib/images';
 import { withBase, stripMd } from '../lib/href';
 
 const settings = (await getEntry('site', 'settings'))!.data;
@@ -32,9 +33,9 @@ const lightboxItems = linkToPage
   ? []
   : await Promise.all(
       artworks.map(async (a) => {
-        const img = await getImage({ src: a.data.image, width: 1600 });
+        const img = await getImage({ src: a.data.image, widths: FULL_WIDTHS, sizes: LIGHTBOX_SIZES });
         const meta = [a.data.year, a.data.medium, a.data.dimensions].filter(Boolean).join(' · ');
-        return { src: img.src, alt: a.data.alt, title: a.data.title, meta };
+        return { src: img.src, srcset: img.srcSet.attribute, alt: a.data.alt, title: a.data.title, meta };
       })
     );
 ---

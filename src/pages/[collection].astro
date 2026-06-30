@@ -1,11 +1,12 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import { getCollection, getEntry, render } from 'astro:content';
-import { getImage, Image } from 'astro:assets';
+import { getImage, Picture } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import ArtworkCard from '../components/ArtworkCard.astro';
 import Lightbox from '../components/Lightbox.astro';
 import { resolveDesign } from '../lib/design';
+import { FULL_WIDTHS, LIGHTBOX_SIZES } from '../lib/images';
 import { withBase, stripMd } from '../lib/href';
 
 // Astro 5 content-collection ids include the file extension; strip it for clean
@@ -34,9 +35,9 @@ const lightboxItems = linkToPage
   ? []
   : await Promise.all(
       artworks.map(async (a) => {
-        const img = await getImage({ src: a.data.image, width: 1600 });
+        const img = await getImage({ src: a.data.image, widths: FULL_WIDTHS, sizes: LIGHTBOX_SIZES });
         const meta = [a.data.year, a.data.medium, a.data.dimensions].filter(Boolean).join(' · ');
-        return { src: img.src, alt: a.data.alt, title: a.data.title, meta };
+        return { src: img.src, srcset: img.srcSet.attribute, alt: a.data.alt, title: a.data.title, meta };
       })
     );
 
@@ -52,7 +53,7 @@ const heroLayout = !!series.data.storyLayout && !!cover;
 <Base pageTitle={series.data.title} pageDescription={series.data.description} pageImage={withBase(`/og/series-${seriesSlug}.png`)}>
   {heroLayout && (
     <section class="ez-series-hero">
-      <Image src={cover} alt={series.data.title} widths={[768, 1280, 1920]} sizes="100vw" loading="eager" fetchpriority="high" class="ez-series-hero__img" />
+      <Picture src={cover} alt={series.data.title} formats={['avif', 'webp']} widths={[768, 1280, 1920]} sizes="100vw" loading="eager" fetchpriority="high" class="ez-series-hero__img" />
       <div class="ez-series-hero__cap">
         <h1 class="ez-series-hero__title">{series.data.title}</h1>
         {lede && <p class="ez-series-hero__lede">{lede}</p>}
@@ -64,7 +65,7 @@ const heroLayout = !!series.data.storyLayout && !!cover;
     {!heroLayout && (
       <header class="ez-series-head">
         {cover && (
-          <Image src={cover} alt={series.data.title} widths={[480, 960]} sizes="(max-width: 700px) 100vw, 700px" loading="eager" fetchpriority="high" class="ez-series-head__img" />
+          <Picture src={cover} alt={series.data.title} formats={['avif', 'webp']} widths={[480, 960]} sizes="(max-width: 700px) 100vw, 700px" loading="eager" fetchpriority="high" class="ez-series-head__img" />
         )}
         <h1>{series.data.title}</h1>
         {lede && <p class="ez-series-lede">{lede}</p>}

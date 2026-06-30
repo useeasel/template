@@ -1,12 +1,12 @@
 ---
 import type { GetStaticPaths } from 'astro';
 import { getCollection, getEntry, render } from 'astro:content';
-import { getImage, Image } from 'astro:assets';
+import { getImage, Image, Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import StatusPill from '../../components/StatusPill.astro';
 import Lightbox from '../../components/Lightbox.astro';
 import NewsletterSignup from '../../components/NewsletterSignup.astro';
-import { FULL_WIDTHS } from '../../lib/images';
+import { FULL_WIDTHS, LIGHTBOX_SIZES } from '../../lib/images';
 import { visualArtworkLd, breadcrumbLd } from '../../lib/structured-data';
 import { toEmbedSrc, toAudioEmbed } from '../../lib/embed';
 import { withBase, stripMd } from '../../lib/href';
@@ -48,15 +48,14 @@ const pageAbs = new URL(Astro.url.pathname, origin).href;
 // visitor can step through; with none, the page keeps its plain single image.
 const gallery = a.images ?? [];
 const hasGallery = gallery.length > 0;
+const coverFull = hasGallery ? await getImage({ src: a.image, widths: FULL_WIDTHS, sizes: LIGHTBOX_SIZES }) : null;
 const lightboxItems = hasGallery
   ? [
-      // The cover is already transformed above as `ogImg` (same width) — reuse it
-      // instead of re-running the transform for index 0.
-      { src: ogImg.src, alt: a.alt, title: a.title, meta: metaParts.join(' · ') },
+      { src: coverFull!.src, srcset: coverFull!.srcSet.attribute, alt: a.alt, title: a.title, meta: metaParts.join(' · ') },
       ...(await Promise.all(
         gallery.map(async (img, i) => {
-          const full = await getImage({ src: img, width: 1600 });
-          return { src: full.src, alt: `${a.title} — detail ${i + 1}`, title: a.title, meta: metaParts.join(' · ') };
+          const full = await getImage({ src: img, widths: FULL_WIDTHS, sizes: LIGHTBOX_SIZES });
+          return { src: full.src, srcset: full.srcSet.attribute, alt: `${a.title} — detail ${i + 1}`, title: a.title, meta: metaParts.join(' · ') };
         }),
       )),
     ]
@@ -92,13 +91,13 @@ const jsonLd = [
         {a.protected ? (
           // Protected (Glaze/Nightshade): original bytes, untransformed, no lightbox
           // (the lightbox would show a re-encoded copy).
-          <img src={a.image.src} width={a.image.width} height={a.image.height} alt={a.alt} fetchpriority="high" class="ez-work__img" />
+          <img src={a.image.src} width={a.image.width} height={a.image.height} alt={a.alt} decoding="async" fetchpriority="high" class="ez-work__img" />
         ) : hasGallery ? (
           <button type="button" class="ez-work__imgbtn" data-ez-lightbox data-index="0" aria-label={`View ${a.title} larger`}>
-            <Image src={a.image} alt={a.alt} widths={FULL_WIDTHS} sizes="(max-width: 800px) 100vw, 60vw" loading="eager" fetchpriority="high" class="ez-work__img" />
+            <Picture src={a.image} alt={a.alt} formats={['avif', 'webp']} widths={FULL_WIDTHS} sizes="(max-width: 800px) 100vw, 60vw" loading="eager" fetchpriority="high" class="ez-work__img" />
           </button>
         ) : (
-          <Image src={a.image} alt={a.alt} widths={FULL_WIDTHS} sizes="(max-width: 800px) 100vw, 60vw" loading="eager" fetchpriority="high" class="ez-work__img" />
+          <Picture src={a.image} alt={a.alt} formats={['avif', 'webp']} widths={FULL_WIDTHS} sizes="(max-width: 800px) 100vw, 60vw" loading="eager" fetchpriority="high" class="ez-work__img" />
         )}
         {hasGallery && (
           <div class="ez-work__thumbs">

@@ -7,8 +7,11 @@
  *   - basic swipe (touch) navigation
  *   - a gallery label showing the artwork metadata
  */
+import { LIGHTBOX_SIZES } from '../lib/images';
 interface LightboxItem {
   src: string;
+  /** Responsive candidates so phones don't pull the largest variant. */
+  srcset?: string;
   alt: string;
   title: string;
   meta?: string;
@@ -39,7 +42,7 @@ const { items } = Astro.props;
   </button>
 
   <figure class="ez-lightbox__stage">
-    <img class="ez-lightbox__img" data-ez-lb-img alt="" />
+    <img class="ez-lightbox__img" data-ez-lb-img alt="" decoding="async" sizes={LIGHTBOX_SIZES} />
     <figcaption class="ez-lightbox__label" data-ez-lb-label>
       <span class="ez-lightbox__title" data-ez-lb-title></span>
       <span class="ez-lightbox__meta" data-ez-lb-meta></span>
@@ -147,7 +150,7 @@ const { items } = Astro.props;
 </style>
 
 <script>
-  type Item = { src: string; alt: string; title: string; meta?: string };
+  type Item = { src: string; srcset?: string; alt: string; title: string; meta?: string };
 
   const root = document.querySelector<HTMLElement>('[data-ez-lightbox-root]');
   const dataEl = document.querySelector<HTMLScriptElement>('[data-ez-lb-data]');
@@ -172,6 +175,9 @@ const { items } = Astro.props;
       const item = items[current];
       if (!item) return;
       if (zoomOn) setZoom(false); // reset zoom whenever the image changes
+      // Set srcset before src so the browser can pick the right candidate up front.
+      if (item.srcset) img.srcset = item.srcset;
+      else img.removeAttribute('srcset');
       img.src = item.src;
       img.alt = item.alt;
       titleEl.textContent = item.title;
